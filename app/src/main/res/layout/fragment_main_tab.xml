@@ -25,6 +25,6 @@
         <TabWidget
             android:id="@android:id/tabs"
             android:layout_width="match_parent"
-            android:layout_height="50dp"></TabWidget>
+            android:layout_height="55dp"></TabWidget>
     </LinearLayout>
 </com.lxkj.administrator.fealty.widget.QuickFragmentTabHost>

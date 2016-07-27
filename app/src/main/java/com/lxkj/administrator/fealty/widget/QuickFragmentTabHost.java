@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.lxkj.administrator.fealty.widget;
-
 import java.util.ArrayList;
 
 import android.content.Context;
@@ -57,7 +55,7 @@ public class QuickFragmentTabHost extends TabHost
     private Context mContext;
     private FragmentManager mFragmentManager;
     private int mContainerId;
-    private OnTabChangeListener mOnTabChangeListener;
+    private TabHost.OnTabChangeListener mOnTabChangeListener;
     private TabInfo mLastTab;
     private boolean mAttached;
 
@@ -74,7 +72,7 @@ public class QuickFragmentTabHost extends TabHost
         }
     }
 
-    static class DummyTabFactory implements TabContentFactory {
+    static class DummyTabFactory implements TabHost.TabContentFactory {
         private final Context mContext;
 
         public DummyTabFactory(Context context) {
@@ -115,8 +113,8 @@ public class QuickFragmentTabHost extends TabHost
                     + " curTab=" + curTab + "}";
         }
 
-        public static final Creator<SavedState> CREATOR
-                = new Creator<SavedState>() {
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);
             }
@@ -154,15 +152,15 @@ public class QuickFragmentTabHost extends TabHost
         if (findViewById(android.R.id.tabs) == null) {
             LinearLayout ll = new LinearLayout(context);
             ll.setOrientation(LinearLayout.VERTICAL);
-            addView(ll, new LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT));
+            addView(ll, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.FILL_PARENT,
+                    ViewGroup.LayoutParams.FILL_PARENT));
 
             TabWidget tw = new TabWidget(context);
             tw.setId(android.R.id.tabs);
             tw.setOrientation(TabWidget.HORIZONTAL);
             ll.addView(tw, new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.FILL_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT, 0));
 
             FrameLayout fl = new FrameLayout(context);
@@ -172,7 +170,7 @@ public class QuickFragmentTabHost extends TabHost
             mRealTabContent = fl = new FrameLayout(context);
             mRealTabContent.setId(mContainerId);
             ll.addView(fl, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+                    LinearLayout.LayoutParams.FILL_PARENT, 0, 1));
         }
     }
 
@@ -226,7 +224,7 @@ public class QuickFragmentTabHost extends TabHost
         mOnTabChangeListener = l;
     }
 
-    public void addTab(TabSpec tabSpec, Class<?> clss, Bundle args) {
+    public void addTab(TabHost.TabSpec tabSpec, Class<?> clss, Bundle args) {
         tabSpec.setContent(new DummyTabFactory(mContext));
         String tag = tabSpec.getTag();
 
