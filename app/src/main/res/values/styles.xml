@@ -1,5 +1,4 @@
 <resources>
-
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
@@ -7,5 +6,38 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+    <!-- Base application theme. -->
+    <style name="FealtyAppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+    <!-- Common style begin-->
+    <style name="CommonStyle"></style>
+    <!-- Common input edittext begin-->
+    <style name="CommonStyle.input_edittext" parent="CommonStyle">
+        <item name="android:background">@color/Transparent</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColorHint">#d8d8d8</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+    <!-- Common input edittext end-->
+    <!-- Common style end-->
+    <!-- button ui begin -->
+    <declare-styleable name="ProcessButton">
+        <attr name="pb_textProgress" format="string" />
+        <attr name="pb_textComplete" format="string" />
+        <attr name="pb_textError" format="string" />
+        <attr name="pb_colorProgress" format="color" />
+        <attr name="pb_colorComplete" format="color" />
+        <attr name="pb_colorError" format="color" />
+    </declare-styleable>
 
+    <declare-styleable name="FlatButton">
+        <attr name="pb_colorPressed" format="color" />
+        <attr name="pb_colorNormal" format="color" />
+        <attr name="pb_cornerRadius" format="dimension" />
+    </declare-styleable>
+    <!-- button ui end -->
 </resources>

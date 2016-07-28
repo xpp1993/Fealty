@@ -5,4 +5,60 @@
     <color name="colorAccent">#FF4081</color>
     <color name="btn_blue_normal">#ff1e90ff</color>
     <color name="btn_blue_pressed">#ff0066ff</color>
+    <color name="Transparent">#00ffffff</color>
+    <!-- 主题色 -->
+    <color name="MainTheme">#35B9BB</color>
+    <!-- 主背景色-->
+    <color name="MainBackGround">#DCDCDC</color>
+    <!-- 分割线 -->
+    <color name="SplitLine">#d8d8d8</color>
+
+    <color name="gray">#8a000000</color>
+
+    <!-- Card item begin -->
+    <color name="button_present">#7ED221</color>
+    <color name="button_want">#2196f3</color>
+    <color name="button_sale">#FF5722</color>
+    <color name="product_img_back">#d8d8d8</color>
+    <color name="CardBackGround">#F0F0F0 </color>
+    <!-- Card item end -->
+
+    <!-- button ui begin-->
+    <color name="blue_pressed">#ff0099cc</color>
+    <color name="blue_normal">#ff33b5e5</color>
+    <color name="green_complete">#ff99cc00</color>
+    <color name="purple_progress">#ffaa66cc</color>
+    <color name="red_error">#ffff4444</color>
+
+    <color name="holo_blue_bright">#ff00ddff</color>
+    <color name="holo_green_light">#ff99cc00</color>
+    <color name="holo_orange_light">#ffffbb33</color>
+    <color name="holo_red_light">#ffff4444</color>
+
+    <color name="call_enable_normal">#ff0000</color>
+    <color name="call_enable_pressed">#D8514D</color>
+
+    <color name="confirm_enable_normal">#00FF00</color>
+    <color name="confirm_enable_pressed">#2F9C17</color>
+
+    <color name="commit_item_normal">#FFF6F6F6</color>
+    <color name="commit_item_pressed">#979797</color>
+
+    <color name="commit_button_pressed">#2F9C17</color>
+    <!-- button ui end-->
+
+    <!-- PagerSlidingTabStrip begin -->
+    <color name="background_tab_pressed">#6633B5E5</color>
+    <color name="tabstrip_bg">#F6F6F8</color>
+    <!-- PagerSlidingTabStrip end -->
+    <!-- pinned-section-listview begin-->
+    <color name="red_light">#ffff4444</color>
+    <color name="green_light">#ff99cc00</color>
+    <color name="orange_light">#ffffbb33</color>
+    <color name="blue_light">#ff33b5e5</color>
+    <color name="mine_fragment_navigation_text_selected">#ff4081</color>
+    <color name="mine_fragment_navigation_text_unselected">#ffffff</color>
+    <!-- pinned-section-listview end-->
+    <!-- navigationtextcolor -->
+    <color name="navigation_text_default">#9b9b9b</color>
 </resources>
