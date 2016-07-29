@@ -2,10 +2,12 @@ package com.lxkj.administrator.fealty;
 
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import org.xutils.view.annotation.ContentView;
 import  org.xutils.x;
@@ -22,7 +24,7 @@ import de.greenrobot.event.EventBus;
  * fragment跳转，返回键的控制
  */
 @ContentView(R.layout.activity_main)
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FragmentActivity {
 //声明Fragmentmanager
     private FragmentManager fm;
     //tag 容器，管理Fragment的tag
@@ -39,12 +41,12 @@ public class MainActivity extends AppCompatActivity {
         // EventBus 注册
         fm = getSupportFragmentManager();
         EventBus.getDefault().register(this);
-        BaseFragment baseFragment;
+         SplashFagment baseFragment;
         String tag;
            baseFragment = new SplashFagment();
             tag = baseFragment.getMTag();
         mFragments.add(tag);
-        fm.beginTransaction().add(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();
+        fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();
     }
 
 //监听返回键
@@ -77,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
             if (mFragments.size() > 0) {
                 mFragments.pollLast();
             }
+            Log.d("lanxin", "mFragments.size()" + mFragments.size());
             fm.popBackStack();
         }
     }

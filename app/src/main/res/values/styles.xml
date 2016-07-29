@@ -3,9 +3,16 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/MainTheme</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+    <!-- MainBar Begin -->
+    <style name="MainBarTextStyle">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#F1F1F1</item>
+        <item name="android:alpha">1</item>
+    </style>
+    <!-- MainBar End -->
     <!-- Base application theme. -->
     <style name="FealtyAppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
@@ -33,11 +40,36 @@
         <attr name="pb_colorComplete" format="color" />
         <attr name="pb_colorError" format="color" />
     </declare-styleable>
-
     <declare-styleable name="FlatButton">
         <attr name="pb_colorPressed" format="color" />
         <attr name="pb_colorNormal" format="color" />
         <attr name="pb_cornerRadius" format="dimension" />
     </declare-styleable>
     <!-- button ui end -->
+    <!-- regist activity start-->
+    <style name="regist_layout_ll_input">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_marginLeft">40dp</item>
+        <item name="android:layout_marginRight">40dp</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="regist_layout_tv_title">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">#FF4A4A4A</item>
+    </style>
+    <!-- regist activity end-->
+    <!-- selfInfo activity start-->
+
+
+    <style name="self_info_layout_tv_title">
+        <item name="android:textSize">14sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerVertical">true</item>
+    </style>
+    <!-- selfInfo activity end-->
 </resources>

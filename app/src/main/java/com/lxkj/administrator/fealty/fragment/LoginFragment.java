@@ -1,5 +1,6 @@
 package com.lxkj.administrator.fealty.fragment;
 
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
@@ -7,8 +8,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
@@ -56,19 +55,26 @@ public class LoginFragment extends BaseFragment {
     private ImageView seePasswordImageView;
     @Override
     protected void init() {
-
+     EventBus.getDefault().register(this);
     }
-
+    // 用EventBus 来导航,订阅者
+    public void onEventMainThread(NavFragmentEvent event) {
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
     @Override
     protected void initListener() {
 seePasswordImageView.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View v) {
         if (showPassword) {
-           login_password_edittext.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            login_password_edittext.setTransformationMethod(PasswordTransformationMethod.getInstance());
             seePasswordImageView.setImageResource(R.mipmap.icon_login_show_password_normal);
         } else {
-          login_password_edittext.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+            login_password_edittext.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
             seePasswordImageView.setImageResource(R.mipmap.icon_login_show_password_active);
         }
         showPassword = !showPassword;
@@ -86,15 +92,7 @@ seePasswordImageView.setOnClickListener(new View.OnClickListener() {
         phone = login_phone_edittext.getText().toString().trim();
         password = login_password_edittext.getText().toString().trim();
         doLogin(phone, password);
-//        switch (view.getId()){
-//            case R.id.tv_login:
-//                break;
-//            case R.id.tv_regist:
-//                break;
-//            case R.id.tv_forgetpw:
-//                break;
-//        }
-
+       this.isHidden();
     }
 
     /**
@@ -117,6 +115,7 @@ seePasswordImageView.setOnClickListener(new View.OnClickListener() {
             //RequireServiceManager.getRequireServiceManager().requireToLogin(this, userid, password, REQUEST_CODE_LOGIN_COMMIT, this);
             MainTabsFragemnt mainTabsFragemnt = new MainTabsFragemnt();
             EventBus.getDefault().post(new NavFragmentEvent(mainTabsFragemnt));
+            this.isHidden();
         }
     }
 
@@ -124,6 +123,7 @@ seePasswordImageView.setOnClickListener(new View.OnClickListener() {
     private void goToResetPassword(View view) {
         ResetPasswordFragment resetPasswordFragment = new ResetPasswordFragment();
         EventBus.getDefault().post(new NavFragmentEvent(resetPasswordFragment));
+        this.isHidden();
     }
 
     @Event(R.id.tv_regist)
@@ -136,4 +136,6 @@ seePasswordImageView.setOnClickListener(new View.OnClickListener() {
     protected void initData() {
 
     }
+
+
 }

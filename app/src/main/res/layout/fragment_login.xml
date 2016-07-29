@@ -10,7 +10,8 @@
         android:layout_height="236dp"
         android:layout_centerHorizontal="true"
         android:scaleType="fitXY"
-        android:background="@color/blue_normal"/>
+      android:src="@color/navigation_text_default"
+     />
 
     <LinearLayout
         android:id="@+id/activity_login_ll_phone"

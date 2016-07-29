@@ -3,12 +3,11 @@
    android:layout_width="match_parent"
     android:layout_height="match_parent"
    >
-
     <TextView
         android:id="@+id/splash_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="这是引导页"
+        android:text="点击这里进入主页"
         android:textSize="26sp"
        />
 </FrameLayout>
