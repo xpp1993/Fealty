@@ -1,4 +1,4 @@
-package com.lxkj.administrator.fealty.manager;
+package com.lxkj.administrator.fealty.fragment;
 
 public class ParameterManager {
     public static int nickNameLength = 8 ;

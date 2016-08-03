@@ -9,63 +9,24 @@ import java.io.Serializable;
  * Created by Administrator on 2016/7/27.
  */
 public class UserInfo implements Serializable{
-    public String userName;
-    public Bitmap bitmap;
-
-    //用户类型标杆 1.USER_OLDMAN_CODE_MAN ,老人 2.USER_YUNGMAN_CODE_WOMAN子女
-    public static final String USER_OLDMAN_CODE_MAN = "1", USER_YUNGMAN_CODE_WOMAN = "2";
-    private String gender;
-    private String userid;
-    private String mobile;//掩码
-    private String mobilePlain;//明码
+    private String mobile;//手机号
+    private String gender;//性别
     private String nickName;//昵称
     private String username;//真实姓名
-    private String birthday;
-    private String userpic;
-
-    /**
-     * 登录
-     */
-    protected void login() {
-
-    }
-
-    /**
-     * 退出登录
-     */
-    protected void logout() {
-
-    }
-
-    /**
-     * 注册
-     */
-    protected void regist() {
-
-    }
-
-    /**
-     * 修改密码
-     */
-
-    protected void changePassword() {
-
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
+    private String birthday;//生日
+    private String userpic;//头像
+    private String identity;//身份标识
+    public UserInfo(String mobile, String gender, String nickName, String username, String birthday, String userpic) {
+        this.mobile = mobile;
         this.gender = gender;
+        this.nickName = nickName;
+        this.username = username;
+        this.birthday = birthday;
+        this.userpic = userpic;
+        this.identity=identity;
     }
 
-    public String getUserid() {
-        return userid;
-    }
-
-    public void setUserid(String userid) {
-        this.userid = userid;
+    public UserInfo() {
     }
 
     public String getMobile() {
@@ -76,12 +37,12 @@ public class UserInfo implements Serializable{
         this.mobile = mobile;
     }
 
-    public String getMobilePlain() {
-        return mobilePlain;
+    public String getGender() {
+        return gender;
     }
 
-    public void setMobilePlain(String mobilePlain) {
-        this.mobilePlain = mobilePlain;
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getNickName() {
@@ -115,4 +76,13 @@ public class UserInfo implements Serializable{
     public void setUserpic(String userpic) {
         this.userpic = userpic;
     }
+
+    public String getIdentity() {
+        return identity;
+    }
+
+    public void setIdentity(String identity) {
+        this.identity = identity;
+    }
+
 }

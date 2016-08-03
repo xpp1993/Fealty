@@ -5,9 +5,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.lxkj.administrator.fealty.bean.UserInfo;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public final class DecodeManager {
@@ -27,10 +31,6 @@ public final class DecodeManager {
         //  insertRecInformation(data, jsonObject);
 
         if (isRequestOK(jsonObject)) {//请求服务器成功
-//            String code = jsonObject.optString("code");
-//            String send_id = jsonObject.optString("send_id");
-//            data.putString("code", code);
-//            data.putString("send_id", send_id);
             int code = jsonObject.optInt("code");
             String desc = jsonObject.optString("message");
             String check_code = jsonObject.optString("check_code");
@@ -85,18 +85,9 @@ public final class DecodeManager {
         Message msg = new Message();
         Bundle data = new Bundle();
         msg.what = messageWhat;
-      //  insertRecInformation(data, jsonObject);
+        //  insertRecInformation(data, jsonObject);
 
         if (isRequestOK(jsonObject)) {
-          //  String sess_id = jsonObject.getString("sess_id");
-            //String sess_key = jsonObject.getString("sess_key");
-          //  String userid = jsonObject.getString("userid");
-           // String login_time = jsonObject.getString("login_time");
-
-          //  data.putString("sess_id", sess_id);
-          //  data.putString("sess_key", sess_key);
-           // data.putString("userid", userid);
-           // data.putString("login_time", login_time);
             int code = jsonObject.optInt("code");
             String desc = jsonObject.optString("desc");
             data.putInt("code", code);
@@ -118,20 +109,13 @@ public final class DecodeManager {
         Message msg = new Message();
         Bundle data = new Bundle();
         msg.what = messageWhat;
-        //   insertRecInformation(data, jsonObject);
+        insertRecInformation(data, jsonObject);
 
         if (isRequestOK(jsonObject)) {
-//            String sess_id = jsonObject.getString("sess_id");
-//            String sess_key = jsonObject.getString("sess_key");
-//            String userpic = jsonObject.optString("userpic", "");
-//            String login_time = jsonObject.getString("login_time");
-            String check_code = jsonObject.optString("check_code");
-            data.putSerializable("check_code", check_code);
-
-//            data.putString("sess_id", sess_id);
-//            data.putString("sess_key", sess_key);
-//            data.putString("userpic", userpic);
-//            data.putString("login_time", login_time);
+            int identity = jsonObject.optInt("identity", 0);
+            int binded = jsonObject.optInt("binded", 0);
+            data.putInt("identity", identity);
+            data.putInt("binded", binded);
         }
         msg.setData(data);
         handler.sendMessage(msg);
@@ -173,7 +157,11 @@ public final class DecodeManager {
         Message msg = new Message();
         Bundle data = new Bundle();
         msg.what = messageWhat;
-        insertRecInformation(data, jsonObject);
+        // insertRecInformation(data, jsonObject);
+        int code = jsonObject.optInt("code");
+        String desc = jsonObject.optString("desc");
+        data.putInt("code", code);
+        data.putString("desc", desc);
         msg.setData(data);
         handler.sendMessage(msg);
     }
@@ -298,51 +286,58 @@ public final class DecodeManager {
         handler.sendMessage(msg);
     }
 
-//    public static void decodeFriendMessage(JSONObject jsonObject, int messageWhat,
-//                                           Handler handler) throws JSONException {
-//        Log.v("decodeFriendMessage", jsonObject.toString());
-//        Message msg = new Message();
-//        Bundle data = new Bundle();
-//        msg.what = messageWhat;
-//        insertRecInformation(data, jsonObject);
-//
-//        if (isRequestOK(jsonObject)) {
-//            JSONArray contact_list = jsonObject.optJSONArray("contact_list");
-//            if (contact_list != null && contact_list.length() > 0) {
-//                ArrayList<User> friends = new ArrayList<User>();
-//                for (int i = 0; i < contact_list.length(); i++) {
-//                    JSONObject friendJsonObject = contact_list.getJSONObject(i);
-//                    String contact_id = friendJsonObject.getString("contact_id");
-//                    String nickname = friendJsonObject.getString("nickname");
-//                    String userpic = friendJsonObject.optString("userpic", "");
-//                    User user = new User();
-//                    user.setUserid(contact_id);
-//                    user.setNickName(nickname);
-//                    user.setUserpic(userpic);
-//                    friends.add(user);
-//                }
-//                data.putSerializable("contact_list", friends);
-//            }
-//        }
-//        msg.setData(data);
-//        handler.sendMessage(msg);
-//    }
+    /**
+     * 上传通讯录得到的返回json数据
+     *
+     * @param jsonObject
+     * @param messageWhat
+     * @param handler
+     * @throws JSONException
+     */
+    public static void decodeFriendMessage(JSONObject jsonObject, int messageWhat,
+                                           Handler handler) throws JSONException {
+        Log.v("decodeFriendMessage", jsonObject.toString());
+        Message msg = new Message();
+        Bundle data = new Bundle();
+        msg.what = messageWhat;
+        insertRecInformation(data, jsonObject);
+        if (isRequestOK(jsonObject)) {
+            JSONArray old_people_list = jsonObject.optJSONObject("json").optJSONArray("old_people_list");
+            if (old_people_list != null && old_people_list.length() > 0) {
+                ArrayList<UserInfo> friends = new ArrayList<UserInfo>();
+                for (int i = 0; i < old_people_list.length(); i++) {
+                    JSONObject friendJsonObject = old_people_list.getJSONObject(i);
+                    String nickname = friendJsonObject.getString("nickName");
+                    String mobile = friendJsonObject.optString("mobile");
+                    String userpic = friendJsonObject.optString("headFile");
+                    UserInfo user = new UserInfo();
+                    user.setNickName(nickname);
+                    user.setMobile(mobile);
+                    user.setUserpic(userpic);
+                    friends.add(user);
+                }
+                data.putSerializable("old_people_list", friends);
+            }
+        }
+        msg.setData(data);
+        handler.sendMessage(msg);
+    }
 
-//    public static void decodeComment(JSONObject jsonObject, int messageWhat,
-//                                     Handler handler) throws JSONException {
-//        Log.v("decodeComment", jsonObject.toString());
-//        Message msg = new Message();
-//        Bundle data = new Bundle();
-//        msg.what = messageWhat;
-//        insertRecInformation(data, jsonObject);
-//
-//        if (isRequestOK(jsonObject)) {
-//            int id = jsonObject.getInt("id");
-//            data.putInt("id", id);
-//        }
-//        msg.setData(data);
-//        handler.sendMessage(msg);
-//    }
+    public static void decodeComment(JSONObject jsonObject, int messageWhat,
+                                     Handler handler) throws JSONException {
+        Log.v("decodeComment", jsonObject.toString());
+        Message msg = new Message();
+        Bundle data = new Bundle();
+        msg.what = messageWhat;
+        insertRecInformation(data, jsonObject);
+
+        if (isRequestOK(jsonObject)) {
+            int id = jsonObject.getInt("id");
+            data.putInt("id", id);
+        }
+        msg.setData(data);
+        handler.sendMessage(msg);
+    }
 
     /**
      * 解析 信息流查询
@@ -701,15 +696,15 @@ public final class DecodeManager {
      * @throws JSONException
      */
     private static void insertRecInformation(Bundle bundle, JSONObject jsonObject) throws JSONException {
-        int retcode = jsonObject.getInt("retcode");
-        String retinfo = jsonObject.getString("retinfo");
-        String retinfo_dev = jsonObject.optString("retinfo_dev");
-        bundle.putInt("retcode", retcode);
-        bundle.putString("retinfo", retinfo);
-        bundle.putString("retinfo_dev", retinfo_dev);
+        int code = jsonObject.getInt("code");
+        String desc = jsonObject.getString("desc");
+        //  String retinfo_dev = jsonObject.optString("retinfo_dev");
+        bundle.putInt("code", code);
+        bundle.putString("desc", desc);
+        // bundle.putString("retinfo_dev", retinfo_dev);
         bundle.putSerializable("params", (HashMap<String, String>) (jsonObject.opt("params")));
         //维护服务器时间段
-        Long timestamp = jsonObject.optLong("timestamp", 0);
+        //    Long timestamp = jsonObject.optLong("timestamp", 0);
 //        if (timestamp != 0) {
 //            SessionHolder.serviceTime = timestamp * 1000;
 //        }

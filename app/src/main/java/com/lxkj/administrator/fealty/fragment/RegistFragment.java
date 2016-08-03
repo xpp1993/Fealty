@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
@@ -35,6 +36,7 @@ import com.lxkj.administrator.fealty.ui.MyRadioGroup;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
 import com.lxkj.administrator.fealty.utils.FormatCheck;
+import com.lxkj.administrator.fealty.utils.ImageUtil;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
 
@@ -62,16 +64,15 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 @ContentView(R.layout.fragment_regist)
 public class RegistFragment extends BaseFragment implements View.OnClickListener, NetWorkAccessTools.RequestTaskListener {
-    private static final int PHOTO_REQUEST_CAREMA = 1;
-    private static final int PHOTO_REQUEST_GALLERY = 2;
-    private static final int PHOTO_REQUEST_CUT = 3;
+    private static final int REQUEST_CODE_PICK_IMAGE = 0x1;
+    private static final int REQUEST_CODE_CAPTURE_CAMEIA = 0x2;
+    private static final int REQUEST_CODE_CAPTURE_CAMEIA_CROP = 0x3;
     private static final String PHOTO_FILE_NAME = "temp_photo.jpg";
     public static final int REQUEST_CODE_REGIST_GET_CHECKCODE = 0X110;
     public static final int REQUEST_CODE_REGIST_COMMIT = 0X111;
     private boolean showPassword;
     @ViewInject(R.id.activity_regist_et_password)
     private EditText regist_password_edittext;
-    private File headImageFile;
     @ViewInject(R.id.fragment_regist_iv_head)
     private CircleImageView headImageView;//头像展示容器
     @ViewInject(R.id.bar_iv_left)
@@ -104,7 +105,9 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
     private MyRadioGroup myRadioGroup;
     private RadioButton radioButton;
     String radiobuttonString;
-    private String  indentity;
+    private String indentity;
+    private File tempImageFile;//相机拍摄图片缓存
+    private File headImageFile;//剪切图片缓存
 
     protected void init() {
         EventBus.getDefault().register(this);
@@ -140,6 +143,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
             public void onCheckedChanged(MyRadioGroup group, int checkedId) {
                 radioButton = (RadioButton) getActivity().findViewById(checkedId);
                 radiobuttonString = radioButton.getText().toString();
+                System.out.println(radiobuttonString);
             }
         });
 
@@ -156,25 +160,9 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                     public void onClick(DialogInterface dialog, int item) {
                         // 这里item是根据选择的方式，
                         if (item == 0) {
-                            Intent intent = new Intent(Intent.ACTION_PICK);
-                            intent.setType("image/*");
-                            startActivityForResult(intent,
-                                    PHOTO_REQUEST_GALLERY);
+                           getImageFromAlbum();
                         } else {
-                            Intent intent = new Intent(
-                                    MediaStore.ACTION_IMAGE_CAPTURE);
-                            if (Environment.getExternalStorageState().equals(
-                                    Environment.MEDIA_MOUNTED)) {
-                                headImageFile = new File(Environment
-                                        .getExternalStorageDirectory(),
-                                        PHOTO_FILE_NAME);
-                                Uri uri = Uri.fromFile(headImageFile);
-                                intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                                startActivityForResult(intent,
-                                        PHOTO_REQUEST_CAREMA);
-                            } else {
-                                ToastUtils.showToastInUIThread("未找到存储卡，无法存储照片！");
-                            }
+                           getImageFromCamera();
                         }
                     }
                 }).create();
@@ -205,50 +193,63 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PHOTO_REQUEST_GALLERY) {
-            if (data != null) {
-                Uri uri = data.getData();
-                Log.e("图片路径？？", uri.toString());
-                crop(uri);
-            }
-
-        } else if (requestCode == PHOTO_REQUEST_CAREMA) {
-            if (Environment.getExternalStorageState().equals(
-                    Environment.MEDIA_MOUNTED)) {
-                crop(Uri.fromFile(headImageFile));
+   public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_PICK_IMAGE) {
+            if (resultCode == Activity.RESULT_OK) {
+                Intent photoZoomIntent = ImageUtil.getPhotoZoomIntent(data.getData());
+                headImageFile = CommonTools.getTempFile(".jpg");
+                photoZoomIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(headImageFile));//将截取器截取的图片缓存人指定的路径
+                startActivityForResult(photoZoomIntent, REQUEST_CODE_CAPTURE_CAMEIA_CROP);
             } else {
-                ToastUtils.showToastInUIThread("未找到存储卡，无法存储照片！");
+                Log.v("RegistActivity", "onActivityResult:请求图片从相册没有返回");
             }
-
-        } else if (requestCode == PHOTO_REQUEST_CUT) {
-            if (data != null) {
-                final Bitmap bitmap = data.getParcelableExtra("data");
-                headImageView.setImageBitmap(bitmap);
+        } else if (requestCode == REQUEST_CODE_CAPTURE_CAMEIA) {
+            if (resultCode == Activity.RESULT_OK) {
+                Intent photoZoomIntent = ImageUtil.getPhotoZoomIntent(Uri.fromFile(tempImageFile));
+                headImageFile = CommonTools.getTempFile(".jpg");
+                photoZoomIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(headImageFile));//将截取器截取的图片缓存人指定的路径
+                startActivityForResult(photoZoomIntent, REQUEST_CODE_CAPTURE_CAMEIA_CROP);
+            } else {
+                Log.v("RegistActivity", "onActivityResult:请求图片从相机没有返回");
             }
-            try {
-                if (headImageFile != null && headImageFile.exists())
-                    headImageFile.delete();
-            } catch (Exception e) {
-                e.printStackTrace();
+        } else if (requestCode == REQUEST_CODE_CAPTURE_CAMEIA_CROP) {
+            if (resultCode == Activity.RESULT_OK) {
+                Log.v("RegistActivity", "onActivityResult:请求图片从从剪切器返回成功");
+                try {
+                    headImageView.setImageURI(Uri.fromFile(headImageFile));
+                } catch (Exception e) {
+                    Log.e("RegistActivity", "onActivityResult:" + e.getMessage());
+                }
+            } else {
+                Log.v("RegistActivity", "onActivityResult:请求图片从剪切器没有返回");
             }
-
+            if (tempImageFile != null && tempImageFile.exists()) {
+                tempImageFile.delete();
+            }
         }
     }
+    /**
+     * 从相册获取图片
+     */
+    private void getImageFromAlbum() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");//相片类型
+        startActivityForResult(intent, REQUEST_CODE_PICK_IMAGE);
+    }
 
-    private void crop(Uri uri) {
-        Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setDataAndType(uri, "image/*");
-        intent.putExtra("crop", true);
-        intent.putExtra("aspectX", 1);
-        intent.putExtra("aspect", 1);
-        intent.putExtra("outputX", 250);
-        intent.putExtra("outputY", 250);
-        intent.putExtra("outputFormat", "JPEG");
-        intent.putExtra("noFaceDetection", true);
-        intent.putExtra("return-data", true);
-        startActivityForResult(intent, PHOTO_REQUEST_CUT);
+    /**
+     * 从相机获取图片
+     */
+    private void getImageFromCamera() {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            Intent getImageByCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            tempImageFile = CommonTools.getTempFile(".jpg");
+            getImageByCamera.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tempImageFile));//将相机拍摄的照片缓存人指定的路径
+            startActivityForResult(getImageByCamera, REQUEST_CODE_CAPTURE_CAMEIA);
+        } else {
+            Log.v(getClass().getName(), "getImageFromCamera:不存在SD卡");
+            Toast.makeText(getContext(), "请确认已经插入SD卡", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -265,7 +266,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fragment_regist_iv_head:
-                changeHeadIcon();
+                    changeHeadIcon();
                 break;
             case R.id.bar_iv_left:
                 getActivity().onBackPressed();//返回
@@ -318,22 +319,21 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                     ToastUtils.showToastInUIThread("密码不能为空");
                     passwordEditText.requestFocus();
                 } else {
-
                     try {
-
                         if ("老人".equals(radiobuttonString)) {
-                            indentity=1+"";
-                        }else if ("子女".equals(radiobuttonString)){
-                            indentity=0+"";
+                            indentity = "1";
+                        } else if ("子女".equals(radiobuttonString)) {
+                            indentity = "0";
                         }
-                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "password", "check_code", "identity", "nickname","identity"}, phone, password, checkCode, nickName,indentity);
+                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "password", "check_code", "nickname", "identity"}, phone, password, checkCode, nickName, indentity);
+                        // System.out.print("headfile"+headImageFile.getAbsolutePath());
                         if (headImageFile != null && headImageFile.exists()) {
-                            params.put("pic_type", "jpg");
                             HashMap<String, String> map = new HashMap<String, String>();
                             byte[] buffer = changeFileToByte(headImageFile);
                             byte[] encode = Base64.encode(buffer, Base64.DEFAULT);
                             String photo = new String(encode);
-                            map.put("userpic", photo);
+                            map.put("headFile", photo);
+                            System.out.print("headfile"+headImageFile.getAbsolutePath());
                             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SIGN_IN_SUBMIT, params, map, REQUEST_CODE_REGIST_COMMIT, this);
                         } else {
                             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SIGN_IN_SUBMIT, params, null, REQUEST_CODE_REGIST_COMMIT, this);
@@ -357,14 +357,14 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
         byte[] buffer = null;
         try {
 
-            if (!file.exists() && file == null) {
+            if (file == null || !file.exists()) {
                 return null;
             }
             FileInputStream fis = new FileInputStream(file);
             ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
             byte[] b = new byte[1000];
             int n;
-            //每次从fis读1000个长度到b中，fis中读完就会返回-1
+
             while ((n = fis.read(b)) != -1) {
                 bos.write(b, 0, n);
                 bos.flush();
@@ -427,9 +427,9 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                 break;
             case REQUEST_CODE_REGIST_COMMIT:
                 ToastUtils.showToastInUIThread("网络连接错误,请检查重试");
-                if (headImageFile != null && headImageFile.exists()) {
-                    headImageFile.delete();
-                }
+//                if (headImageFile != null || headImageFile.exists()) {
+//                    headImageFile.delete();
+//                }
                 break;
         }
 

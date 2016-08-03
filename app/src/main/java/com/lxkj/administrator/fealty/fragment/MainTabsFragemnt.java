@@ -21,10 +21,10 @@ import java.util.List;
 public class MainTabsFragemnt extends BaseFragment {
     @ViewInject(android.R.id.tabhost)
     private QuickFragmentTabHost mTabsHost;
-    private final String[] TITLES = {"状态", "老人", "我的"};
-    private final String[] TAGS = {"status", "oldman", "me"};
-    private int[] ICONS = {R.drawable.tab_status, R.drawable.tab_status,R.drawable.tab_status};
-    private final Class[] fragments = {StatusFragment.class, OldManListFragment.class, MeFragment.class};
+    private final String[] TITLES = {"状态",  "我的设置"};
+    private final String[] TAGS = {"status", "me"};
+    private int[] ICONS = {R.drawable.tab_status,R.drawable.tab_status};
+    private final Class[] fragments = {StatusFragment.class,  MeFragment.class};
     private List<ViewHolder> viewHolders = new ArrayList<ViewHolder>();
 
     @Override

@@ -28,4 +28,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile files('libs/afinal_0.5.1_bin.jar')
+    compile files('libs/fastjson-1.2.2.jar')
 }

@@ -17,8 +17,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
-        android:text="姓名"
-        android:paddingLeft="15dp"
+        android:text="电话号码"
+        android:paddingLeft="25dp"
         android:textSize="26sp"/>
 </LinearLayout>
 </LinearLayout>
