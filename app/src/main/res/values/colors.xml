@@ -61,4 +61,5 @@
     <!-- pinned-section-listview end-->
     <!-- navigationtextcolor -->
     <color name="navigation_text_default">#9b9b9b</color>
+    <color name="holo_blue">#FF33E5B5</color>
 </resources>

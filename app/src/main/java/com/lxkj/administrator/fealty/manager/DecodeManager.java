@@ -34,9 +34,12 @@ public final class DecodeManager {
             int code = jsonObject.optInt("code");
             String desc = jsonObject.optString("message");
             String check_code = jsonObject.optString("check_code");
+            String seesion= jsonObject.optString("data");
+            String id=seesion.substring(0,seesion.indexOf("@"));
             data.putString("check_code", check_code);
             data.putInt("code", code);
             data.putString("desc", desc);
+            data.putString("id",id);
         }
         msg.setData(data);
         handler.sendMessage(msg);

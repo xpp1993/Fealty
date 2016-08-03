@@ -2,11 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
+
+    <com.lxkj.administrator.fealty.widget.JazzyViewPager
+        android:id="@+id/mJazzy"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textSize="26sp"
-        android:text="这里是状态页"
-        android:gravity="center"/>
+        android:layout_height="match_parent"></com.lxkj.administrator.fealty.widget.JazzyViewPager>
 
 </LinearLayout>

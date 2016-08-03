@@ -13,6 +13,7 @@ import org.xutils.view.annotation.ContentView;
 import  org.xutils.x;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
+import com.lxkj.administrator.fealty.fragment.LoginFragment;
 import com.lxkj.administrator.fealty.fragment.SplashFagment;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
 
@@ -41,9 +42,9 @@ public class MainActivity extends FragmentActivity {
         // EventBus 注册
         fm = getSupportFragmentManager();
         EventBus.getDefault().register(this);
-         SplashFagment baseFragment;
+         LoginFragment baseFragment;
         String tag;
-           baseFragment = new SplashFagment();
+           baseFragment = new LoginFragment();
             tag = baseFragment.getMTag();
         mFragments.add(tag);
         fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();

@@ -168,7 +168,6 @@ public class NetWorkAccessTools {
                 if(listener!=null)
                 listener.onRequestSuccess(jsonObject, requestCode);
             }
-
             @Override
             public void onFailure(Throwable t, int errorNo, String strMsg) {
                 Log.d(NetWorkAccessTools.class.getSimpleName(), "onFailure :" + strMsg);

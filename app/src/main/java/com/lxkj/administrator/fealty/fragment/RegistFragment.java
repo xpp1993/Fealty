@@ -108,9 +108,10 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
     private String indentity;
     private File tempImageFile;//相机拍摄图片缓存
     private File headImageFile;//剪切图片缓存
+    private String check_id;//获取验证码id
 
     protected void init() {
-        EventBus.getDefault().register(this);
+     //   EventBus.getDefault().register(this);
         bar_iv_left.setVisibility(View.VISIBLE);
         bar_view_left_line.setVisibility(View.VISIBLE);
         bar_tv_title_left.setVisibility(View.VISIBLE);
@@ -121,13 +122,13 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
     }
 
     // 用EventBus 来导航,订阅者
-    public void onEventMainThread(NavFragmentEvent event) {
-    }
+//    public void onEventMainThread(NavFragmentEvent event) {
+//    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
+       // EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -143,7 +144,6 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
             public void onCheckedChanged(MyRadioGroup group, int checkedId) {
                 radioButton = (RadioButton) getActivity().findViewById(checkedId);
                 radiobuttonString = radioButton.getText().toString();
-                System.out.println(radiobuttonString);
             }
         });
 
@@ -325,17 +325,16 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                         } else if ("子女".equals(radiobuttonString)) {
                             indentity = "0";
                         }
-                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "password", "check_code", "nickname", "identity"}, phone, password, checkCode, nickName, indentity);
-                        // System.out.print("headfile"+headImageFile.getAbsolutePath());
+                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "password", "check_code", "nickName", "identity","headFile","id"}, phone, password, checkCode, nickName, indentity,"",check_id);
                         if (headImageFile != null && headImageFile.exists()) {
                             HashMap<String, String> map = new HashMap<String, String>();
                             byte[] buffer = changeFileToByte(headImageFile);
                             byte[] encode = Base64.encode(buffer, Base64.DEFAULT);
                             String photo = new String(encode);
                             map.put("headFile", photo);
-                            System.out.print("headfile"+headImageFile.getAbsolutePath());
                             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SIGN_IN_SUBMIT, params, map, REQUEST_CODE_REGIST_COMMIT, this);
                         } else {
+
                             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SIGN_IN_SUBMIT, params, null, REQUEST_CODE_REGIST_COMMIT, this);
                         }
                     } catch (Exception e) {
@@ -403,7 +402,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                     ToastUtils.showToastInUIThread("服务器返回结果错误");
                 }
                 break;
-            case R.id.activity_regist_bt_commit:
+            case REQUEST_CODE_REGIST_COMMIT:
                 try {
                     DecodeManager.decodeRegistConfirm(jsonObject, requestCode, handler);
                 } catch (JSONException e) {
@@ -414,7 +413,6 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                 break;
         }
     }
-
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
 
@@ -443,6 +441,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                     if (msg.getData().getInt("code") == 1) {//如果请求成功
                         startRock();//开启倒计时
                         String check_code = msg.getData().getString("check_code");
+                        check_id=msg.getData().getString("id");
                         if (TextUtils.isEmpty(check_code)) {
                             checkCodeEditText.requestFocus();
                         } else {
@@ -460,11 +459,13 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                     break;
                 case REQUEST_CODE_REGIST_COMMIT:
                     if (msg.getData().getInt("code") == 1) {//请求成功
-                        ToastUtils.showToastInUIThread("请登录!");
+                        System.out.print("注册成功！！！！！！！！！！！！！！");
                         EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));//跳转到登录页面
-                    } else {//请求失败
-                        ToastUtils.showToastInUIThread(msg.getData().getString("desc"));
+                        ToastUtils.showToastInUIThread("请登录!");
+                    } else if(msg.getData().getInt("code") == 2) {
+                       System.out.print("注册失败！");
                     }
+
                     break;
             }
         }

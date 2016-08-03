@@ -21,7 +21,7 @@ import java.util.List;
 public class MainTabsFragemnt extends BaseFragment {
     @ViewInject(android.R.id.tabhost)
     private QuickFragmentTabHost mTabsHost;
-    private final String[] TITLES = {"状态",  "我的设置"};
+    private final String[] TITLES = {"健康监测",  "我的设置"};
     private final String[] TAGS = {"status", "me"};
     private int[] ICONS = {R.drawable.tab_status,R.drawable.tab_status};
     private final Class[] fragments = {StatusFragment.class,  MeFragment.class};
@@ -32,7 +32,6 @@ public class MainTabsFragemnt extends BaseFragment {
         //在那个布局上填充的id
         mTabsHost.setup(getContext(), getChildFragmentManager(), R.id.realtabcontent);
         initTabs();
-
     }
 
     //初始化tabs

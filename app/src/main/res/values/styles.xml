@@ -72,4 +72,5 @@
         <item name="android:layout_centerVertical">true</item>
     </style>
     <!-- selfInfo activity end-->
+
 </resources>

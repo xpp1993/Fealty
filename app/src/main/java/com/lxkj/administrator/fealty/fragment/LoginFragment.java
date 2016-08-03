@@ -86,21 +86,21 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
 
     @Override
     protected void init() {
-        EventBus.getDefault().register(this);
+      //  EventBus.getDefault().register(this);
         showPassword = false;
         handler = new MyHandler();
 
     }
 
-    // 用EventBus 来导航,订阅者
-    public void onEventMainThread(NavFragmentEvent event) {
-
-    }
+//    // 用EventBus 来导航,订阅者
+//    public void onEventMainThread(NavFragmentEvent event) {
+//
+//    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
+      //  EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -264,21 +264,25 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                     int binded = bundle.getInt("binded");
                     int code = bundle.getInt("code");
                     if (code == 1) {
-                        if (identity == 1) {//老人,进入主页面
+                      //  if (identity == 1) {//老人,进入主页面
+                        login_password_edittext.setText("");
+                        login_phone_edittext.setText("");
+                        loginButton.setProgress(0);
                             EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
-                        } else if (identity == 0) {//子女
-                            if (binded == 1) {//已绑定老人
-                                EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
-                            } else if (binded == 0) {//没有绑定老人
-                                //1.获取手机联系人
-                                ArrayList<Contacts> contacts = (ArrayList<Contacts>) getContacts(AppUtils.getBaseContext());
-                                //2.上传通讯录,返回通讯录中,注册过 ,且是老人 的 用户列表（老人头像，老人手机号）
-                                Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list"}, uploadContacts(contacts));
-                                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, LoginFragment.this);
-                                ToastUtils.showToastInUIThread("正在获取联系人列表....");
-                                //3.选择绑定的老人
-                            }
-                        }
+                     //   }
+//                        else if (identity == 0) {//子女
+//                            if (binded == 1) {//已绑定老人
+//                                EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
+//                            } else if (binded == 0) {//没有绑定老人
+//                                //1.获取手机联系人
+//                                ArrayList<Contacts> contacts = (ArrayList<Contacts>) getContacts(AppUtils.getBaseContext());
+//                                //2.上传通讯录,返回通讯录中,注册过 ,且是老人 的 用户列表（老人头像，老人手机号）
+//                                Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list"}, uploadContacts(contacts));
+//                                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, LoginFragment.this);
+//                                ToastUtils.showToastInUIThread("正在获取联系人列表....");
+//                                //3.选择绑定的老人
+//                            }
+//                        }
                     } else {
                         Message msg1 = new Message();
                         msg1.what = MESSAGE_WHAT_LOGIN_LOGINFAIL;
@@ -375,7 +379,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
             if (phones != null)
                 phones.close();
         }
-
         return contacts;
 
     }

@@ -59,13 +59,13 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
     @ViewInject(R.id.activity_reset_bt_commit)
     private Button commitButton;
     private Handler handler;
-
+    private String check_id;//获取验证码id
     private int remainRockTime;//倒计时剩余时长
     private String checkCode;
     private String phone;
 
     protected void init() {
-        EventBus.getDefault().register(this);
+      //  EventBus.getDefault().register(this);
         handler = new MyHandler();
         remainRockTime = ParameterManager.TOTAL_ROCK_TIME;
         barBackImageView.setVisibility(View.VISIBLE);
@@ -76,13 +76,13 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
     }
 
     // 用EventBus 来导航,订阅者
-    public void onEventMainThread(NavFragmentEvent event) {
-    }
+//    public void onEventMainThread(NavFragmentEvent event) {
+//    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
+       // EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -177,7 +177,7 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
 
     @Override
     public void onClick(View v) {
-        switch (view.getId()) {
+        switch (v.getId()) {
             case R.id.bar_iv_left:
                 getActivity().onBackPressed();//返回
                 break;
@@ -225,7 +225,7 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
                     newPasswordEditText.requestFocus();
                 } else {
                     try {
-                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "password", "check_code"}, phone, newPassword1, checkCode);
+                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "new_password", "check_code","id"}, phone, newPassword1, checkCode,check_id);
                         // RequireServiceManager.getRequireServiceManager().requireToResetPassword(this, CommonTools.encodeByMD5(phoneEditText.getText().toString().trim()), checkCode, send_id, newPassword1, REQUEST_CODE_SELF_GET_RESET_PASSWORD_CONFIRM, this);
                         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.RESET_PASSWORD, params, null, REQUEST_CODE_SELF_GET_RESET_PASSWORD_CONFIRM, this);
                     } catch (Exception e) {
@@ -235,9 +235,7 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
                 }
                 break;
         }
-
     }
-
     private class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -245,11 +243,13 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
                 case REQUEST_CODE_SELF_GET_RESET_PASSWORD_REQUIRE_CHECKCODE:
                     if (msg.getData().getInt("code") == 1) {//请求成功
                         startRock();//开启倒计时
-                        String code = msg.getData().getString("code");
-                        if (TextUtils.isEmpty(code)) {
+                        String check_code = msg.getData().getString("check_code");
+                        check_id=msg.getData().getString("id");
+                        if (TextUtils.isEmpty(check_code)) {
                             checkCodeEditText.requestFocus();
                         } else {
-                            checkCodeEditText.setText(code);
+                            checkCodeEditText.setText(check_id);
+                            getCheckCodeTextView.setText("获取验证码");
                             commitButton.setEnabled(true);
                             newPasswordEditText.requestFocus();
                         }
@@ -261,15 +261,14 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
                     }
                     break;
                 case REQUEST_CODE_SELF_GET_RESET_PASSWORD_CONFIRM://提交修改密码返回
-                    if (msg.getData().getInt("retcode") == 0) {//请求成功
+                    if (msg.getData().getInt("code") == 1) {//请求成功
                         ToastUtils.showToastInUIThread("密码修改成功,请重新登陆!");
                         EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));//跳转到登录页面
                         // finish();
                     } else {//请求失败
+                        ToastUtils.showToastInUIThread("请求失败！"+msg.getData().getString("desc"));
                     }
-
                     break;
-
             }
         }
     }
