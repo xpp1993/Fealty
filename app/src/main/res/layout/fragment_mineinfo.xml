@@ -1,0 +1,273 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:background="@color/MainBackGround"
+    android:fitsSystemWindows="true"
+    android:clipToPadding="true"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/MainBackGround"
+        android:orientation="vertical">
+        <include layout="@layout/bar" />
+        <LinearLayout
+            android:id="@+id/fragment_mine_ll_head"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <ImageView
+                android:id="@+id/fragment_mine_iv_callCamera"
+                android:layout_width="43dp"
+                android:layout_height="35dp"
+                android:layout_marginRight="24dp"
+                android:src="@mipmap/icon_register_avatar_photo_camera" />
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/fragment_mine_iv_head"
+                android:layout_width="86dp"
+                android:layout_height="86dp"
+                android:src="@mipmap/unknow_head" />
+            <ImageView
+                android:id="@+id/fragment_mine_iv_callAlbum"
+                android:layout_width="43dp"
+                android:layout_height="35dp"
+                android:layout_marginLeft="24dp"
+                android:src="@mipmap/icon_register_avatar_photo_album" />
+        </LinearLayout>
+        <TextView
+            android:id="@+id/fragment_mine_tv_nickname_smile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="Sophia" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/background_light"
+            android:orientation="vertical">
+            <RelativeLayout
+                android:id="@+id/fragment_mine_rl_nickname"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/setting_item_background"
+                android:gravity="center_vertical"
+                android:paddingBottom="5dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp">
+                <TextView
+                    style="@style/self_info_layout_tv_title"
+                    android:text="昵称" />
+
+                <ImageView
+                    android:id="@+id/fragment_mine_iv_nickname"
+                    style="@style/detail_layout_iv_next"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true" />
+
+                <TextView
+                    android:id="@+id/fragment_mine_tv_nickname"
+                    style="@style/self_info_layout_tv_title"
+                    android:layout_toLeftOf="@id/fragment_mine_iv_nickname"
+                    android:text="昵称" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EFEFF4" />
+
+            <RelativeLayout
+                android:id="@+id/fragment_mine_rl_sex"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/setting_item_background"
+                android:gravity="center_vertical"
+                android:paddingBottom="5dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp">
+
+                <TextView
+                    style="@style/self_info_layout_tv_title"
+                    android:text="性别" />
+
+
+                <ImageView
+                    android:id="@+id/fragment_mine_iv_sex"
+                    style="@style/detail_layout_iv_next"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true" />
+
+                <TextView
+                    android:id="@+id/fragment_mine_tv_sex"
+                    style="@style/self_info_layout_tv_title"
+                    android:layout_toLeftOf="@id/fragment_mine_iv_sex"
+                    android:text="性别" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EFEFF4" />
+
+            <RelativeLayout
+                android:id="@+id/fragment_mine_rl_birthday"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/setting_item_background"
+                android:gravity="center_vertical"
+                android:paddingBottom="5dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp">
+
+                <TextView
+                    style="@style/self_info_layout_tv_title"
+                    android:text="生日" />
+
+
+                <ImageView
+                    android:id="@+id/fragment_mine_iv_birthday"
+                    style="@style/detail_layout_iv_next"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true" />
+
+                <TextView
+                    android:id="@+id/fragment_mine_tv_birthday"
+                    style="@style/self_info_layout_tv_title"
+                    android:layout_toLeftOf="@id/fragment_mine_iv_birthday"
+                    android:text="未设置" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/background_light"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/fragment_mine_rl_phone"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center_vertical"
+                android:paddingBottom="5dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp">
+
+                <TextView
+                    style="@style/self_info_layout_tv_title"
+                    android:text="手机" />
+
+                <TextView
+                    android:id="@+id/fragment_mine_tv_phone"
+                    style="@style/self_info_layout_tv_title"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="25dp"
+                    android:text="18888888888" />
+            </RelativeLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EFEFF4" />
+
+            <RelativeLayout
+                android:id="@+id/fragment_mine_rl_reset"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/setting_item_background"
+                android:gravity="center_vertical"
+                android:paddingBottom="5dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp">
+                <TextView
+                    style="@style/self_info_layout_tv_title"
+                    android:text="修改密码" />
+
+                <ImageView
+                    android:id="@+id/fragment_mine_iv_reset"
+                    style="@style/detail_layout_iv_next"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/background_light"
+            android:orientation="vertical">
+            <RelativeLayout
+                android:id="@+id/fragment_mine_rl_about"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/setting_item_background"
+                android:gravity="center_vertical"
+                android:paddingBottom="5dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp">
+
+                <TextView
+                    style="@style/self_info_layout_tv_title"
+                    android:text="查看绑定的用户" />
+
+                <ImageView
+                    android:id="@+id/fragment_mine_iv_about"
+                    style="@style/detail_layout_iv_next"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true" />
+
+            </RelativeLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EFEFF4" />
+
+            <RelativeLayout
+                android:id="@+id/fragment_mine_rl_feedback"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/setting_item_background"
+                android:gravity="center_vertical"
+                android:paddingBottom="5dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp">
+                <TextView
+                    style="@style/self_info_layout_tv_title"
+                    android:text="当前版本" />
+
+                <ImageView
+                    android:id="@+id/fragment_mine_iv_feedback"
+                    style="@style/detail_layout_iv_next"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/background_light"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/fragment_mine_tv_exit"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/setting_item_background"
+                android:gravity="center"
+                android:text="退出登录"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

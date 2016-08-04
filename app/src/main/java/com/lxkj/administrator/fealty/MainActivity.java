@@ -1,5 +1,6 @@
 package com.lxkj.administrator.fealty;
 
+import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -9,8 +10,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+
 import org.xutils.view.annotation.ContentView;
-import  org.xutils.x;
+import org.xutils.x;
+
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.fragment.LoginFragment;
@@ -26,31 +29,34 @@ import de.greenrobot.event.EventBus;
  */
 @ContentView(R.layout.activity_main)
 public class MainActivity extends FragmentActivity {
-//声明Fragmentmanager
+    //声明Fragmentmanager
     private FragmentManager fm;
     //tag 容器，管理Fragment的tag
-    private LinkedList<String> mFragments=new LinkedList<String>();
-    public static final int LAST_CLICK_GAP=600;
-    public static final int EXIT_GAP=2000;
-    public long lastClickTime=0;
+    private LinkedList<String> mFragments = new LinkedList<String>();
+    public static final int LAST_CLICK_GAP = 600;
+    public static final int EXIT_GAP = 2000;
+    public long lastClickTime = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-      //  setContentView(R.layout.activity_main);
+        //  setContentView(R.layout.activity_main);
         // 注入xutils3 的view
         x.view().inject(this);
         // EventBus 注册
         fm = getSupportFragmentManager();
         EventBus.getDefault().register(this);
-         LoginFragment baseFragment;
+        LoginFragment baseFragment;
         String tag;
-           baseFragment = new LoginFragment();
-            tag = baseFragment.getMTag();
+        baseFragment = new LoginFragment();
+        tag = baseFragment.getMTag();
         mFragments.add(tag);
-        fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();
+        /**
+         *  这里一定要在save为null时才加载Fragment，Fragment中onCreateView等生命周里加载根子Fragment同理
+         *因为在页面重启时，Fragment会被保存恢复，而此时再加载Fragment会重复加载，导致重叠
+         */
+        fm.beginTransaction().add(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();
     }
-
-//监听返回键
+    //监听返回键
     //按返回键，Fragment要不要禁用返回键
     //假如fragment不控制返回键---》MainActivity 管理东西---->mFragments.pollLast();fm.popBackStack
 //                                                      只有一个Fragment情况下，
@@ -58,13 +64,13 @@ public class MainActivity extends FragmentActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-        if (KeyEvent.KEYCODE_BACK==keyCode){
-            if (!backCurrentFragment()){
+        if (KeyEvent.KEYCODE_BACK == keyCode) {
+            if (!backCurrentFragment()) {
                 goBack();
             }
             return true;//消费
         }
-        return super.onKeyDown(keyCode,event);
+        return super.onKeyDown(keyCode, event);
     }
 
     private void goBack() {
@@ -108,10 +114,6 @@ public class MainActivity extends FragmentActivity {
         if (fragment == null) {
             throw new IllegalArgumentException("fragment is null");
         }
-
-//        System.currentTimeMillis();
-//        Thread.sleep(1000);
-//        SystemClock.sleep(1000);
         if (lastClickTime + LAST_CLICK_GAP < SystemClock.uptimeMillis()) {
             //把tag添加到mFragments
             // 1 获取tag
@@ -157,9 +159,10 @@ public class MainActivity extends FragmentActivity {
         }
 
     }
+
     //找到当前的fragment
-    public Fragment getCurrentFragment(){
-        return  mFragments.size()>0?fm.findFragmentByTag(mFragments.peekLast()):null;
+    public Fragment getCurrentFragment() {
+        return mFragments.size() > 0 ? fm.findFragmentByTag(mFragments.peekLast()) : null;
     }
 
     @Override

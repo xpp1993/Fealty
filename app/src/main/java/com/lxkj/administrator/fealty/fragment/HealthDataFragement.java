@@ -18,14 +18,12 @@ public class HealthDataFragement extends BaseFragment {
     private TextView tv_gps;
     @ViewInject(R.id.tv_health)
     private TextView tv_health;
-
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
         tv_gps.setText("老人" + arguments.getInt("i") + "号的GPS");
         tv_health.setText("老人" + arguments.getInt("i") + "号的健康监测数据");
     }
-
     @Override
     protected void init() {
 

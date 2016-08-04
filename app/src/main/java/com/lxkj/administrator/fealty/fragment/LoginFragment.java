@@ -224,7 +224,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
             }
         }
     }
-
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
         switch (requestCode) {
@@ -268,6 +267,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                         login_password_edittext.setText("");
                         login_phone_edittext.setText("");
                         loginButton.setProgress(0);
+                        tv_login.setClickable(true);
                             EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
                      //   }
 //                        else if (identity == 0) {//子女
@@ -327,7 +327,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
             return jsonString;
         }
     }
-
     /**
      * 获取手机联系人的方法
      *

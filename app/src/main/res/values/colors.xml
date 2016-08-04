@@ -14,7 +14,7 @@
     <color name="SplitLine">#d8d8d8</color>
 
     <color name="gray">#8a000000</color>
-
+    <color name="gray_btn_bg_pressed_color">#B6B6B6</color>
     <!-- Card item begin -->
     <color name="button_present">#7ED221</color>
     <color name="button_want">#2196f3</color>

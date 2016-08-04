@@ -72,5 +72,13 @@
         <item name="android:layout_centerVertical">true</item>
     </style>
     <!-- selfInfo activity end-->
+    <!-- selfInfo activity start-->
+    <style name="detail_layout_iv_next">
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:src">@drawable/detail_next</item>
+        <item name="android:layout_marginLeft">5dp</item>
+    </style>
 
+    <!-- selfInfo activity end-->
 </resources>

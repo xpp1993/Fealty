@@ -16,37 +16,59 @@
         android:id="@+id/fragment_me_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/fragment_me_iv_banner"
-        android:background="#FFF0F0F0">
+        android:layout_below="@id/fragment_me_iv_banner">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/me_headpic"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:src="@mipmap/unknow_head"
-            android:layout_marginTop="10dp"
             android:layout_marginLeft="10dp"
-           />
+            android:layout_marginTop="10dp"
+            android:src="@mipmap/unknow_head" />
+
         <TextView
             android:id="@+id/me_username"
-            android:textSize="26sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="12dp"
             android:layout_toRightOf="@+id/me_headpic"
             android:text="周杰伦"
-            android:layout_marginLeft="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-           android:layout_marginTop="12dp"
-            />
+            android:textSize="26sp" />
+
         <TextView
             android:id="@+id/me_phone"
-            android:text="手机号：159-9999-9999"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/me_username"
             android:layout_below="@id/me_username"
             android:layout_marginTop="5dp"
             android:layout_toRightOf="@id/me_headpic"
-            android:layout_alignLeft="@id/me_username"
-            />
+            android:text="手机号：159-9999-9999" />
+
+        <ImageView
+            android:id="@+id/me_iv_left"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="25dp"
+            android:src="@mipmap/fanghui" />
     </RelativeLayout>
+    <View
+        android:id="@+id/view1"
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:layout_below="@id/fragment_me_details"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
+        android:background="#DCDCDC" />
+    <LinearLayout
+        android:id="@+id/me_setting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/view1"
+        android:orientation="horizontal">
+    </LinearLayout>
 
 </RelativeLayout>

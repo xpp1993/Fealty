@@ -41,8 +41,8 @@ public class HeathMonitoringAdapter extends FragmentPagerAdapter {
         Object obj = super.instantiateItem(container, position);
         mJazzy.setObjectForPosition(obj, position);
         return obj;
-    }
 
+    }
     @Override
     public boolean isViewFromObject(View view, Object object) {
         if (object != null) {
@@ -50,5 +50,7 @@ public class HeathMonitoringAdapter extends FragmentPagerAdapter {
         } else {
             return false;
         }
+
     }
+
 }
