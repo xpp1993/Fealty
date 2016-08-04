@@ -6,8 +6,10 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.lxkj.administrator.fealty.fragment.HealthDataFragement;
 import com.lxkj.administrator.fealty.widget.JazzyViewPager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,12 +17,13 @@ import java.util.List;
  * Created by Administrator on 2016/8/3.
  */
 public class HeathMonitoringAdapter extends FragmentPagerAdapter {
-    private List<Fragment> fragments;
+    private List<HealthDataFragement> fragments;
     private JazzyViewPager mJazzy;
-    public HeathMonitoringAdapter(FragmentManager fm, List<Fragment> fragments,JazzyViewPager mJazzy) {
+
+    public HeathMonitoringAdapter(FragmentManager fm, JazzyViewPager mJazzy, List<HealthDataFragement> fragments) {
         super(fm);
         this.fragments = fragments;
-        this.mJazzy=mJazzy;
+        this.mJazzy = mJazzy;
     }
 
     @Override

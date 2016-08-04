@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/MainBackGround">
+    <TextView
+        android:id="@+id/tv_gps"
+        android:paddingTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="老人GPS定位..........."
+        android:gravity="center_horizontal"/>
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/MainTheme" />
+<TextView
+    android:id="@+id/tv_health"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:text="老人健康监测数据"
+    android:gravity="center"
+    android:textSize="30sp"/>
+</LinearLayout>
