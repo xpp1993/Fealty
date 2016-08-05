@@ -59,6 +59,7 @@
                 android:paddingRight="10dp"
                 android:paddingTop="5dp">
                 <TextView
+                    android:id="@+id/fragment_setting_nickName"
                     style="@style/self_info_layout_tv_title"
                     android:text="昵称" />
 
@@ -162,6 +163,7 @@
                 android:paddingTop="5dp">
 
                 <TextView
+                    android:id="@+id/fragment_setting_phone"
                     style="@style/self_info_layout_tv_title"
                     android:text="手机" />
 

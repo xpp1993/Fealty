@@ -34,47 +34,46 @@ public final class DecodeManager {
             int code = jsonObject.optInt("code");
             String desc = jsonObject.optString("message");
             String check_code = jsonObject.optString("check_code");
-            String seesion= jsonObject.optString("data");
-            String id=seesion.substring(0,seesion.indexOf("@"));
+            String seesion = jsonObject.optString("data");
+            String id = seesion.substring(0, seesion.indexOf("@"));
             data.putString("check_code", check_code);
             data.putInt("code", code);
             data.putString("desc", desc);
-            data.putString("id",id);
+            data.putString("id", id);
         }
         msg.setData(data);
         handler.sendMessage(msg);
     }
-
-    public static void decodeCheckSession(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
-        Log.v("decodeCheckSession", jsonObject.toString());
-        Message msg = new Message();
-        Bundle data = new Bundle();
-        msg.what = messageWhat;
-        insertRecInformation(data, jsonObject);
-
-        if (isRequestOK(jsonObject)) {//请求服务器成功
-            JSONObject sessionUpdate = jsonObject.optJSONObject("session_update");
-            if (sessionUpdate != null) {
-                data.putString("session_id", sessionUpdate.optString("session_id"));
-                data.putString("sess_key", sessionUpdate.optString("sess_key"));
-                data.putString("login_time", sessionUpdate.optString("login_time"));
-            }
-
-            JSONObject contact = jsonObject.optJSONObject("contact");
-            if (contact != null) {
-                data.putString("checksum", contact.optString("checksum"));
-                data.putString("checksum_extra", contact.optString("checksum_extra"));
-            }
-
-            JSONObject config_update = jsonObject.optJSONObject("config_update");
-            if (config_update != null) {
-                data.putInt("splash_time", config_update.optInt("splash_time"));
-                data.putInt("bg_update_time", config_update.optInt("bg_update_time"));
-            }
-        }
-        msg.setData(data);
-        handler.sendMessage(msg);
-    }
+//    public static void decodeCheckSession(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
+//        Log.v("decodeCheckSession", jsonObject.toString());
+//        Message msg = new Message();
+//        Bundle data = new Bundle();
+//        msg.what = messageWhat;
+//        insertRecInformation(data, jsonObject);
+//
+//        if (isRequestOK(jsonObject)) {//请求服务器成功
+//            JSONObject sessionUpdate = jsonObject.optJSONObject("session_update");
+//            if (sessionUpdate != null) {
+//                data.putString("session_id", sessionUpdate.optString("session_id"));
+//                data.putString("sess_key", sessionUpdate.optString("sess_key"));
+//                data.putString("login_time", sessionUpdate.optString("login_time"));
+//            }
+//
+//            JSONObject contact = jsonObject.optJSONObject("contact");
+//            if (contact != null) {
+//                data.putString("checksum", contact.optString("checksum"));
+//                data.putString("checksum_extra", contact.optString("checksum_extra"));
+//            }
+//
+//            JSONObject config_update = jsonObject.optJSONObject("config_update");
+//            if (config_update != null) {
+//                data.putInt("splash_time", config_update.optInt("splash_time"));
+//                data.putInt("bg_update_time", config_update.optInt("bg_update_time"));
+//            }
+//        }
+//        msg.setData(data);
+//        handler.sendMessage(msg);
+//    }
 
     /**
      * 解码 注册确认
@@ -117,35 +116,43 @@ public final class DecodeManager {
         if (isRequestOK(jsonObject)) {
             int identity = jsonObject.optInt("identity", 0);
             int binded = jsonObject.optInt("binded", 0);
+            String mobile = jsonObject.optString("mobile");
+            String password = jsonObject.optString("password");
+            String nickName = jsonObject.optString("nickName");
+            String headFile = jsonObject.optString("headFile");
             data.putInt("identity", identity);
             data.putInt("binded", binded);
+            data.putString("mobile", mobile);
+            data.putString("password", password);
+            data.putString("nickName", nickName);
+            data.putString("headFile", headFile);
         }
         msg.setData(data);
         handler.sendMessage(msg);
     }
 
-    /**
-     * 解析 发布信息
-     *
-     * @param jsonObject
-     * @param handler
-     * @throws JSONException
-     */
-    public static void decodeIssueMessage(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
-        Log.v("decodeIssueMessage", jsonObject.toString());
-        Message msg = new Message();
-        Bundle data = new Bundle();
-        msg.what = messageWhat;
-        insertRecInformation(data, jsonObject);
-
-        if (isRequestOK(jsonObject)) {
-            int post_id = jsonObject.getInt("post_id");
-
-            data.putInt("post_id", post_id);
-        }
-        msg.setData(data);
-        handler.sendMessage(msg);
-    }
+//    /**
+//     * 解析 发布信息
+//     *
+//     * @param jsonObject
+//     * @param handler
+//     * @throws JSONException
+//     */
+//    public static void decodeIssueMessage(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
+//        Log.v("decodeIssueMessage", jsonObject.toString());
+//        Message msg = new Message();
+//        Bundle data = new Bundle();
+//        msg.what = messageWhat;
+//        insertRecInformation(data, jsonObject);
+//
+//        if (isRequestOK(jsonObject)) {
+//            int post_id = jsonObject.getInt("post_id");
+//
+//            data.putInt("post_id", post_id);
+//        }
+//        msg.setData(data);
+//        handler.sendMessage(msg);
+//    }
 
     /**
      * 解析 通用jsonObject
@@ -177,17 +184,17 @@ public final class DecodeManager {
      * @param handler
      * @throws JSONException
      */
-    public static void decodeCommonWithPostId(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
-        Log.v("decodeCommonWithPostId", jsonObject.toString());
-        Message msg = new Message();
-        Bundle data = new Bundle();
-        msg.what = messageWhat;
-        insertRecInformation(data, jsonObject);
-        HashMap<String, String> params = (HashMap<String, String>) jsonObject.get("params");
-        data.putInt("post_id", Integer.valueOf(params.get("post_id")));
-        msg.setData(data);
-        handler.sendMessage(msg);
-    }
+//    public static void decodeCommonWithPostId(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
+//        Log.v("decodeCommonWithPostId", jsonObject.toString());
+//        Message msg = new Message();
+//        Bundle data = new Bundle();
+//        msg.what = messageWhat;
+//        insertRecInformation(data, jsonObject);
+//        HashMap<String, String> params = (HashMap<String, String>) jsonObject.get("params");
+//        data.putInt("post_id", Integer.valueOf(params.get("post_id")));
+//        msg.setData(data);
+//        handler.sendMessage(msg);
+//    }
 
     /**
      * 解析 个人资料查询
@@ -204,19 +211,17 @@ public final class DecodeManager {
         insertRecInformation(data, jsonObject);
 
         if (isRequestOK(jsonObject)) {
-            String mobile = jsonObject.getString("mobile");
-            String nickname = jsonObject.getString("nickname");
-            String gender = String.valueOf(jsonObject.optInt("gender", 0) == 0 ? "" : jsonObject.getInt("gender"));
-            String username = jsonObject.optString("username", "");
-            String birthday = jsonObject.optString("birthday", "");
-            String userpic = jsonObject.optString("userpic", "");
-
+            JSONObject jsonObject1 = jsonObject.getJSONObject("json").getJSONObject("user");
+            String mobile = jsonObject1.getString("mobile");
+            String nickName = jsonObject1.getString("nickName");
+            String headFile = jsonObject1.optString("headFile","");
+            String sex = String.valueOf(jsonObject1.optInt("sex", 0) == 0 ? "" : jsonObject1.getInt("sex"));
+            String birthday = jsonObject1.optString("birthday", "");
             data.putString("mobile", mobile);
-            data.putString("nickname", nickname);
-            data.putString("gender", gender);
-            data.putString("username", username);
+            data.putString("nickName", nickName);
+            data.putString("sex", sex);
             data.putString("birthday", birthday);
-            data.putString("userpic", userpic);
+            data.putString("headFile", headFile);
         }
         msg.setData(data);
         handler.sendMessage(msg);

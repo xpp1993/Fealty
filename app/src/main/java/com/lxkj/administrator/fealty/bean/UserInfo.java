@@ -16,7 +16,8 @@ public class UserInfo implements Serializable{
     private String birthday;//生日
     private String userpic;//头像
     private String identity;//身份标识
-    public UserInfo(String mobile, String gender, String nickName, String username, String birthday, String userpic) {
+    private String password;
+    public UserInfo(String mobile, String gender, String nickName, String username, String birthday, String userpic,String password) {
         this.mobile = mobile;
         this.gender = gender;
         this.nickName = nickName;
@@ -24,6 +25,7 @@ public class UserInfo implements Serializable{
         this.birthday = birthday;
         this.userpic = userpic;
         this.identity=identity;
+        this.password=password;
     }
 
     public UserInfo() {
@@ -85,4 +87,11 @@ public class UserInfo implements Serializable{
         this.identity = identity;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

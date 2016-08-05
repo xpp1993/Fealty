@@ -17,6 +17,7 @@ import org.xutils.x;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.fragment.LoginFragment;
+import com.lxkj.administrator.fealty.fragment.MainTabsFragemnt;
 import com.lxkj.administrator.fealty.fragment.SplashFagment;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
 
@@ -46,14 +47,13 @@ public class MainActivity extends FragmentActivity {
         fm = getSupportFragmentManager();
         EventBus.getDefault().register(this);
         LoginFragment baseFragment;
+      //  MainTabsFragemnt baseFragment;
         String tag;
         baseFragment = new LoginFragment();
+      //  baseFragment=new MainTabsFragemnt();
         tag = baseFragment.getMTag();
         mFragments.add(tag);
-        /**
-         *  这里一定要在save为null时才加载Fragment，Fragment中onCreateView等生命周里加载根子Fragment同理
-         *因为在页面重启时，Fragment会被保存恢复，而此时再加载Fragment会重复加载，导致重叠
-         */
+
         fm.beginTransaction().add(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();
     }
     //监听返回键

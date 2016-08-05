@@ -21,5 +21,9 @@ public class ParameterManager {
     public static final String RESET_PASSWORD="http://192.168.8.133:8080/cuffapi/user/password_submit";
     public static  final  String SIGN_UP_COMMIT="http://192.168.8.133:8080/cuffapi/user/sign_up_submint";
     public static  final String  UPLOAD_CONTACTS_LIST="http://192.168.8.133:8080/cuffapi/user/upload_contact_list";
+    public static final String GET_USER_BYMOBILE="http://192.168.8.133:8080/cuffapi/user/get_user_by_phone";
+    public static final String UPDATE_USER_MSG="http://192.168.8.133:8080/cuffapi/user/update_user_msg";
     public static final int NOTIFICATION_ID = 0X2131 ;
+    //性别标杆
+    public static final String USER_SEX_CODE_MAN = "1", USER_SEX_CODE_WOMAN = "2";
 }

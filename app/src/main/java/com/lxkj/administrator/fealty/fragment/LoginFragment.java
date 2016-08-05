@@ -24,6 +24,8 @@ import com.lxkj.administrator.fealty.bean.UserInfo;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
+import com.lxkj.administrator.fealty.manager.SPManager;
+import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.ui.ActionProcessButton;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
@@ -262,6 +264,11 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                     int identity = bundle.getInt("identity");
                     int binded = bundle.getInt("binded");
                     int code = bundle.getInt("code");
+                   String mobile=bundle.getString("mobile");
+                    UserInfo userInfo=new UserInfo();
+                    userInfo.setMobile(phone);
+                    SessionHolder.initHolder(mobile, userInfo);
+                    SPManager.getSPManager(AppUtils.getBaseContext()).persistenceSession();
                     if (code == 1) {
                       //  if (identity == 1) {//老人,进入主页面
                         login_password_edittext.setText("");

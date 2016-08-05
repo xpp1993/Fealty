@@ -36,7 +36,7 @@ public class StatusFragment extends BaseFragment {
             healthDataFragement.setArguments(bundle);
             fragments.add(healthDataFragement);
         }
-        mJazzy.setTransitionEffect(JazzyViewPager.TransitionEffect.Stack);
+        mJazzy.setTransitionEffect(JazzyViewPager.TransitionEffect.ZoomIn);
         mJazzy.setPageMargin(30);
         adapter = new HeathMonitoringAdapter(getChildFragmentManager(), mJazzy, fragments);
         mJazzy.setAdapter(adapter);

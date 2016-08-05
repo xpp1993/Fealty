@@ -24,7 +24,7 @@
             android:layout_height="60dp"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"
-            android:src="@mipmap/unknow_head" />
+           />
 
         <TextView
             android:id="@+id/me_username"
@@ -33,7 +33,6 @@
             android:layout_marginLeft="10dp"
             android:layout_marginTop="12dp"
             android:layout_toRightOf="@+id/me_headpic"
-            android:text="周杰伦"
             android:textSize="26sp" />
 
         <TextView
@@ -44,7 +43,7 @@
             android:layout_below="@id/me_username"
             android:layout_marginTop="5dp"
             android:layout_toRightOf="@id/me_headpic"
-            android:text="手机号：159-9999-9999" />
+             />
 
         <ImageView
             android:id="@+id/me_iv_left"

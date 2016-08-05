@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class NetWorkAccessTools {
     private static final int BITMAP_MAX_SIZE = 60;
 

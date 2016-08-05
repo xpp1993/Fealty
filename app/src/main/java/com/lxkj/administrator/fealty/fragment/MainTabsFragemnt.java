@@ -1,18 +1,26 @@
 package com.lxkj.administrator.fealty.fragment;
 
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
+import com.lxkj.administrator.fealty.manager.ParameterManager;
+import com.lxkj.administrator.fealty.manager.SessionHolder;
+import com.lxkj.administrator.fealty.utils.AppUtils;
+import com.lxkj.administrator.fealty.utils.CommonTools;
+import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.widget.QuickFragmentTabHost;
 
+import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2016/7/26.
@@ -26,7 +34,6 @@ public class MainTabsFragemnt extends BaseFragment {
     private int[] ICONS = {R.drawable.tab_status,R.drawable.tab_status};
     private final Class[] fragments = {StatusFragment.class,  MeFragment.class};
     private List<ViewHolder> viewHolders = new ArrayList<ViewHolder>();
-
     @Override
     protected void init() {
         //在那个布局上填充的id
@@ -55,6 +62,10 @@ public class MainTabsFragemnt extends BaseFragment {
             drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
             viewHolder.iconTabTv.setCompoundDrawables(null, drawable, null, null);
             viewHolders.add(viewHolder);
+//            if (i==1) {
+//                //请求个人资料
+//
+//            }
             mTabsHost.addTab(mTabsHost.newTabSpec(viewHolder.tag).setIndicator(view), fragments[i], null);
         }
     }
@@ -68,6 +79,7 @@ public class MainTabsFragemnt extends BaseFragment {
     protected void initData() {
 
     }
+
 
     class ViewHolder {
         TextView iconTabTv;
