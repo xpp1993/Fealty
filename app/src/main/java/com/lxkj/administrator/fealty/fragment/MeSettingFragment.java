@@ -38,6 +38,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
+import org.xutils.x;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -120,7 +121,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
         if (TextUtils.isEmpty(SessionHolder.user.getUserpic())) {
             circleImageView.setImageResource(R.mipmap.unknow_head);
         } else {
-            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage(SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+           NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage(ParameterManager.GET_USER_BYMOBILE+"/"+SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+          System.out.println(ParameterManager.GET_USER_BYMOBILE + "/" + SessionHolder.user.getUserpic());
         }
         tv_nickName.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
         tv_phone.setText(SessionHolder.user.getMobile());
@@ -360,7 +362,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
         try {
             if (SessionHolder.user.getUserpic() == null || "".equals(SessionHolder.user.getUserpic()))
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_USER_MSG, params, null, REQUEST_CODE_SELF_DATA_ALTER, MeSettingFragment.this);
-            else {
+            if (headImageFile != null && headImageFile.exists()) {
                 Map<String, String> map = new HashMap<>();
                 byte[] buffer = changeFileToByte(headImageFile);
                 byte[] encode = Base64.encode(buffer, Base64.DEFAULT);
@@ -418,7 +420,6 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
             switch (msg.what) {
                 case REQUEST_CODE_SELF_DATA_ALTER://个人信息修改
                     if (msg.getData().getInt("code") == 1) {//请求成功
-                        // CommonTools.showToast(SettingActivity.this, "修改成功");
                         ToastUtils.showToastInUIThread("修改成功！");
                         // 请求个人资料
                         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
@@ -432,12 +433,12 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                     if (msg.getData().getInt("code") == 1) {//请求成功
                         String mobile = msg.getData().getString("mobile");
                         String nickname = msg.getData().getString("nickName");
-                        //  String userpic = msg.getData().getString("headFile");
+                        String userpic = msg.getData().getString("headFile");
                         String sex = msg.getData().getString("sex");
                         String birthday = msg.getData().getString("birthday");
                         SessionHolder.user.setMobile(mobile);
                         SessionHolder.user.setNickName(nickname);
-                        //  SessionHolder.user.setUserpic(userpic);
+                        SessionHolder.user.setUserpic(userpic);
                         SessionHolder.user.setGender(sex);
                         SessionHolder.user.setBirthday(birthday);
                     } else {//请求失败
@@ -445,6 +446,9 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                         Log.w("service error", msg.getData().getString("desc"));
                     }
                     initPersonalDataShow();
+                    break;
+                default:
+                    ToastUtils.showToastInUIThread("服务器错误！");
                     break;
             }
         }

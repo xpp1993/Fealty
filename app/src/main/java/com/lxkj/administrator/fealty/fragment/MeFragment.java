@@ -104,8 +104,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         if (TextUtils.isEmpty(SessionHolder.user.getUserpic())||"".equals(SessionHolder.user.getUserpic())) {
             circleImageView.setImageResource(R.mipmap.unknow_head);
         } else {
-            System.out.print("-----------"+SessionHolder.user.getUserpic());
-            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage(SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage(ParameterManager.GET_USER_BYMOBILE+"/"+SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
         }
         me_username.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
         me_phone.setText(TextUtils.isEmpty(SessionHolder.user.getMobile()) ? "未设置" : "手机号:"+SessionHolder.user.getMobile());
@@ -118,12 +117,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     if (msg.getData().getInt("code") == 1) {//请求成功
                         String mobile = msg.getData().getString("mobile");
                         String nickname = msg.getData().getString("nickName");
-                    //   String userpic = msg.getData().getString("headFile");
+                       String userpic = msg.getData().getString("headFile");
                         String sex=msg.getData().getString("sex");
                         String birthday=msg.getData().getString("birthday");
                         SessionHolder.user.setMobile(mobile);
                         SessionHolder.user.setNickName(nickname);
-                       // SessionHolder.user.setUserpic(userpic);
+                        SessionHolder.user.setUserpic(userpic);
                         SessionHolder.user.setGender(sex);
                         SessionHolder.user.setBirthday(birthday);
                     } else {//请求失败
