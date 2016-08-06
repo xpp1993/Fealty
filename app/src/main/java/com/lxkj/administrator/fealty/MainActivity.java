@@ -46,15 +46,15 @@ public class MainActivity extends FragmentActivity {
         // EventBus 注册
         fm = getSupportFragmentManager();
         EventBus.getDefault().register(this);
-        LoginFragment baseFragment;
-      //  MainTabsFragemnt baseFragment;
+      LoginFragment baseFragment;
+     // MainTabsFragemnt baseFragment;
         String tag;
-        baseFragment = new LoginFragment();
-      //  baseFragment=new MainTabsFragemnt();
-        tag = baseFragment.getMTag();
+       baseFragment = new LoginFragment();
+       // baseFragment=new MainTabsFragemnt();
+       tag = baseFragment.getMTag();
         mFragments.add(tag);
 
-        fm.beginTransaction().add(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();
+        fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();
     }
     //监听返回键
     //按返回键，Fragment要不要禁用返回键

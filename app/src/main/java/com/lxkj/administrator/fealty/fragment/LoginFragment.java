@@ -276,6 +276,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                         loginButton.setProgress(0);
                         tv_login.setClickable(true);
                             EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
+                        finish();
                      //   }
 //                        else if (identity == 0) {//子女
 //                            if (binded == 1) {//已绑定老人

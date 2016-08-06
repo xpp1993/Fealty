@@ -45,6 +45,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private Handler handler=new MyHandler();
     @Override
     protected void init() {
+        EventBus.getDefault().register(this);
         //初始化个人资料显示
         initPersonalDataShow();
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
@@ -58,6 +59,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     protected void initData() {
 
     }
+    // 用EventBus 来导航,订阅者
+    public void onEventMainThread(String event) {
+     String str=   event.getBytes().toString();
+        Log.d("Tag",str);
+        initPersonalDataShow();
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()){
@@ -104,7 +117,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         if (TextUtils.isEmpty(SessionHolder.user.getUserpic())||"".equals(SessionHolder.user.getUserpic())) {
             circleImageView.setImageResource(R.mipmap.unknow_head);
         } else {
-            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage(ParameterManager.GET_USER_BYMOBILE+"/"+SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080"+"/"+SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
         }
         me_username.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
         me_phone.setText(TextUtils.isEmpty(SessionHolder.user.getMobile()) ? "未设置" : "手机号:"+SessionHolder.user.getMobile());
