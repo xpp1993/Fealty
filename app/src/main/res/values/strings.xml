@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Fealty</string>
+    <string name="app_name">德信手环SDK</string>
     <string-array name="jazzy_effects">
         <item>Standard</item>
         <item>Tablet</item>

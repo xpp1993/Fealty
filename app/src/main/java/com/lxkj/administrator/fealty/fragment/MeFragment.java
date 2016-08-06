@@ -1,9 +1,14 @@
 package com.lxkj.administrator.fealty.fragment;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,6 +22,8 @@ import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
+import com.yc.peddemo.sdk.BLEServiceOperate;
+import com.yc.peddemo.sdk.DeviceScanInterfacer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +39,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by Administrator on 2016/7/26.
  */
 @ContentView(R.layout.fragement_me)
-public class MeFragment extends BaseFragment implements View.OnClickListener, NetWorkAccessTools.RequestTaskListener {
+public class MeFragment extends BaseFragment implements View.OnClickListener, NetWorkAccessTools.RequestTaskListener, DeviceScanInterfacer {
     @ViewInject(R.id.me_iv_left)
     private ImageView me_iv_left;
     @ViewInject(R.id.me_headpic)
@@ -41,8 +48,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private TextView me_username;
     @ViewInject(R.id.me_phone)
     private TextView me_phone;
+    @ViewInject(R.id.bluee_iv_left)
+    private ImageView bluee_iv_left;
     public static final int REQUEST_USER_BYMIBILE=0x01;
     private Handler handler=new MyHandler();
+    private BLEServiceOperate mBLEServiceOperate;
+    private final int REQUEST_ENABLE_BT = 1;
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
@@ -50,10 +61,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         initPersonalDataShow();
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_USER_BYMOBILE, params, null, MeFragment.REQUEST_USER_BYMIBILE, this);
+        mBLEServiceOperate=BLEServiceOperate.getInstance(AppUtils.getBaseContext());//BluetoothLeService实例化准备,必须
     }
     @Override
     protected void initListener() {
         me_iv_left.setOnClickListener(this);
+        bluee_iv_left.setOnClickListener(this);
     }
     @Override
     protected void initData() {
@@ -69,6 +82,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        mBLEServiceOperate.unBindService();// unBindService
     }
 
     @Override
@@ -76,6 +90,27 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         switch (v.getId()){
             case R.id.me_iv_left:
                 EventBus.getDefault().post(new NavFragmentEvent(new MeSettingFragment()));
+                break;
+            case R.id.bluee_iv_left:
+               //1实例化，绑定服务（DeviceScanInterfacer.getInstance(Context)）
+                //2。是否支持ble 4.0，否退出app
+                // Checks if Bluetooth is supported on the device.
+                if (!mBLEServiceOperate.isSupportBle4_0()){
+                    ToastUtils.showToastInUIThread("设备不支持蓝牙4.0");
+                   finish();
+                    return;
+                }
+                //3.设置扫描监听
+                mBLEServiceOperate.setDeviceScanListener(this);
+                //4.蓝牙是否打开
+                if (!mBLEServiceOperate.isBleEnabled()) {
+                    Intent enableBtIntent = new Intent(
+                            BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                }
+                //5.是，扫描设备，未扫描扫到，相应提示
+                //6.链接相应设备
+                //7.如果连接成功，启动，否则提示连接失败
                 break;
         }
     }
@@ -120,7 +155,23 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080"+"/"+SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
         }
         me_username.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
-        me_phone.setText(TextUtils.isEmpty(SessionHolder.user.getMobile()) ? "未设置" : "手机号:"+SessionHolder.user.getMobile());
+        me_phone.setText(TextUtils.isEmpty(SessionHolder.user.getMobile()) ? "未设置" : "手机号:" + SessionHolder.user.getMobile());
+    }
+
+    @Override
+    public void LeScanCallback(BluetoothDevice bluetoothDevice, int i) {
+
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // User chose not to enable Bluetooth.
+        if (requestCode == REQUEST_ENABLE_BT
+                && resultCode == getActivity().RESULT_CANCELED) {
+
+            finish();
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
     private class MyHandler extends Handler {
         @Override

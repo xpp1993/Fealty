@@ -47,7 +47,7 @@ public class MainActivity extends FragmentActivity {
         fm = getSupportFragmentManager();
         EventBus.getDefault().register(this);
       LoginFragment baseFragment;
-     // MainTabsFragemnt baseFragment;
+    //  MainTabsFragemnt baseFragment;
         String tag;
        baseFragment = new LoginFragment();
        // baseFragment=new MainTabsFragemnt();

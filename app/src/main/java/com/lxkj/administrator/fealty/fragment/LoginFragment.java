@@ -73,9 +73,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
     private long delayTime;//最短睡眠时间
     private long afterTime;
     public static final int MESSAGE_WHAT_LOGIN_LOGINING = 1;
-    public static final int MESSAGE_WHAT_LOGIN_LOGINSUCCESS = 2;
     public static final int MESSAGE_WHAT_LOGIN_LOGINFAIL = 3;
-    public static final int MESSAGE_WHAT_LOGIN_COMMIT = 0X10;
     private static long DEFAULTTIME = 500;//登录过程最少持续时间
     private static final String[] CONTACTOR_NEED = new String[]{    //联系人字段
             ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
@@ -268,14 +266,14 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                     UserInfo userInfo=new UserInfo();
                     userInfo.setMobile(phone);
                     SessionHolder.initHolder(mobile, userInfo);
-                    SPManager.getSPManager(AppUtils.getBaseContext()).persistenceSession();
+                  //  SPManager.getSPManager(AppUtils.getBaseContext()).persistenceSession();
                     if (code == 1) {
                       //  if (identity == 1) {//老人,进入主页面
                         login_password_edittext.setText("");
                         login_phone_edittext.setText("");
                         loginButton.setProgress(0);
                         tv_login.setClickable(true);
-                            EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
+                        EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
                         finish();
                      //   }
 //                        else if (identity == 0) {//子女
