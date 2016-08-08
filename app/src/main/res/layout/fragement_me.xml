@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="12dp"
-            android:layout_toRightOf="@+id/me_headpic"
+            android:layout_toRightOf="@id/me_headpic"
             android:textSize="26sp" />
 
         <TextView
@@ -59,30 +59,34 @@
         android:layout_width="match_parent"
         android:layout_height="15dp"
         android:layout_below="@id/fragment_me_details"
-        android:layout_marginBottom="16dp"
         android:layout_marginTop="16dp"
         android:background="#DCDCDC" />
     <RelativeLayout
         android:id="@+id/me_setting"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_below="@id/view1"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="3dp"
         android:orientation="horizontal">
         <TextView
             android:id="@+id/connect_le"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="连接手环"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="5dp"
             android:textSize="26sp"
             />
-        <ImageView
-            android:id="@+id/bluee_iv_left"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="15dp"
-            android:src="@mipmap/fanghui" />
+       <TextView
+           android:id="@+id/bluee_iv_left"
+           android:layout_width="78dp"
+           android:layout_height="38dp"
+           android:textSize="15sp"
+           android:layout_alignParentRight="true"
+           android:layout_marginRight="5dp"
+           android:text="正在扫描.."
+           android:gravity="center_vertical"
+          />
     </RelativeLayout>
 
 </RelativeLayout>
