@@ -8,6 +8,7 @@ import android.widget.TextView;
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseView;
 
+import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
 /**

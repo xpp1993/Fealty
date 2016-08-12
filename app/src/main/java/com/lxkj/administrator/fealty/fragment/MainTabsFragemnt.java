@@ -1,30 +1,18 @@
 package com.lxkj.administrator.fealty.fragment;
 
-import android.bluetooth.BluetoothAdapter;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
-import com.lxkj.administrator.fealty.manager.ParameterManager;
-import com.lxkj.administrator.fealty.manager.SessionHolder;
-import com.lxkj.administrator.fealty.utils.AppUtils;
-import com.lxkj.administrator.fealty.utils.CommonTools;
-import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
-import com.lxkj.administrator.fealty.utils.ToastUtils;
 import com.lxkj.administrator.fealty.widget.QuickFragmentTabHost;
-import com.yc.peddemo.sdk.BLEServiceOperate;
 
-import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Administrator on 2016/7/26.

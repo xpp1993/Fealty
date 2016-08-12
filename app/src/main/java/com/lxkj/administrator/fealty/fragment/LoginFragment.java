@@ -1,12 +1,8 @@
 package com.lxkj.administrator.fealty.fragment;
 
-import android.content.ContentResolver;
-import android.content.Context;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
@@ -16,15 +12,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONArray;
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.bean.UserInfo;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
-import com.lxkj.administrator.fealty.manager.SPManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.ui.ActionProcessButton;
 import com.lxkj.administrator.fealty.utils.AppUtils;
@@ -35,12 +28,9 @@ import com.lxkj.administrator.fealty.utils.ToastUtils;
 import org.json.JSONException;
 import org.xutils.view.annotation.ContentView;
 
-import com.lxkj.administrator.fealty.bean.Contacts;
-
 import org.xutils.view.annotation.ViewInject;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import de.greenrobot.event.EventBus;
@@ -75,11 +65,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
     public static final int MESSAGE_WHAT_LOGIN_LOGINING = 1;
     public static final int MESSAGE_WHAT_LOGIN_LOGINFAIL = 3;
     private static long DEFAULTTIME = 500;//登录过程最少持续时间
-    private static final String[] CONTACTOR_NEED = new String[]{    //联系人字段
-            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-            ContactsContract.CommonDataKinds.Phone.NUMBER,
-            ContactsContract.Contacts.DISPLAY_NAME
-    };
 
     private Handler handler;
 
@@ -262,20 +247,20 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                     int identity = bundle.getInt("identity");
                     int binded = bundle.getInt("binded");
                     int code = bundle.getInt("code");
-                   String mobile=bundle.getString("mobile");
-                    UserInfo userInfo=new UserInfo();
+                    String mobile = bundle.getString("mobile");
+                    UserInfo userInfo = new UserInfo();
                     userInfo.setMobile(phone);
                     SessionHolder.initHolder(mobile, userInfo);
-                  //  SPManager.getSPManager(AppUtils.getBaseContext()).persistenceSession();
+                    //  SPManager.getSPManager(AppUtils.getBaseContext()).persistenceSession();
                     if (code == 1) {
-                      //  if (identity == 1) {//老人,进入主页面
+                        //  if (identity == 1) {//老人,进入主页面
                         login_password_edittext.setText("");
                         login_phone_edittext.setText("");
                         loginButton.setProgress(0);
                         tv_login.setClickable(true);
                         EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
                         finish();
-                     //   }
+                        //   }
 //                        else if (identity == 0) {//子女
 //                            if (binded == 1) {//已绑定老人
 //                                EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
@@ -303,88 +288,14 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                     if (msg.getData().getInt("code") == 1) {//请求成功
                         ArrayList<UserInfo> list_user = (ArrayList<UserInfo>) msg.getData().getSerializable("old_people_list");
                         //跳转到注册过此APP的联系人列表
-                        Bundle data=new Bundle();
-                        data.putSerializable("list_user",list_user);
-                        EventBus.getDefault().post(new NavFragmentEvent(new OlsManListFragment(),bundle));
+                        Bundle data = new Bundle();
+                        data.putSerializable("list_user", list_user);
+                        EventBus.getDefault().post(new NavFragmentEvent(new OlsManListFragment(), bundle));
                     }
                     break;
             }
         }
 
-        /**
-         * 上传通讯录
-         *
-         * @param contacts
-         */
-        private String uploadContacts(ArrayList<Contacts> contacts) {
-            JSONObject object = new JSONObject();
-            JSONArray jsonArray = new JSONArray();
-            JSONObject jsonObject = null;
-            for (int i = 0; i < contacts.size(); i++) {
-                Contacts contact = contacts.get(i);
-                phone = contact.getPhone();
-                jsonObject = new JSONObject();
-                jsonObject.put("mobile", phone);
-                jsonArray.add(jsonObject);
-            }
-            object.put("contact_list", jsonArray);
-            String jsonString = object.toJSONString();
-            System.out.println(jsonString);
-            return jsonString;
-        }
     }
-    /**
-     * 获取手机联系人的方法
-     *
-     * @param context
-     * @return
-     */
-    public static List<Contacts> getContacts(Context context) {
-        ArrayList<Contacts> contacts = new ArrayList<Contacts>();
 
-        Cursor phones = null;
-        ContentResolver cr = context.getContentResolver();
-        try {
-            phones = cr
-                    .query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI
-                            , CONTACTOR_NEED, null, null, null);
-
-            if (phones != null) {
-                final int contactIdIndex = phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID);
-                final int displayNameIndex = phones.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-                final int phoneIndex = phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                String phoneString, displayNameString, contactIdString;
-                while (phones.moveToNext()) {
-                    try {
-                        contactIdString = phones.getString(contactIdIndex);    //id
-
-                        phoneString = phones.getString(phoneIndex);    //号码
-                        if (TextUtils.isEmpty(phoneString)) {
-                            continue;
-                        }
-                        phoneString = phoneString.replace(" ", "");
-                        if (phoneString.length() > 11) {
-                            phoneString = phoneString.substring(phoneString.length() - 11, phoneString.length());
-                        }
-
-                        displayNameString = phones.getString(displayNameIndex);    //名称
-                        if (TextUtils.isEmpty(displayNameString)) {
-                            continue;
-                        }
-
-                        contacts.add(new Contacts(contactIdString, displayNameString, phoneString));
-                    } catch (Exception e) {
-                        continue;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (phones != null)
-                phones.close();
-        }
-        return contacts;
-
-    }
 }

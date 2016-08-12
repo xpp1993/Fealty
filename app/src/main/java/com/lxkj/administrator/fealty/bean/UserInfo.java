@@ -94,4 +94,13 @@ public class UserInfo implements Serializable{
     public void setPassword(String password) {
         this.password = password;
     }
+
+    @Override
+    public String toString() {
+        return "UserInfo{" +
+                "mobile='" + mobile + '\'' +
+                ", nickName='" + nickName + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 }

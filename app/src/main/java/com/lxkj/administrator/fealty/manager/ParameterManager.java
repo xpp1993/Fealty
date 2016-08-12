@@ -26,4 +26,5 @@ public class ParameterManager {
     public static final int NOTIFICATION_ID = 0X2131 ;
     //性别标杆
     public static final String USER_SEX_CODE_MAN = "1", USER_SEX_CODE_WOMAN = "2";
+    public static final String  SELECT_BIND_OLD ="http://192.168.8.133:8080/cuffapi/user/select_bind_old";
 }

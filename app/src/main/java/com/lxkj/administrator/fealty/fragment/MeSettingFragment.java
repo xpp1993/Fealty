@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -38,7 +37,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
-import org.xutils.x;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -398,10 +396,10 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                 HashMap<String, String> map = new HashMap<>();
                 map.put("headFile","http://192.168.8.133:8080"+"/"+SessionHolder.user.getUserpic());
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_USER_MSG, params, map, REQUEST_CODE_SELF_DATA_ALTER, MeSettingFragment.this);
-                System.out.println("??????????????????????????????");
+
             }
               NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_USER_MSG, params, null, REQUEST_CODE_SELF_DATA_ALTER, MeSettingFragment.this);
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!");
+
 
         } catch (Exception e) {
             e.printStackTrace();

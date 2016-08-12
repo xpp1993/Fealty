@@ -23,8 +23,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
-           />
+            android:layout_marginTop="10dp" />
 
         <TextView
             android:id="@+id/me_username"
@@ -42,8 +41,7 @@
             android:layout_alignLeft="@id/me_username"
             android:layout_below="@id/me_username"
             android:layout_marginTop="5dp"
-            android:layout_toRightOf="@id/me_headpic"
-             />
+            android:layout_toRightOf="@id/me_headpic" />
 
         <ImageView
             android:id="@+id/me_iv_left"
@@ -54,39 +52,79 @@
             android:layout_marginTop="25dp"
             android:src="@mipmap/fanghui" />
     </RelativeLayout>
+
     <View
         android:id="@+id/view1"
         android:layout_width="match_parent"
-        android:layout_height="15dp"
+        android:layout_height="10dp"
         android:layout_below="@id/fragment_me_details"
-        android:layout_marginTop="16dp"
         android:background="#DCDCDC" />
+
     <RelativeLayout
         android:id="@+id/me_setting"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         android:layout_below="@id/view1"
-        android:gravity="center_horizontal"
+        android:layout_marginBottom="3dp"
+        android:layout_marginLeft="5dp"
         android:layout_marginTop="3dp"
-        android:orientation="horizontal">
+        android:gravity="center_vertical">
+
         <TextView
             android:id="@+id/connect_le"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="连接手环"
             android:layout_marginLeft="5dp"
-            android:textSize="26sp"
-            />
-       <TextView
-           android:id="@+id/bluee_iv_left"
-           android:layout_width="78dp"
-           android:layout_height="38dp"
-           android:textSize="15sp"
-           android:layout_alignParentRight="true"
-           android:layout_marginRight="5dp"
-           android:text="正在扫描.."
-           android:gravity="center_vertical"
-          />
+            android:layout_marginTop="3dp"
+            android:text="连接手环"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/bluee_iv_left"
+            android:layout_width="78dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="5dp"
+            android:gravity="center_vertical"
+            android:layout_marginTop="3dp"
+            android:text="未连接"
+            android:textSize="15sp" />
     </RelativeLayout>
 
+    <View
+        android:id="@+id/view2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/me_setting"
+        android:background="#DCDCDC" />
+
+    <RelativeLayout
+        android:id="@+id/me_binded"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/view2"
+        android:layout_marginBottom="3dp"
+        android:layout_marginTop="3dp"
+        android:layout_marginLeft="5dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/binded_user"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="绑定用户"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/binded_action"
+            android:layout_width="78dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="5dp"
+            android:gravity="center_vertical"
+            android:layout_marginTop="3dp"
+            android:text="未绑定"
+            android:textSize="15sp" />
 </RelativeLayout>
+    </RelativeLayout>

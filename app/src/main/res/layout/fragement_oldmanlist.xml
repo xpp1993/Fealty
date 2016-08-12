@@ -2,16 +2,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/tv"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="您的好友用户如下："
+        android:textSize="20sp"/>
    <ListView
+       android:layout_below="@id/tv"
        android:id="@+id/oldmanlistview"
        android:layout_width="match_parent"
        android:layout_height="match_parent"></ListView>
-    <TextView
-        android:id="@+id/tv_tomain"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:text="直接跳过，进入主页面"
-        android:textColor="#ff0000"
-        android:gravity="center"
-        android:textSize="26sp"/>
+
 </RelativeLayout>

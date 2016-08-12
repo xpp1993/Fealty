@@ -4,12 +4,12 @@ package com.lxkj.administrator.fealty.adapter;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.MyBaseAdapter;
 import com.lxkj.administrator.fealty.bean.UserInfo;
 import com.lxkj.administrator.fealty.ui.ContactsListItemView;
 import com.lxkj.administrator.fealty.utils.AppUtils;
-
-import org.xutils.x;
+import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 
 import java.util.List;
 
@@ -28,9 +28,8 @@ public class OldmanListviewAdpter extends MyBaseAdapter<UserInfo>{
         }
         ContactsListItemView contactsListItemView= (ContactsListItemView) convertView;
         contactsListItemView.getTv_phone().setText(list.get(position).getMobile());
-        if (list.get(position).getUserpic()!=null){
-            x.image().bind(contactsListItemView.getHeadimage(),list.get(position).getUserpic());
-        }
+           // 加载图片
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + list.get(position).getUserpic(),contactsListItemView.getHeadimage(), R.mipmap.unknow_head, R.mipmap.unknow_head);
         return convertView;
     }
 }

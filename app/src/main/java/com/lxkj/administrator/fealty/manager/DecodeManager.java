@@ -167,13 +167,13 @@ public final class DecodeManager {
         Message msg = new Message();
         Bundle data = new Bundle();
         msg.what = messageWhat;
-        // insertRecInformation(data, jsonObject);
-        int code = jsonObject.optInt("code");
-        String desc = jsonObject.optString("desc");
-        data.putInt("code", code);
-        data.putString("desc", desc);
-        msg.setData(data);
-        handler.sendMessage(msg);
+         insertRecInformation(data, jsonObject);
+//        int code = jsonObject.optInt("code");
+//        String desc = jsonObject.optString("desc");
+//        data.putInt("code", code);
+//        data.putString("desc", desc);
+//        msg.setData(data);
+//        handler.sendMessage(msg);
     }
 
     /**
@@ -317,6 +317,7 @@ public final class DecodeManager {
                     JSONObject friendJsonObject = old_people_list.getJSONObject(i);
                     String nickname = friendJsonObject.getString("nickName");
                     String mobile = friendJsonObject.optString("mobile");
+                    Log.e("moblie",mobile);
                     String userpic = friendJsonObject.optString("headFile");
                     UserInfo user = new UserInfo();
                     user.setNickName(nickname);
@@ -330,7 +331,6 @@ public final class DecodeManager {
         msg.setData(data);
         handler.sendMessage(msg);
     }
-
     public static void decodeComment(JSONObject jsonObject, int messageWhat,
                                      Handler handler) throws JSONException {
         Log.v("decodeComment", jsonObject.toString());

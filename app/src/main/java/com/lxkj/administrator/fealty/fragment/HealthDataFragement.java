@@ -38,4 +38,5 @@ public class HealthDataFragement extends BaseFragment {
     protected void initData() {
 
     }
+
 }
