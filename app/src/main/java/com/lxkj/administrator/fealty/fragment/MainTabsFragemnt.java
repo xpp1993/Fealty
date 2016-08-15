@@ -23,7 +23,8 @@ public class MainTabsFragemnt extends BaseFragment {
     private QuickFragmentTabHost mTabsHost;
     private final String[] TITLES = {"健康监测", "我的设置"};
     private final String[] TAGS = {"status", "me"};
-    private int[] ICONS = {R.drawable.tab_status, R.drawable.tab_status};
+   // private int[] ICONS = {R.drawable.tab_status, R.drawable.tab_status};
+    private int[]ICONS={R.mipmap.shuju,R.mipmap.wo};
     private final Class[] fragments = {StatusFragment.class, MeFragment.class};
     private List<ViewHolder> viewHolders = new ArrayList<ViewHolder>();
 
@@ -73,10 +74,13 @@ public class MainTabsFragemnt extends BaseFragment {
             viewHolder.iconTabTv = (TextView) view.findViewById(R.id.icon_tab_tv);
             //给TextView设置文本
             viewHolder.iconTabTv.setText(TITLES[i]);
+            viewHolder.iconTabTv.setTextSize(15);
+
             //设置tag
             viewHolder.tag = TAGS[i];
             //设置标题
             viewHolder.title = TITLES[i];
+
             //设置图片
             Drawable drawable = getResources().getDrawable(ICONS[i]);
             drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());

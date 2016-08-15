@@ -1,20 +1,31 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ppview="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipToPadding="true"
     android:fitsSystemWindows="true">
+
     <LinearLayout
         android:id="@+id/old_gps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
         android:orientation="horizontal">
-        <TextView
-            android:id="@+id/tv_gps"
-            android:layout_width="match_parent"
+
+        <ImageView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:gravity="center"
-            android:text="GPS定位地址" />
+            android:layout_marginBottom="13dp"
+            android:src="@mipmap/dingwei" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="深圳市罗湖区外贸轻工业大厦"
+            android:textColor="#585858"
+            android:textSize="16sp" />
     </LinearLayout>
 
     <View
@@ -22,15 +33,202 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_below="@id/old_gps"
-        android:layout_marginTop="10dp"
         android:background="@color/MainTheme" />
-
-    <TextView
-        android:id="@+id/tv_health"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <RelativeLayout
+        android:layout_marginTop="12dp"
         android:layout_below="@id/shouview"
-        android:gravity="center"
-        android:text="老人健康数据"
-        android:textSize="26sp" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <com.lxkj.administrator.fealty.view.PPView
+            android:id="@+id/pp"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            ppview:bitmap="@mipmap/xinlv"
+            ppview:firstTextColor="#5dcbdf"
+            ppview:firstTextSize="18sp"
+            ppview:fourthTextColor="#5dcbdf"
+            ppview:fourthTextSize="19sp"
+            ppview:innerCircleColor="#5dcbdf"
+            ppview:innerCircleRadius="76dp"
+            ppview:innerCircleWidth="5dp"
+            ppview:outerCircleColor="#2e5dcbdf"
+            ppview:outerCircleRadius="85.5dp"
+            ppview:outerCircleWidth="5dp"
+            ppview:secondTextColor="#5dcbdf"
+            ppview:secondTextSize="35sp"
+            ppview:thirdTextColor="#5dcbdf"
+            ppview:thirdTextSize="12sp" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/pp">
+            <HorizontalScrollView
+                android:id="@+id/horizontalScrollView1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fadingEdge="none"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/line"
+                    android:layout_width="360dp"
+                    android:layout_height="wrap_content">
+                    <com.lxkj.administrator.fealty.view.LineChart03View
+                        android:id="@+id/lineChartView_right"
+                        android:layout_width="360dp"
+                        android:layout_height="140dp" />
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <com.lxkj.administrator.fealty.view.LineChart03View_left
+                android:id="@+id/circle_view"
+                android:layout_width="360dp"
+                android:layout_height="140dp"
+                android:layout_gravity="left" />
+        </FrameLayout>
+    </RelativeLayout>
+
+<RelativeLayout
+    android:layout_alignParentBottom="true"
+    android:layout_marginBottom="20dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <View
+        android:id="@+id/shouview2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/MainTheme" />
+    <RelativeLayout
+        android:id="@+id/relativeLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="69dp"
+        android:layout_below="@id/shouview2"
+        android:gravity="center_vertical">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:src="@mipmap/shuimian" />
+
+        <TextView
+            android:id="@+id/shuimiantotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="8dp"
+            android:drawableLeft="@mipmap/shijian"
+            android:drawablePadding="5dp"
+            android:text="睡眠  6小时"
+            android:textColor="#585858"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/shuimiandetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/shuimiantotal"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="8dp"
+            android:text="深度睡眠45分钟"
+            android:textColor="#838383"
+            android:textSize="11sp" />
+        <View
+            android:id="@+id/shouview3"
+            android:layout_width="1dp"
+            android:layout_height="13dp"
+            android:layout_below="@id/shuimiantotal"
+            android:layout_toLeftOf="@id/shuimiandetail"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="7dp"
+            android:background="@color/MainTheme" />
+        <TextView
+            android:id="@+id/shuimiandetail2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/shuimiantotal"
+            android:layout_marginTop="8dp"
+            android:layout_toLeftOf="@id/shouview3"
+            android:text="浅度睡眠15分钟"
+            android:layout_marginRight="8dp"
+            android:textColor="#838383"
+            android:textSize="11sp" />
+
+    </RelativeLayout>
+    <View
+        android:id="@+id/shouview4"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/relativeLayout2"
+        android:background="@color/MainTheme" />
+    <RelativeLayout
+        android:id="@+id/relativeLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="69dp"
+        android:layout_below="@id/shouview4"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:src="@mipmap/yundong"
+            />
+
+        <TextView
+            android:id="@+id/yundongtotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="8dp"
+            android:drawableLeft="@mipmap/shijian"
+            android:drawablePadding="5dp"
+            android:text="运动  6.3公里"
+            android:textColor="#585858"
+            android:textSize="16sp" />
+        <TextView
+            android:id="@+id/yundongdetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/yundongtotal"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="8dp"
+            android:text="消耗120卡路里"
+            android:textColor="#838383"
+            android:textSize="11sp" />
+        <View
+            android:id="@+id/shouview5"
+            android:layout_width="1dp"
+            android:layout_height="13dp"
+            android:layout_below="@id/yundongtotal"
+            android:layout_toLeftOf="@id/yundongdetail"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="7dp"
+            android:background="@color/MainTheme" />
+        <TextView
+            android:id="@+id/yundongdetail2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/yundongtotal"
+            android:layout_marginTop="8dp"
+            android:layout_toLeftOf="@id/shouview5"
+            android:text="步行610步"
+            android:layout_marginRight="8dp"
+            android:textColor="#838383"
+            android:textSize="11sp" />
+
+    </RelativeLayout>
+    <View
+        android:id="@+id/shouview1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/relativeLayout3"
+        android:background="@color/MainTheme" />
+</RelativeLayout>
+
 </RelativeLayout>

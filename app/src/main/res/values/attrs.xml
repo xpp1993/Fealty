@@ -20,5 +20,23 @@
         <attr name="outlineEnabled" format="boolean" />
         <attr name="outlineColor" format="color|reference" />
     </declare-styleable>
+    <declare-styleable name="PPView">
+        <attr name="outerCircleColor" format="color" />
+        <attr name="outerCircleRadius" format="dimension" />
+        <attr name="outerCircleWidth" format="dimension" />
+        <attr name="innerCircleColor" format="color" />
+        <attr name="innerCircleRadius" format="dimension" />
+        <attr name="innerCircleWidth" format="dimension" />
+        <attr name="firstTextSize" format="dimension" />
+        <attr name="secondTextSize" format="dimension" />
+        <attr name="thirdTextSize" format="dimension" />
+        <attr name="fourthTextSize" format="dimension" />
+        <attr name="firstTextColor" format="color" />
+        <attr name="secondTextColor" format="color" />
+        <attr name="thirdTextColor" format="color" />
+        <attr name="fourthTextColor" format="color" />
+        <attr name="bitmap" format="reference" />
 
+
+    </declare-styleable>
 </resources>

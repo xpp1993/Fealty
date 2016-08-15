@@ -1,0 +1,60 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ppview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.lxkj.administrator.fealty.view.PPView
+        android:id="@+id/pp"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        ppview:bitmap="@mipmap/xinlv"
+        ppview:firstTextColor="#5dcbdf"
+        ppview:firstTextSize="18sp"
+        ppview:fourthTextColor="#5dcbdf"
+        ppview:fourthTextSize="19sp"
+        ppview:innerCircleColor="#5dcbdf"
+        ppview:innerCircleRadius="76dp"
+        ppview:innerCircleWidth="5dp"
+        ppview:outerCircleColor="#2e5dcbdf"
+        ppview:outerCircleRadius="85.5dp"
+        ppview:outerCircleWidth="5dp"
+        ppview:secondTextColor="#5dcbdf"
+        ppview:secondTextSize="35sp"
+        ppview:thirdTextColor="#5dcbdf"
+        ppview:thirdTextSize="12sp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/pp">
+
+        <HorizontalScrollView
+            android:id="@+id/horizontalScrollView1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fadingEdge="none"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/line"
+                android:layout_width="360dp"
+                android:layout_height="wrap_content">
+                <com.lxkj.administrator.fealty.view.LineChart03View
+                    android:id="@+id/lineChartView_right"
+                    android:layout_width="360dp"
+                    android:layout_height="140dp" />
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <com.lxkj.administrator.fealty.view.LineChart03View_left
+            android:id="@+id/circle_view"
+            android:layout_width="360dp"
+            android:layout_height="140dp"
+            android:layout_gravity="left" />
+    </FrameLayout>
+
+
+</RelativeLayout>

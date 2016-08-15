@@ -19,12 +19,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONArray;
 import com.avast.android.dialogs.fragment.ListDialogFragment;
 import com.avast.android.dialogs.iface.IListDialogListener;
 import com.lxkj.administrator.fealty.R;
+import com.lxkj.administrator.fealty.adapter.LeDeviceListAdapter;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.bean.Contacts;
 import com.lxkj.administrator.fealty.bean.SleepData;
@@ -116,14 +118,22 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private final int UPDATE_STEP_UI_MSG = 0;//同步计步数据
     private final int UPDATE_SLEEP_UI_MSG = 23;//同步睡眠数据
     public static final int REQUEST_CODE_UPLOAD_CONTACTS = 0X20;//上传通讯录
+    public static final int REQUEST_CODE_SPORTDATA_SLEEPDATA = 0x10;//把运动数据睡眠数据上传到服务器
+    public static final int REQUEST_CODE_RATE = 0x22;//把测试的心率数据上传到服务器
     private Bundle bundle;
     private String phone;
+    int step, calories;
+    float distance;
+    String total_hour_str;
+    int deep_hour, deep_minute, light_minute, light_hour;
     private static final String[] CONTACTOR_NEED = new String[]{    //联系人字段
             ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
             ContactsContract.CommonDataKinds.Phone.NUMBER,
             ContactsContract.Contacts.DISPLAY_NAME
     };
 
+    //    private LeDeviceListAdapter mLeDeviceListAdapter;
+//    private ListView listView=new ListView(AppUtils.getBaseContext());
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
@@ -140,7 +150,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         bundle = new Bundle();
         mBLEServiceOperate = BLEServiceOperate.getInstance(AppUtils.getBaseContext());// 用于BluetoothLeService实例化准备,必须
         mRegisterReceiver();
-
     }
 
     /**
@@ -181,7 +190,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         Log.d("Tag", str);
         initPersonalDataShow();
     }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -198,9 +206,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.removeCallbacks(runnable3);
         if (runnable4 != null)
             myHandler.removeCallbacks(runnable4);
+        if (runnable5!=null)
+            myHandler.removeCallbacks(runnable5);
         mBLEServiceOperate.disConnect();
     }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -218,14 +227,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                             BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBtIntent, REQUEST_ENABLE);
                 }
+                //2016-813
+//                mLeDeviceListAdapter = new LeDeviceListAdapter();
+//                listView.setAdapter(mLeDeviceListAdapter);//end
                 scanLeDevice(true);
                 break;
             case R.id.binded_action://绑定用户
                 //1.获取手机联系人
                 ArrayList<Contacts> contacts = (ArrayList<Contacts>) getContacts(AppUtils.getBaseContext());
                 //2.上传通讯录,返回通讯录中,注册过  的 用户列表
-                Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list","mobile"}, uploadContacts(contacts),SessionHolder.mobile);
-                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS,MeFragment.this);
+                Log.e("telephoe", SessionHolder.mobile);
+                Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list", "mobile"}, uploadContacts(contacts), SessionHolder.mobile);
+                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, MeFragment.this);
                 ToastUtils.showToastInUIThread("正在获取联系人列表....");
                 break;
             default:
@@ -292,10 +305,20 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 }
             case REQUEST_CODE_UPLOAD_CONTACTS:
                 try {//上传手机通讯录得到的返回数据
-                    DecodeManager.decodeFriendMessage(jsonObject,REQUEST_CODE_UPLOAD_CONTACTS,myHandler);
+                    DecodeManager.decodeFriendMessage(jsonObject, REQUEST_CODE_UPLOAD_CONTACTS, myHandler);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                break;
+            case REQUEST_CODE_SPORTDATA_SLEEPDATA:
+            case REQUEST_CODE_RATE:
+                try {
+                    DecodeManager.decodeCommon(jsonObject, requestCode, myHandler);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                break;
+            default:
                 break;
         }
     }
@@ -314,6 +337,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             public void run() {
                 Log.d("Rssi", "" + j);
                 mDevice.add(bluetoothDevice);
+//                //代表扫描过程,2016-8-13
+//                try {
+//                    Thread.sleep(2000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }//end
                 if (mDevice.size() == 0) {
                     ToastUtils.showToastInUIThread("未扫描到设备！");
                     return;
@@ -340,11 +369,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         .setTargetFragment(MeFragment.this, REQUEST_LIST_SINGLE)
                         .show();
                 mDevice.clear();
-                scanLeDevice(false);
+                //2016-8-13
+                if (mScanning) {
+                    mBLEServiceOperate.stopLeScan();
+                    mScanning = false;
+                }//end
+//                mLeDeviceListAdapter.addDevice(bluetoothDevice);
+//                mLeDeviceListAdapter.notifyDataSetChanged();
             }
         });
     }
-
 
     // IListDialogListener
     @Override
@@ -409,6 +443,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     if (tempStatus == GlobalVariable.RATE_TEST_FINISH) {
 //                        UpdateUpdataRateMainUI(CalendarUtils.getCalendar(0));
 //                        Toast.makeText(mContext, "Rate test finish", Toast.LENGTH_SHORT).show();
+                        bundle.putInt("tempRate", tempRate);
+                        EventBus.getDefault().post(bundle);//将心率发送到状态页
                     }
                     break;
                 case UPDATE_SLEEP_UI_MSG://睡眠数据
@@ -419,22 +455,31 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     break;
                 case REQUEST_CODE_UPLOAD_CONTACTS://处理上传手机通讯录返回的数据
                     if (msg.getData().getInt("code") == 1) {//请求成功
-                        if (msg.getData().getSerializable("old_people_list")!=null) {
+                        if (msg.getData().getSerializable("old_people_list") != null) {
                             Bundle bundle = new Bundle();
                             bundle.putSerializable("old_people_list", msg.getData().getSerializable("old_people_list"));
-                           EventBus.getDefault().post(new NavFragmentEvent(new OlsManListFragment(),bundle));
+                            EventBus.getDefault().post(new NavFragmentEvent(new OlsManListFragment(), bundle));
                         }
                     }
+                    break;
+                case REQUEST_CODE_SPORTDATA_SLEEPDATA:
+                case REQUEST_CODE_RATE:
+                    ToastUtils.showToastInUIThread("数据已更新到服务器！");
                     break;
                 default:
                     break;
             }
         }
     }
-
     private void functionRateFinished() {
         mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_STOP);//发送心率测试关闭
         //执行上传收集到的心率测试数据，上传成功后清空
+        //做数据保存操作
+        bundle.putInt("tempRate", tempRate);
+        EventBus.getDefault().post(bundle);//将心率发送到状态页
+//        Bundle rate=new Bundle();
+//        rate.putInt("tempRate",tempRate);
+//        new StatusFragment().setArguments(rate);
         Log.e("wyj", "functionRateFinished");
     }
 
@@ -468,7 +513,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             tempRate = rate;
             tempStatus = status;
             Log.e("wyj", "onRateChange =" + tempRate);
-            //做数据保存操作
             myHandler.sendEmptyMessage(UPDATA_REAL_RATE_MSG);
         }
     };
@@ -499,18 +543,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
      */
     private void queryStepInfo() {
         StepInfo stepInfo = mySQLOperate.queryStepInfo(CalendarUtils.getCalendar(0));
-        int step, calories;
-        float distance;
+//        int step, calories;
+//        float distance;
         if (stepInfo != null) {
             step = stepInfo.getStep();//运动的步数
             calories = stepInfo.getCalories();//卡路里
             distance = stepInfo.getDistance();//距离
             SportData sportData = new SportData(step, calories, distance);
             bundle.putSerializable("sportdata", sportData);
-            //   bundle.put
             //上传到服务器
-            Log.e("stepData", "step=" + step + ",calories=" + calories + ",distance=" + distance);
-            // Toast.makeText(AppUtils.getBaseContext(), "step=" + step + ",calories=" + calories + ",distance=" + distance, Toast.LENGTH_SHORT).show();
+
         } else {
             Log.e("stepData", stepInfo + "");
         }
@@ -543,13 +585,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     + ",timePointArray.length =" + timePointArray.length);
             double total_hour = ((float) sleepTotalTime / 60f);
             DecimalFormat df1 = new DecimalFormat("0.0"); // 保留1位小数，带前导零
-            int deep_hour = deepTime / 60;
-            int deep_minute = (deepTime - deep_hour * 60);
-            int light_hour = lightTime / 60;
-            int light_minute = (lightTime - light_hour * 60);
+            deep_hour = deepTime / 60;
+            Log.e("deep", deep_hour + "");
+            // int deep_minute = (deepTime - deep_hour * 60);
+            deep_minute = deepTime % 60;
+            light_hour = lightTime / 60;
+            // int light_minute = (lightTime - light_hour * 60);
+            light_minute = lightTime % 60;
+            Log.e("light", light_hour + "");
             int active_count = awakeCount;
-            String total_hour_str = df1.format(total_hour);
+            total_hour_str = df1.format(total_hour);
             SleepData sleepData = new SleepData(deep_hour, deep_minute, light_hour, light_minute, active_count, total_hour_str);
+            //把这些数据上传到服务器
             bundle.putSerializable("sleepData", sleepData);
             if (total_hour_str.equals("0.0")) {
                 total_hour_str = "0";
@@ -577,6 +624,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.postDelayed(runnable3, 1000 * 30);//发送心率测试开始
             myHandler.postDelayed(runnable4, 1000 * 15);//请求手环电量
             EventBus.getDefault().post(bundle);
+            myHandler.postDelayed(runnable5, 1000);//把数据上传到服务器
+        } else if (status == ICallbackStatus.GET_BLE_BATTERY_OK) {
         } else if (status == ICallbackStatus.DISCONNECT_STATUS) {
             myHandler.sendEmptyMessage(DISCONNECT_MSG);
         } else if (status == ICallbackStatus.CONNECTED_STATUS) {
@@ -652,7 +701,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.postDelayed(this, 1000 * 15);
         }
     };
-
+  private Runnable runnable5=  new Runnable() {
+        @Override
+        public void run() {
+            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "total_hour_str", "light_hour", "light_minute", "deep_hour", "deep_minute", "calories", "distance", "step"}, SessionHolder.user.getMobile(), total_hour_str, light_hour + "", light_minute + "", deep_hour + "", deep_minute + "", calories + "", distance + "", step + "");
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_SLEEP_SPORT, params, null, REQUEST_CODE_SPORTDATA_SLEEPDATA, MeFragment.this);
+        }
+    };
     /**
      * 上传通讯录
      *
@@ -671,7 +726,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }
         object.put("contact_list", jsonArray);
         String jsonString = object.toJSONString();
-      //  System.out.println(jsonString);
+        //  System.out.println(jsonString);
         return jsonString;
     }
 

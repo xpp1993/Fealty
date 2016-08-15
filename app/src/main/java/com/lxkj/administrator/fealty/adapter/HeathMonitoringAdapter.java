@@ -1,5 +1,6 @@
 package com.lxkj.administrator.fealty.adapter;
 
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -7,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.lxkj.administrator.fealty.fragment.HealthDataFragement;
+import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.widget.JazzyViewPager;
 
 import java.util.ArrayList;
@@ -19,16 +21,17 @@ import java.util.List;
 public class HeathMonitoringAdapter extends FragmentPagerAdapter {
     private List<HealthDataFragement> fragments;
     private JazzyViewPager mJazzy;
-
     public HeathMonitoringAdapter(FragmentManager fm, JazzyViewPager mJazzy, List<HealthDataFragement> fragments) {
         super(fm);
         this.fragments = fragments;
         this.mJazzy = mJazzy;
+       // notifyDataSetChanged();
     }
 
     @Override
     public Fragment getItem(int position) {
-        return fragments.get(position);
+    return fragments.get(position);
+     //   return  Fragment.instantiate(AppUtils.getBaseContext(),fragments.get(position).getClass().getName());
     }
 
     @Override

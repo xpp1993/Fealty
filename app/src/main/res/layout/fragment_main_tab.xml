@@ -24,7 +24,8 @@
 
         <TabWidget
             android:id="@android:id/tabs"
+            android:background="#BEEBE5"
             android:layout_width="match_parent"
-            android:layout_height="55dp"></TabWidget>
+            android:layout_height="61dp"></TabWidget>
     </LinearLayout>
 </com.lxkj.administrator.fealty.widget.QuickFragmentTabHost>

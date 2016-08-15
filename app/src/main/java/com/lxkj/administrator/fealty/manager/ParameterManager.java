@@ -24,6 +24,7 @@ public class ParameterManager {
     public static final String GET_USER_BYMOBILE="http://192.168.8.133:8080/cuffapi/user/get_user_by_phone";
     public static final String UPDATE_USER_MSG="http://192.168.8.133:8080/cuffapi/user/update_user_msg";
     public static final int NOTIFICATION_ID = 0X2131 ;
+    public static  final String UPDATE_SLEEP_SPORT="http://192.168.8.133:8080/cuffapi/sport/insert_user_sport_sleep";
     //性别标杆
     public static final String USER_SEX_CODE_MAN = "1", USER_SEX_CODE_WOMAN = "2";
     public static final String  SELECT_BIND_OLD ="http://192.168.8.133:8080/cuffapi/user/select_bind_old";

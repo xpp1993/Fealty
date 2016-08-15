@@ -15,6 +15,7 @@ import com.lxkj.administrator.fealty.bean.UserInfo;
 import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
+import com.lxkj.administrator.fealty.ui.picker.CustomHeaderAndFooterPicker;
 import com.lxkj.administrator.fealty.ui.picker.OptionPicker;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
@@ -64,7 +65,7 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
         final String oldmobile = userInfo.getMobile();
 
         //点击弹出身份选择框
-        OptionPicker picker = new OptionPicker(getActivity(), new String[]{
+       CustomHeaderAndFooterPicker picker = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
                 "爸爸", "妈妈", "爷爷", "奶奶", "姥爷", "姥姥", "叔叔", "阿姨", "姑姑", "大伯", "婶婶", "姐姐", "哥哥"
         });
         picker.setSelectedIndex(1);
@@ -79,8 +80,7 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
             @Override
             public void onOptionPicked(int position, String option) {
                 Toast.makeText(getActivity(), option, Toast.LENGTH_LONG).show();
-                identity = option;
-                Map<String, String> params = CommonTools.getParameterMap(new String[]{"old_people_mobile", "mobile", "identity"}, oldmobile, SessionHolder.mobile, identity);
+                Map<String, String> params = CommonTools.getParameterMap(new String[]{"old_people_mobile", "mobile", "identity"}, oldmobile, SessionHolder.user.getMobile(),option);
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_BIND_OLD, params, null, REQUEST_CODE_BIND_OTHERS, OlsManListFragment.this);
             }
         });
@@ -93,7 +93,6 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
         adpter = new OldmanListviewAdpter(list_user);
         oldmanlistview.setAdapter(adpter);
     }
-
     @Override
     public void onRequestStart(int requestCode) {
 
