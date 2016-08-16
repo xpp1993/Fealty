@@ -121,7 +121,7 @@
             android:layout_marginTop="8dp"
             android:drawableLeft="@mipmap/shijian"
             android:drawablePadding="5dp"
-            android:text="睡眠  6小时"
+            android:text="睡眠  0小时"
             android:textColor="#585858"
             android:textSize="16sp" />
 
@@ -133,7 +133,7 @@
             android:layout_below="@id/shuimiantotal"
             android:layout_marginRight="15dp"
             android:layout_marginTop="8dp"
-            android:text="深度睡眠45分钟"
+            android:text="深度睡眠0分钟"
             android:textColor="#838383"
             android:textSize="11sp" />
         <View
@@ -152,7 +152,7 @@
             android:layout_below="@id/shuimiantotal"
             android:layout_marginTop="8dp"
             android:layout_toLeftOf="@id/shouview3"
-            android:text="浅度睡眠15分钟"
+            android:text="浅度睡眠0分钟"
             android:layout_marginRight="8dp"
             android:textColor="#838383"
             android:textSize="11sp" />
@@ -185,9 +185,9 @@
             android:layout_alignParentRight="true"
             android:layout_marginRight="15dp"
             android:layout_marginTop="8dp"
-            android:drawableLeft="@mipmap/shijian"
+            android:drawableLeft="@mipmap/zoulu"
             android:drawablePadding="5dp"
-            android:text="运动  6.3公里"
+            android:text="运动  0公里"
             android:textColor="#585858"
             android:textSize="16sp" />
         <TextView
@@ -198,7 +198,7 @@
             android:layout_below="@id/yundongtotal"
             android:layout_marginRight="15dp"
             android:layout_marginTop="8dp"
-            android:text="消耗120卡路里"
+            android:text="消耗0卡路里"
             android:textColor="#838383"
             android:textSize="11sp" />
         <View
@@ -217,7 +217,7 @@
             android:layout_below="@id/yundongtotal"
             android:layout_marginTop="8dp"
             android:layout_toLeftOf="@id/shouview5"
-            android:text="步行610步"
+            android:text="步行0步"
             android:layout_marginRight="8dp"
             android:textColor="#838383"
             android:textSize="11sp" />

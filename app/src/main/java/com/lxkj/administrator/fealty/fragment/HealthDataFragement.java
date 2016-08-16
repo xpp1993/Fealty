@@ -1,11 +1,16 @@
 package com.lxkj.administrator.fealty.fragment;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
@@ -19,6 +24,8 @@ import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
 import java.util.TreeMap;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by Administrator on 2016/8/4.
@@ -51,11 +58,13 @@ public class HealthDataFragement extends BaseFragment {
     private LineChart03View mLineChart03View;
     @ViewInject(R.id.circle_view)
     private LineChart03View_left mLineChart03View_left;
+    private HealthDataReceiver mReceiver = null;
+    public static final String DATA_CHANGED = "com.lxkj.administrator.fealty.fragment";
+private MyHandler handler=new MyHandler();
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
         identiy = arguments.getString("identity");
-        int tempRate=arguments.getInt("tempRate");
         SportData sportData = (SportData) arguments.getSerializable("sportData");
         SleepData sleepData = (SleepData) arguments.getSerializable("sleepData");
         if (identiy != null && !"".equals(identiy)) {
@@ -70,11 +79,7 @@ public class HealthDataFragement extends BaseFragment {
             map.put(16, 75);
             map.put(17, 75);
             initChart(map);
-            if (tempRate!=0)
-            mPpView.setFountText(tempRate+"");
-            Log.e("2016rate",tempRate+"");
             mPpView.setFirstText(identiy);
-            //   mPpView.setSecondText("良好");
             mPpView.postInvalidate();
         }
         if (sportData != null) {
@@ -96,11 +101,29 @@ public class HealthDataFragement extends BaseFragment {
             shuimiandetail.setText("深度度睡眠" + deep_hour + "小时" + deep_minute + "分钟");
         }
     }
+//    // 用EventBus 来导航,订阅者
+//    public void onEventMainThread(int event) {
+//        int tempRate=event;
+//        Log.e("2016rate",tempRate+"");
+//            if (tempRate!=0){
+//                mPpView.setFountText(tempRate+"");
+//                mPpView.invalidate();}
+//    }
 
     @Override
     protected void init() {
         //设置horizontalScrollvView拉到头和尾的时候没有阴影颜色
+//        EventBus.getDefault().register(this);
+        registeHealthDataChangedReceiver();
         horiView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+      //  EventBus.getDefault().unregister(this);
+        getActivity().unregisterReceiver(mReceiver);
+
     }
 
     @Override
@@ -111,35 +134,55 @@ public class HealthDataFragement extends BaseFragment {
     @Override
     protected void initData() {
 
+
     }
 
-    //    public void function(View view) {
-//        TreeMap<Integer, Integer> map = new TreeMap<>();
-//        map.put(9, 75);
-//        map.put(10, 84);
-//        map.put(11, 75);
-//        map.put(12, 75);
-//        map.put(13, 79);
-//        map.put(14, 87);
-//        map.put(15, 80);
-//        map.put(16, 75);
-//        map.put(17, 75);
-//        initChart(map);
-//        ///
-//        mPpView.setFountText("70");
-//        mPpView.setFirstText("奶奶");
-//        mPpView.setSecondText("良好");
-//        mPpView.postInvalidate();
-//
-//
-//
-//    }
     private void initChart(TreeMap<Integer, Integer> map) {
-//        LineChart03View mLineChart03View =(LineChart03View) findViewById(R.id.lineChartView_right);
-//        LineChart03View_left mLineChart03View_left  = (LineChart03View_left) findViewById(R.id.circle_view);
         mLineChart03View.reset(map);
         mLineChart03View_left.reset(map);
         mLineChart03View.postInvalidate();
         mLineChart03View_left.postInvalidate();
+    }
+
+    private void registeHealthDataChangedReceiver() {
+        IntentFilter filter = new IntentFilter();
+        try {
+            if (mReceiver != null) {
+                getActivity().unregisterReceiver(mReceiver);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mReceiver = new HealthDataReceiver();
+        filter.addAction(HealthDataFragement.DATA_CHANGED);
+        getActivity().registerReceiver(mReceiver, filter);
+    }
+    //广播接受者
+    class HealthDataReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(HealthDataFragement.DATA_CHANGED)) {
+                int tempRate= intent.getIntExtra("tempRate",-1);
+             Message msg = new Message();
+               msg.what =0x21;
+               msg.obj =tempRate ;
+              handler.sendMessage(msg);
+
+            }
+        }
+    }
+    private class MyHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 0x21:
+                   int rate= (int) msg.obj;
+                    mPpView.setFountText(rate+"");
+                    mPpView.invalidate();
+                    break;
+            }
+        }
     }
 }
