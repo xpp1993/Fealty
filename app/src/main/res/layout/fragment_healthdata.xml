@@ -14,16 +14,18 @@
         android:orientation="horizontal">
 
         <ImageView
+            android:id="@+id/dingwei"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="13dp"
             android:src="@mipmap/dingwei" />
 
         <TextView
+            android:id="@+id/tv_dingwei"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
-            android:text="深圳市罗湖区外贸轻工业大厦"
+            android:text="定位地址在这里显示"
             android:textColor="#585858"
             android:textSize="16sp" />
     </LinearLayout>

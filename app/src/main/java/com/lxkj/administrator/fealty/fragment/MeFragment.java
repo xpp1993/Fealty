@@ -130,6 +130,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     float distance;
     String total_hour_str;
     int deep_hour, deep_minute, light_minute, light_hour;
+    int RATE_STATUS;
     private static final String[] CONTACTOR_NEED = new String[]{    //联系人字段
             ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
             ContactsContract.CommonDataKinds.Phone.NUMBER,
@@ -194,16 +195,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                             BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBtIntent, REQUEST_ENABLE);
                 }
-                //2016-813
-//                mLeDeviceListAdapter = new LeDeviceListAdapter();
-//                listView.setAdapter(mLeDeviceListAdapter);//end
                 scanLeDevice(true);
 
             }
 
             @Override
             public void close() {
-                bluee_iv_left.setSlideable(true);
+                //bluee_iv_left.setSlideable(true);
             }
         });
     }
@@ -326,7 +324,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 }
                 break;
             case REQUEST_CODE_SPORTDATA_SLEEPDATA:
-            case REQUEST_CODE_RATE:
+           // case REQUEST_CODE_RATE:
                 try {
                     DecodeManager.decodeCommon(jsonObject, requestCode, myHandler);
                 } catch (JSONException e) {
@@ -352,12 +350,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             public void run() {
                 Log.d("Rssi", "" + j);
                 mDevice.add(bluetoothDevice);
-//                //代表扫描过程,2016-8-13
-//                try {
-//                    Thread.sleep(2000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }//end
                 if (mDevice.size() == 0) {
                     ToastUtils.showToastInUIThread("未扫描到设备！");
                     return;
@@ -450,18 +442,20 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     //  bluee_iv_left.setText("已连接");
                     mBluetoothLeService.setRssiHandler(myHandler);
                     CURRENT_STATUS = CONNECTED;
-                    bundle.putString("IF_CONNECTED", "我的");
                     bluee_iv_left.setSlideable(false);
+                    bundle.putString("IF_CONNECTED", "我的");
+                   // bluee_iv_left.setSlideable(false);
                     ToastUtils.showToastInUIThread("已连接");
                     break;
                 case UPDATA_REAL_RATE_MSG://处理接收到的心率数据
                     Log.d("tempRate", tempRate + "");
                     //如果测试完成
                     if (tempStatus == GlobalVariable.RATE_TEST_FINISH) {
-                        bundle.putInt("tempRate", tempRate);
+                        bundle.putInt("tempRate",RATE_STATUS);
                         EventBus.getDefault().post(bundle);
-                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "heartRate"}, SessionHolder.user.getMobile(), "", tempRate + "");
-                        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_SLEEP_SPORT, params, null, REQUEST_CODE_SPORTDATA_SLEEPDATA, MeFragment.this);
+
+//                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "heartRate"}, SessionHolder.user.getMobile(), "", tempRate + "");
+//                        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_SLEEP_SPORT, params, null, REQUEST_CODE_SPORTDATA_SLEEPDATA, MeFragment.this);
                     }
                     break;
                 case UPDATE_SLEEP_UI_MSG://睡眠数据
@@ -479,9 +473,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         }
                     }
                     break;
-                case REQUEST_CODE_SPORTDATA_SLEEPDATA:
-                case REQUEST_CODE_RATE:
-                    ToastUtils.showToastInUIThread("数据已更新到服务器！");
+           case REQUEST_CODE_SPORTDATA_SLEEPDATA:
+//                case REQUEST_CODE_RATE:
+                  ToastUtils.showToastInUIThread("数据已更新到服务器！");
                     break;
                 default:
                     break;
@@ -526,6 +520,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         public void onRateChange(int rate, int status) {
             tempRate = rate;
             tempStatus = status;
+            RATE_STATUS=tempRate;
             Log.e("wyj", "onRateChange =" + tempRate);
             myHandler.sendEmptyMessage(UPDATA_REAL_RATE_MSG);
         }
@@ -642,9 +637,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         } else if (status == ICallbackStatus.CONNECTED_STATUS) {
             myHandler.sendEmptyMessage(CONNECTED_MSG);
         } else if (result == true) {//表示计步状态,在老人清醒时，每隔15分钟上床一次手机坐标
-            Log.e("stepTime", "现在是计步状态");
         } else if (result == false) {//表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
-            Log.e("stepTime", "现在是睡眠状态");
         }
     }
 

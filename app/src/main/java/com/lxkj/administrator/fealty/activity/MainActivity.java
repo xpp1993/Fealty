@@ -1,12 +1,10 @@
-package com.lxkj.administrator.fealty;
+package com.lxkj.administrator.fealty.activity;
 
-import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -14,11 +12,10 @@ import android.view.KeyEvent;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.x;
 
+import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.fragment.LoginFragment;
-import com.lxkj.administrator.fealty.fragment.MainTabsFragemnt;
-import com.lxkj.administrator.fealty.fragment.SplashFagment;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
 
 import java.util.LinkedList;

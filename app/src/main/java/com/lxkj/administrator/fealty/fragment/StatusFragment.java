@@ -30,7 +30,7 @@ public class StatusFragment extends BaseFragment {
     int steps;
     HealthDataFragement healthDataFragement;
     String identity;
-
+    int tempRate;
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
@@ -44,7 +44,7 @@ public class StatusFragment extends BaseFragment {
     // 用EventBus 来导航,订阅者
     public void onEventMainThread(Bundle event) {
         String identity = event.getString("IF_CONNECTED");
-        int tempRate = event.getInt("tempRate");
+      tempRate = event.getInt("tempRate");
         Bundle bundle = new Bundle();
         if (!"".equals(identity) && identity != null) {
             if (healthDataFragement == null) {
