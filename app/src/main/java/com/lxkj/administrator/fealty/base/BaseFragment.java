@@ -7,6 +7,9 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.baidu.mapapi.SDKInitializer;
+
 import  org.xutils.x;
 /**
  * Created by Administrator on 2016/7/26.
@@ -23,6 +26,7 @@ public abstract class BaseFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
        // view=initView(inflater,container);//父类必须实现，但不知怎么实现，抽象抽象方法
         //xutils 的注入，写在BaseFragment,以便其子类复用
+        SDKInitializer.initialize(getActivity().getApplicationContext());
         view= x.view().inject(this,inflater,container);
         init();
         initListener();
