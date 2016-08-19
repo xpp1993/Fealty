@@ -5,17 +5,7 @@ import android.widget.TextView;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
-import com.baidu.location.Poi;
-import com.baidu.mapapi.map.BitmapDescriptor;
-import com.baidu.mapapi.map.BitmapDescriptorFactory;
-import com.baidu.mapapi.map.MapStatus;
-import com.baidu.mapapi.map.MapStatusUpdate;
-import com.baidu.mapapi.map.MapStatusUpdateFactory;
-import com.baidu.mapapi.map.MarkerOptions;
-import com.baidu.mapapi.map.OverlayOptions;
-import com.baidu.mapapi.model.LatLng;
-import com.lxkj.administrator.fealty.R;
-import com.lxkj.administrator.fealty.utils.ToastUtils;
+
 /**
  * Created by Administrator on 2016/8/18/0018.
  */
@@ -24,8 +14,11 @@ public class MyLocationListener implements BDLocationListener {
     private double lon;
     private TextView tv_gsp;
 
-    public MyLocationListener(TextView tv_gsp) {
+    private CallBack mCallBack;
+
+    public MyLocationListener(TextView tv_gsp,CallBack callBack) {
         this.tv_gsp = tv_gsp;
+        this.mCallBack = callBack;
     }
     @Override
     public void onReceiveLocation(BDLocation location) {
@@ -133,6 +126,10 @@ public class MyLocationListener implements BDLocationListener {
 //                setMarker();
 //                setUserMapCenter();
 //            }
+
+            if(mCallBack!=null){
+                mCallBack.callYou(lat, lon);
+            }
         }
     }
 //    /**
@@ -169,4 +166,8 @@ public class MyLocationListener implements BDLocationListener {
 //        //改变地图状态
 //     //   mBaiduMap.setMapStatus(mMapStatusUpdate);
 //    }
+
+    public interface CallBack{
+        void callYou(double lat, double lon);
+    }
 }

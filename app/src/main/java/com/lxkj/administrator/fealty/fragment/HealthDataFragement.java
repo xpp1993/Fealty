@@ -82,6 +82,9 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     TreeMap<Integer, Integer> map = new TreeMap<>();
     private double lat;
     private double lon;
+
+    private MyLocationListener.CallBack mCallBack ;
+
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
@@ -100,6 +103,13 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         mPpView.invalidate();
         horiView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         mRegisterReceiver();
+        mCallBack = new MyLocationListener.CallBack() {
+            @Override
+            public void callYou(double lat, double lon) {
+                HealthDataFragement.this.lat =lat;
+                HealthDataFragement.this.lon = lon;
+            }
+        };
     }
 
     private void mRegisterReceiver() {
@@ -144,10 +154,7 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
 
         //数据初始化，如果identity是我,定位
         if (identiy.equals("我的")){
-            mListener=new MyLocationListener(tv_gps);
-//            lat=mListener.getLat();
-//            lon=mListener.getLon();
-            Log.e("sb",lon+","+lat);
+            mListener=new MyLocationListener(tv_gps,mCallBack);
             locService=  ((BaseApplication) AppUtils.getBaseContext()).locationService;
             //注册监听
             locService.registerListener(mListener);
@@ -240,7 +247,6 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         }
 
     }
-
     //广播接受者
     class HealthDataReceiver extends BroadcastReceiver {
 
