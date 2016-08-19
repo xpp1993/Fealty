@@ -33,6 +33,7 @@ import org.xutils.view.annotation.ViewInject;
 import java.util.ArrayList;
 import java.util.Map;
 
+import cn.jpush.android.api.JPushInterface;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -74,6 +75,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
       //  EventBus.getDefault().register(this);
         showPassword = false;
         handler = new MyHandler();
+
 
     }
 

@@ -1,5 +1,4 @@
 package com.lxkj.administrator.fealty.fragment;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,20 +13,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.baidu.location.LocationClientOption;
 import com.lxkj.administrator.fealty.R;
-import com.lxkj.administrator.fealty.activity.LocationActivity;
 import com.lxkj.administrator.fealty.baidugps.LocationService;
 import com.lxkj.administrator.fealty.baidugps.MyLocationListener;
 import com.lxkj.administrator.fealty.base.BaseApplication;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.bean.SleepData;
 import com.lxkj.administrator.fealty.bean.SportData;
+import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
-import com.lxkj.administrator.fealty.utils.ToastUtils;
 import com.lxkj.administrator.fealty.view.LineChart03View;
 import com.lxkj.administrator.fealty.view.LineChart03View_left;
 import com.lxkj.administrator.fealty.view.PPView;
@@ -82,6 +80,7 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     TreeMap<Integer, Integer> map = new TreeMap<>();
     private double lat;
     private double lon;
+    private MyLocationListener.CallBack mCallBack ;
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
@@ -100,6 +99,13 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         mPpView.invalidate();
         horiView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         mRegisterReceiver();
+        mCallBack = new MyLocationListener.CallBack() {
+            @Override
+            public void callYou(double lat, double lon) {
+                HealthDataFragement.this.lat =lat;
+                HealthDataFragement.this.lon = lon;
+            }
+        };
     }
 
     private void mRegisterReceiver() {
@@ -112,7 +118,9 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     public void onDestroy() {
         super.onDestroy();
         getActivity().unregisterReceiver(mReceiver);
-
+        locService.unregisterListener(mListener); //注销掉监听
+        locService.stop(); //停止定位服务
+        handler.removeCallbacks(runnable);
     }
     @Override
     protected void initListener() {
@@ -132,21 +140,13 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         mLineChart03View_left.postInvalidate();
     }
 
-    @Override
-    public void onStop() {
-        locService.unregisterListener(mListener); //注销掉监听
-        locService.stop(); //停止定位服务
-        super.onStop();
-    }
 
     @Override
     public void onStart() {
 
         //数据初始化，如果identity是我,定位
         if (identiy.equals("我的")){
-            mListener=new MyLocationListener(tv_gps);
-//            lat=mListener.getLat();
-//            lon=mListener.getLon();
+            mListener=new MyLocationListener(tv_gps,mCallBack);
             Log.e("sb",lon+","+lat);
             locService=  ((BaseApplication) AppUtils.getBaseContext()).locationService;
             //注册监听
@@ -230,10 +230,10 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         switch (v.getId()){
             case R.id.dingwei:
                 //跳转到百度地图
-                Intent intent=new Intent(getActivity(), LocationActivity.class);
-               intent.putExtra("lon",lon);
-               intent.putExtra("lat",lat);
-                startActivity(intent);
+                Bundle bundle=new Bundle();
+                bundle.putDouble("lon",lon);
+                bundle.putDouble("lat",lat);
+                EventBus.getDefault().post(new NavFragmentEvent(new LocaltionFragment(),bundle));
                 break;
             default:
                 break;
@@ -281,7 +281,6 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
                 initChart(map);
                 Map<String, String> map = CommonTools.getParameterMap(new String[]{"mobile", "heartRate", "uploadTime"}, SessionHolder.user.getMobile(), rate_status + "", hour + "");
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.INSERT_RATE, map, null, REQUEST_CODE_RATE, HealthDataFragement.this);
-
             }
         }
     };

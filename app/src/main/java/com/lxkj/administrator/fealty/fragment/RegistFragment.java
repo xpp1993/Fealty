@@ -30,8 +30,10 @@ import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.ui.MyRadioGroup;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
+import com.lxkj.administrator.fealty.utils.ExampleUtil;
 import com.lxkj.administrator.fealty.utils.FormatCheck;
 import com.lxkj.administrator.fealty.utils.ImageUtil;
+import com.lxkj.administrator.fealty.utils.MReceiver;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
 
@@ -47,7 +49,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+import cn.jpush.android.api.JPushInterface;
+import cn.jpush.android.api.TagAliasCallback;
 import de.greenrobot.event.EventBus;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -101,26 +106,55 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
     private File tempImageFile;//相机拍摄图片缓存
     private File headImageFile;//剪切图片缓存
     private String check_id;//获取验证码id
+    String registerID;
+    private static final String TAG = "JPush";
 
     protected void init() {
-     //   EventBus.getDefault().register(this);
+        //   EventBus.getDefault().register(this);
         bar_iv_left.setVisibility(View.VISIBLE);
         bar_view_left_line.setVisibility(View.VISIBLE);
         bar_tv_title_left.setVisibility(View.VISIBLE);
         bar_tv_title_left.setText("账号注册");
         remainRockTime = ParameterManager.TOTAL_ROCK_TIME;
         handler = new Myhandler();
-
+        registerID = JPushInterface.getRegistrationID(AppUtils.getBaseContext());
+        handler.sendMessage(handler.obtainMessage(MSG_SET_ALIAS, registerID));
+        Log.e("registerID", registerID);
     }
+    private static final int MSG_SET_ALIAS = 1001;
+    private final TagAliasCallback mAliasCallback = new TagAliasCallback() {
+        @Override
+        public void gotResult(int code, String alias, Set<String> tags) {
+            String logs;
+            switch (code) {
+                case 0:
+                    logs = "Set tag and alias success";
+                    Log.i(TAG, logs);
+                    break;
+                case 6002:
+                    logs = "Failed to set alias and tags due to timeout. Try again after 60s.";
+                    Log.i(TAG, logs);
+                    if (ExampleUtil.isConnected(AppUtils.getBaseContext().getApplicationContext())) {
+                        handler.sendMessageDelayed(handler.obtainMessage(MSG_SET_ALIAS, alias), 1000 * 60);
+                    } else {
+                        Log.i(TAG, "No network");
+                    }
+                    break;
+                default:
+                    logs = "Failed with errorCode = " + code;
+                    Log.e(TAG, logs);
+            }
 
-    // 用EventBus 来导航,订阅者
-//    public void onEventMainThread(NavFragmentEvent event) {
-//    }
+            ExampleUtil.showToast(logs, AppUtils.getBaseContext().getApplicationContext());
+        }
+
+    };
+
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-       // EventBus.getDefault().unregister(this);
+        // EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -152,9 +186,9 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                     public void onClick(DialogInterface dialog, int item) {
                         // 这里item是根据选择的方式，
                         if (item == 0) {
-                           getImageFromAlbum();
+                            getImageFromAlbum();
                         } else {
-                           getImageFromCamera();
+                            getImageFromCamera();
                         }
                     }
                 }).create();
@@ -185,7 +219,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
     }
 
     @Override
-   public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_PICK_IMAGE) {
             if (resultCode == Activity.RESULT_OK) {
                 Intent photoZoomIntent = ImageUtil.getPhotoZoomIntent(data.getData());
@@ -220,6 +254,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
             }
         }
     }
+
     /**
      * 从相册获取图片
      */
@@ -258,7 +293,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fragment_regist_iv_head:
-                    changeHeadIcon();
+                changeHeadIcon();
                 break;
             case R.id.bar_iv_left:
                 getActivity().onBackPressed();//返回
@@ -317,7 +352,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                         } else if ("子女".equals(radiobuttonString)) {
                             indentity = "0";
                         }
-                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "password", "check_code", "nickName", "identity","headFile","id"}, phone, password, checkCode, nickName, indentity,"",check_id);
+                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "password", "check_code", "nickName", "identity", "headFile", "id", "registerID"}, phone, password, checkCode, nickName, indentity, "", check_id, registerID);
                         if (headImageFile != null && headImageFile.exists()) {
                             HashMap<String, String> map = new HashMap<String, String>();
                             byte[] buffer = changeFileToByte(headImageFile);
@@ -405,6 +440,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                 break;
         }
     }
+
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
 
@@ -433,7 +469,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                     if (msg.getData().getInt("code") == 1) {//如果请求成功
                         startRock();//开启倒计时
                         String check_code = msg.getData().getString("check_code");
-                        check_id=msg.getData().getString("id");
+                        check_id = msg.getData().getString("id");
                         if (TextUtils.isEmpty(check_code)) {
                             checkCodeEditText.requestFocus();
                         } else {
@@ -454,10 +490,14 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                         System.out.print("注册成功！！！！！！！！！！！！！！");
                         EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));//跳转到登录页面
                         ToastUtils.showToastInUIThread("请登录!");
-                    } else if(msg.getData().getInt("code") == 2) {
-                       System.out.print("注册失败！");
+                    } else if (msg.getData().getInt("code") == 2) {
+                        System.out.print("注册失败！");
                     }
 
+                    break;
+                case MSG_SET_ALIAS:
+                    Log.d(TAG, "Set alias in handler.");
+                    JPushInterface.setAliasAndTags(AppUtils.getBaseContext().getApplicationContext(), (String) msg.obj, null, mAliasCallback);
                     break;
             }
         }

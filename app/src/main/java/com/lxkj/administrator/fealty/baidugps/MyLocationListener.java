@@ -24,8 +24,11 @@ public class MyLocationListener implements BDLocationListener {
     private double lon;
     private TextView tv_gsp;
 
-    public MyLocationListener(TextView tv_gsp) {
+    private CallBack mCallBack;
+
+    public MyLocationListener(TextView tv_gsp,CallBack callBack) {
         this.tv_gsp = tv_gsp;
+        this.mCallBack = callBack;
     }
     @Override
     public void onReceiveLocation(BDLocation location) {
@@ -132,6 +135,9 @@ public class MyLocationListener implements BDLocationListener {
 //                isFirstLocation = false;
 //                setMarker();
 //                setUserMapCenter();
+            if(mCallBack!=null){
+                mCallBack.callYou(lat, lon);
+            }
 //            }
         }
     }
@@ -169,4 +175,7 @@ public class MyLocationListener implements BDLocationListener {
 //        //改变地图状态
 //     //   mBaiduMap.setMapStatus(mMapStatusUpdate);
 //    }
+public interface CallBack{
+    void callYou(double lat, double lon);
+}
 }
