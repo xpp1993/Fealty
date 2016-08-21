@@ -7,38 +7,47 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.baidu.location.LocationClientOption;
 import com.lxkj.administrator.fealty.R;
-import com.lxkj.administrator.fealty.activity.LocationActivity;
 import com.lxkj.administrator.fealty.baidugps.LocationService;
 import com.lxkj.administrator.fealty.baidugps.MyLocationListener;
 import com.lxkj.administrator.fealty.base.BaseApplication;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.bean.SleepData;
 import com.lxkj.administrator.fealty.bean.SportData;
+import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
-import com.lxkj.administrator.fealty.utils.ToastUtils;
 import com.lxkj.administrator.fealty.view.LineChart03View;
 import com.lxkj.administrator.fealty.view.LineChart03View_left;
 import com.lxkj.administrator.fealty.view.PPView;
+import com.yc.peddemo.sdk.UTESQLOperate;
+import com.yc.peddemo.utils.CalendarUtils;
+import com.yc.pedometer.info.RateOneDayInfo;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
+
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import de.greenrobot.event.EventBus;
+
 /**
  * Created by Administrator on 2016/8/4.
  */
@@ -82,8 +91,8 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     TreeMap<Integer, Integer> map = new TreeMap<>();
     private double lat;
     private double lon;
-
-    private MyLocationListener.CallBack mCallBack ;
+    private String locationdescrible;
+    private MyLocationListener.CallBack mCallBack;
 
     @Override
     public void onGetBunndle(Bundle arguments) {
@@ -105,9 +114,10 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         mRegisterReceiver();
         mCallBack = new MyLocationListener.CallBack() {
             @Override
-            public void callYou(double lat, double lon) {
-                HealthDataFragement.this.lat =lat;
+            public void callYou(double lat, double lon, String loctiondescrible) {
+                HealthDataFragement.this.lat = lat;
                 HealthDataFragement.this.lon = lon;
+                HealthDataFragement.this.locationdescrible = loctiondescrible;
             }
         };
     }
@@ -118,23 +128,39 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         getActivity().registerReceiver(receiver, filter);
     }
 
+    //2016-8-21 xpp add
+    @Override
+    public void onStop() {
+        super.onStop();
+        getActivity().unregisterReceiver(mReceiver);
+        locService.unregisterListener(mListener); //注销掉监听
+        locService.stop(); //停止定位服务
+        handler.removeCallbacks(runnable);
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         getActivity().unregisterReceiver(mReceiver);
-
+        locService.unregisterListener(mListener); //注销掉监听
+        locService.stop(); //停止定位服务
+        handler.removeCallbacks(runnable);
     }
+
     @Override
     protected void initListener() {
-       im_dingwei.setOnClickListener(this);
+        im_dingwei.setOnClickListener(this);
     }
+
     LocationService locService;
     LocationClientOption mOption;
     MyLocationListener mListener;
+
     @Override
     protected void initData() {
 
     }
+
     private void initChart(TreeMap<Integer, Integer> map) {
         mLineChart03View.reset(map);
         mLineChart03View_left.reset(map);
@@ -143,31 +169,40 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     }
 
     @Override
-    public void onStop() {
-        locService.unregisterListener(mListener); //注销掉监听
-        locService.stop(); //停止定位服务
-        super.onStop();
-    }
-
-    @Override
     public void onStart() {
 
         //数据初始化，如果identity是我,定位
-        if (identiy.equals("我的")){
-            mListener=new MyLocationListener(tv_gps,mCallBack);
-            locService=  ((BaseApplication) AppUtils.getBaseContext()).locationService;
+        if (identiy.equals("我的")) {
+            mListener = new MyLocationListener(tv_gps, mCallBack);
+            Log.e("sb", lon + "," + lat);
+            locService = ((BaseApplication) AppUtils.getBaseContext()).locationService;
             //注册监听
             locService.registerListener(mListener);
             mOption = new LocationClientOption();
-            mOption=locService.getDefaultLocationClientOption();
-            mOption.setOpenAutoNotifyMode(60*1000*15,100,LocationClientOption.LOC_SENSITIVITY_HIGHT);
+            mOption = locService.getDefaultLocationClientOption();
+            mOption.setOpenAutoNotifyMode(60 * 1000 * 15, 100, LocationClientOption.LOC_SENSITIVITY_HIGHT);
             locService.setLocationOption(mOption);
             locService.start();// 定位SDK
         }
         super.onStart();
     }
+
     private void loadData(SportData sportData, SleepData sleepData) {
         if (identiy != null && !"".equals(identiy)) {
+            //画心率折线图
+            /*
+     * 获取一天各测试时间点和心率值
+	 */
+            List<RateOneDayInfo> list_rate = mySQLOperate.queryRateOneDayDetailInfo(CalendarUtils.getCalendar(0));//查询今天的心率值
+            if (list_rate != null && list_rate.size() > 0) {
+                for (int i = 0; i < list_rate.size(); i++) {
+                    RateOneDayInfo rateOneDayInfo = list_rate.get(i);
+                    int temprate = rateOneDayInfo.getRate();
+                    int time = rateOneDayInfo.getTime();
+                    map.put(time, temprate);
+                }
+                initChart(map);
+            }
             mPpView.setFirstText(identiy);
             mPpView.postInvalidate();
         }
@@ -190,6 +225,7 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
             shuimiandetail.setText("深度度睡眠" + deep_hour + "小时" + deep_minute + "分钟");
         }
     }
+
     private void registeHealthDataChangedReceiver() {
         IntentFilter filter = new IntentFilter();
         try {
@@ -208,6 +244,7 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     public void onRequestStart(int requestCode) {
 
     }
+
     @Override
     public void onRequestLoading(int requestCode, long current, long count) {
 
@@ -227,6 +264,7 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
                 break;
         }
     }
+
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
 
@@ -234,19 +272,21 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.dingwei:
                 //跳转到百度地图
-                Intent intent=new Intent(getActivity(), LocationActivity.class);
-               intent.putExtra("lon",lon);
-               intent.putExtra("lat",lat);
-                startActivity(intent);
+                Log.e("baidumap", "zoudaoci");
+                Bundle bundle = new Bundle();
+                bundle.putDouble("lon", lon);
+                bundle.putDouble("lat", lat);
+                bundle.putString("describle", locationdescrible);
+                EventBus.getDefault().post(new NavFragmentEvent(new LocaltionFragment(), bundle));
                 break;
             default:
                 break;
         }
-
     }
+
     //广播接受者
     class HealthDataReceiver extends BroadcastReceiver {
 
@@ -262,6 +302,7 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
             }
         }
     }
+
     int hour;
     int minute;
     //监听系统时间的广播
@@ -274,6 +315,7 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
                 minute = calendar.get(Calendar.MINUTE);
                 hour = calendar.get(Calendar.HOUR_OF_DAY);
                 //把心率和时间发给服务器
+                mySQLOperate.saveRate("rate_table_", hour, rate_status);
                 handler.postDelayed(runnable, 1000);
             }
         }
@@ -281,16 +323,14 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            if (minute == 0&&rate_status!=0) {
-                //画心率折线图
-                map.put(hour, rate_status);
-                initChart(map);
+            if (minute == 0 && rate_status != 0) {
                 Map<String, String> map = CommonTools.getParameterMap(new String[]{"mobile", "heartRate", "uploadTime"}, SessionHolder.user.getMobile(), rate_status + "", hour + "");
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.INSERT_RATE, map, null, REQUEST_CODE_RATE, HealthDataFragement.this);
-
             }
         }
     };
+    private UTESQLOperate mySQLOperate = new UTESQLOperate(AppUtils.getBaseContext());//数据库操作类
+
     private class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -298,7 +338,11 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
             switch (msg.what) {
                 case 0x21:
                     int rate = (int) msg.obj;
-                    //如果心率不正常，报警信息上传
+                    //如果心率不正常，报警信息上传,手机振动
+                    if (rate < 60) {
+                        Vibrator vibrator = ((BaseApplication) getActivity().getApplication()).mVibrator;
+                        vibrator.vibrate(2000);//如果心率异常振动两秒
+                    }
                     mPpView.setFountText(rate + "");
                     mPpView.invalidate();
                     break;

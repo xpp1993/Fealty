@@ -13,7 +13,7 @@ public class MyLocationListener implements BDLocationListener {
     private double lat;
     private double lon;
     private TextView tv_gsp;
-
+   private  String   locationdescrible;
     private CallBack mCallBack;
 
     public MyLocationListener(TextView tv_gsp,CallBack callBack) {
@@ -26,8 +26,8 @@ public class MyLocationListener implements BDLocationListener {
         if (null !=location &&location.getLocType() != BDLocation.TypeServerError) {
             StringBuffer sb = new StringBuffer(256);
             //获取经纬度
-            lat = location.getLatitude();
-            lon = location.getLongitude();
+            lat = location.getLatitude();//维度
+            lon = location.getLongitude();//经度
             sb.append(location.getAddrStr());
             tv_gsp.setText(sb.toString());
             Log.e("sb", sb.toString());
@@ -62,14 +62,14 @@ public class MyLocationListener implements BDLocationListener {
             sb.append(location.getDistrict());
             sb.append("\nStreet : ");// 街道
             sb.append(location.getStreet());
-            Log.e("sb",sb.toString());
         //    sb.append("\naddr : ");// 地址信息
 //            sb.append("\nUserIndoorState: ");// *****返回用户室内外判断结果*****
 //            sb.append(location.getUserIndoorState());
 //            sb.append("\nDirection(not all devices have value): ");
 //            sb.append(location.getDirection());// 方向
 //            sb.append("\nlocationdescribe: ");
-//            sb.append(location.getLocationDescribe());// 位置语义化信息
+   locationdescrible=     location.getLocationDescribe();// 位置语义化信息
+            Log.e("sb", sb.toString());
 //            sb.append("\nPoi: ");// POI信息
 //            if (location.getPoiList() != null && !location.getPoiList().isEmpty()) {
 //                for (int i = 0; i < location.getPoiList().size(); i++) {
@@ -128,7 +128,7 @@ public class MyLocationListener implements BDLocationListener {
 //            }
 
             if(mCallBack!=null){
-                mCallBack.callYou(lat, lon);
+                mCallBack.callYou(lat, lon,locationdescrible);
             }
         }
     }
@@ -168,6 +168,6 @@ public class MyLocationListener implements BDLocationListener {
 //    }
 
     public interface CallBack{
-        void callYou(double lat, double lon);
+        void callYou(double lat, double lon,String locationdescrible);
     }
 }

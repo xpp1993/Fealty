@@ -108,7 +108,6 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
     private String check_id;//获取验证码id
     String registerID;
     private static final String TAG = "JPush";
-
     protected void init() {
         //   EventBus.getDefault().register(this);
         bar_iv_left.setVisibility(View.VISIBLE);
@@ -117,6 +116,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
         bar_tv_title_left.setText("账号注册");
         remainRockTime = ParameterManager.TOTAL_ROCK_TIME;
         handler = new Myhandler();
+        //极光推送
         registerID = JPushInterface.getRegistrationID(AppUtils.getBaseContext());
         handler.sendMessage(handler.obtainMessage(MSG_SET_ALIAS, registerID));
         Log.e("registerID", registerID);
@@ -155,6 +155,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
     public void onDestroy() {
         super.onDestroy();
         // EventBus.getDefault().unregister(this);
+        handler.removeCallbacks(runable);
     }
 
     @Override
@@ -174,7 +175,6 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
         });
 
     }
-
     /**
      * 设置头像
      */
@@ -200,24 +200,23 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
      */
     private void startRock() {
         final Handler handler = new Handler();
-        Runnable runable = new Runnable() {
-            @Override
-            public void run() {
-                remainRockTime--;
-                if (remainRockTime > 0) {
-                    getCheckCodeTextView.setClickable(false);
-                    getCheckCodeTextView.setText(remainRockTime + "秒后重新获取");
-                    handler.postDelayed(this, 1000);
-                } else {
-                    getCheckCodeTextView.setClickable(true);
-                    getCheckCodeTextView.setText("获取验证码");
-                    remainRockTime = ParameterManager.TOTAL_ROCK_TIME;
-                }
-            }
-        };
         handler.post(runable);
     }
-
+   private  Runnable runable = new Runnable() {
+        @Override
+        public void run() {
+            remainRockTime--;
+            if (remainRockTime > 0) {
+                getCheckCodeTextView.setClickable(false);
+                getCheckCodeTextView.setText(remainRockTime + "秒后重新获取");
+                handler.postDelayed(this, 1000);
+            } else {
+                getCheckCodeTextView.setClickable(true);
+                getCheckCodeTextView.setText("获取验证码");
+                remainRockTime = ParameterManager.TOTAL_ROCK_TIME;
+            }
+        }
+    };
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_PICK_IMAGE) {
@@ -347,11 +346,11 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                     passwordEditText.requestFocus();
                 } else {
                     try {
-                        if ("老人".equals(radiobuttonString)) {
-                            indentity = "1";
-                        } else if ("子女".equals(radiobuttonString)) {
-                            indentity = "0";
-                        }
+//                        if ("老人".equals(radiobuttonString)) {
+//                            indentity = "1";
+//                        } else if ("子女".equals(radiobuttonString)) {
+//                            indentity = "0";
+//                        }
                         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "password", "check_code", "nickName", "identity", "headFile", "id", "registerID"}, phone, password, checkCode, nickName, indentity, "", check_id, registerID);
                         if (headImageFile != null && headImageFile.exists()) {
                             HashMap<String, String> map = new HashMap<String, String>();
@@ -372,7 +371,6 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                 break;
         }
     }
-
     /**
      * 将file转为数组
      *

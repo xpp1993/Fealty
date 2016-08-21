@@ -10,11 +10,19 @@ import com.lxkj.administrator.fealty.adapter.HeathMonitoringAdapter;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.bean.SleepData;
 import com.lxkj.administrator.fealty.bean.SportData;
+import com.lxkj.administrator.fealty.manager.ParameterManager;
+import com.lxkj.administrator.fealty.manager.SessionHolder;
+import com.lxkj.administrator.fealty.utils.AppUtils;
+import com.lxkj.administrator.fealty.utils.CommonTools;
+import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.widget.JazzyViewPager;
+
+import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
@@ -22,7 +30,7 @@ import de.greenrobot.event.EventBus;
  * Created by Administrator on 2016/7/26.
  */
 @ContentView(R.layout.fragement_status)
-public class StatusFragment extends BaseFragment {
+public class StatusFragment extends BaseFragment implements NetWorkAccessTools.RequestTaskListener {
     @ViewInject(R.id.mJazzy)
     private JazzyViewPager mJazzy;
     private HeathMonitoringAdapter adapter;
@@ -31,11 +39,15 @@ public class StatusFragment extends BaseFragment {
     HealthDataFragement healthDataFragement;
     String identity;
     int tempRate;
+    private final int REQUEST_CODE_UPDATA_USERIFO_INTERNET=0x23;
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
         mJazzy.setTransitionEffect(JazzyViewPager.TransitionEffect.ZoomIn);
         mJazzy.setPageMargin(30);
+        //网络获取数据
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null,REQUEST_CODE_UPDATA_USERIFO_INTERNET,this );
     }
     @Override
     protected void initListener() {
@@ -84,4 +96,23 @@ public class StatusFragment extends BaseFragment {
         EventBus.getDefault().unregister(this);
     }
 
+    @Override
+    public void onRequestStart(int requestCode) {
+
+    }
+
+    @Override
+    public void onRequestLoading(int requestCode, long current, long count) {
+
+    }
+
+    @Override
+    public void onRequestSuccess(JSONObject jsonObject, int requestCode) {
+
+    }
+
+    @Override
+    public void onRequestFail(int requestCode, int errorNo) {
+
+    }
 }

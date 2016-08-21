@@ -1,6 +1,9 @@
 package com.lxkj.administrator.fealty.fragment;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -13,7 +16,9 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.provider.ContactsContract;
+import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +33,7 @@ import com.avast.android.dialogs.iface.IListDialogListener;
 import com.leaking.slideswitch.SlideSwitch;
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.adapter.LeDeviceListAdapter;
+import com.lxkj.administrator.fealty.base.BaseApplication;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.bean.Contacts;
 import com.lxkj.administrator.fealty.bean.SleepData;
@@ -63,6 +69,7 @@ import org.xutils.view.annotation.ViewInject;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -87,8 +94,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 //    private TextView bluee_iv_left;
 
     @ViewInject(R.id.binded_action)
-  //  private SlideSwitch binded_action;
-     private ImageView binded_action;
+    //  private SlideSwitch binded_action;
+    private ImageView binded_action;
     public static final int REQUEST_USER_BYMIBILE = 0x01;
     private Handler myHandler = new MyHandler();
     private BLEServiceOperate mBLEServiceOperate;
@@ -171,8 +178,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     }
 
     private void mRegisterReceiver() {
+        // IntentFilter mFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         IntentFilter mFilter = new IntentFilter();
-        mFilter.addAction(GlobalVariable.READ_BATTERY_ACTION);
+        mFilter.addAction(GlobalVariable.READ_BATTERY_ACTION);//监测手环电量
+        mFilter.addAction("android.intent.action.BATTERY_LOW");//监测手机电量
+        //  mFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         mFilter.addAction(GlobalVariable.READ_BLE_VERSION_ACTION);
         getActivity().registerReceiver(mReceiver, mFilter);
     }
@@ -181,7 +191,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     protected void initListener() {
         me_iv_left.setOnClickListener(this);
 //        bluee_iv_left.setOnClickListener(this);
-       binded_action.setOnClickListener(this);
+        binded_action.setOnClickListener(this);
         bluee_iv_left.setSlideListener(new SlideSwitch.SlideListener() {
             @Override
             public void open() {
@@ -297,6 +307,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 //    }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        JudgeNewDayWhenResume();
+    }
+
+    @Override
     public void onRequestStart(int requestCode) {
 
     }
@@ -324,7 +340,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 }
                 break;
             case REQUEST_CODE_SPORTDATA_SLEEPDATA:
-           // case REQUEST_CODE_RATE:
+                // case REQUEST_CODE_RATE:
                 try {
                     DecodeManager.decodeCommon(jsonObject, requestCode, myHandler);
                 } catch (JSONException e) {
@@ -444,14 +460,14 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     CURRENT_STATUS = CONNECTED;
                     bluee_iv_left.setSlideable(false);
                     bundle.putString("IF_CONNECTED", "我的");
-                   // bluee_iv_left.setSlideable(false);
+                    // bluee_iv_left.setSlideable(false);
                     ToastUtils.showToastInUIThread("已连接");
                     break;
                 case UPDATA_REAL_RATE_MSG://处理接收到的心率数据
                     Log.d("tempRate", tempRate + "");
                     //如果测试完成
                     if (tempStatus == GlobalVariable.RATE_TEST_FINISH) {
-                        bundle.putInt("tempRate",RATE_STATUS);
+                        bundle.putInt("tempRate", RATE_STATUS);
                         EventBus.getDefault().post(bundle);
 
 //                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "heartRate"}, SessionHolder.user.getMobile(), "", tempRate + "");
@@ -473,9 +489,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         }
                     }
                     break;
-           case REQUEST_CODE_SPORTDATA_SLEEPDATA:
+                case REQUEST_CODE_SPORTDATA_SLEEPDATA:
 //                case REQUEST_CODE_RATE:
-                  ToastUtils.showToastInUIThread("数据已更新到服务器！");
+                    ToastUtils.showToastInUIThread("数据已更新到服务器！");
+                    break;
+                case NEW_DAY_MSG:
+                   // mySQLOperate.updateStepSQL();//新一天初始化步行数据库
+                  //  mySQLOperate.updateSleepSQL();//新一天初始化睡眠数据库
+                    mySQLOperate.updateRateSQL();//新一天初始化心率数据库
+                    //mySQLOperate.isDeleteRefreshTable();
+                  //  mySQLOperate.isDeleteRateTable(CalendarUtils.getCalendar(-1));
+                    resetValues();
                     break;
                 default:
                     break;
@@ -489,10 +513,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         //做数据保存操作
         Log.e("wyj", "functionRateFinished");
     }
-
     /**
      * 电量和蓝牙版本接收
      */
+    Vibrator mVibrator = ((BaseApplication) getActivity().getApplication()).mVibrator;
+    NotificationManager notificationManager = ((BaseApplication) getActivity().getApplication()).notificationManager;//1.获取状态栏通知管理器
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
         @Override
@@ -505,10 +530,120 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 int battery = intent.getIntExtra(
                         GlobalVariable.INTENT_BLE_BATTERY_EXTRA, -1);
                 Log.d("battery=", battery + "");
+                if (battery <= 15) {
+                    //推送通知（通知加振动）
+                    Log.e("battery", "手环电量不足，请充电！");
+                    mVibrator.vibrate(2000);//振动两秒
+                    //2,实例化通知栏构造器
+                    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(MeFragment.this.getActivity());
+                    //3.对Build进行配置
+                    mBuilder.setContentTitle("测试标题")//设置通知栏标题
+                            .setContentText("测试内容") //<span style="font-family: Arial;">/设置通知栏显示内容</span>
+                            .setContentIntent(getDefalutIntent(Notification.FLAG_AUTO_CANCEL)) //设置通知栏点击意图, 用户单击通知后自动消失
+                            .setTicker("测试通知来啦") //通知首次出现在通知栏，带上升动画效果的
+                            .setWhen(System.currentTimeMillis())//通知产生的时间，会在通知信息里显示，一般是系统获取到的时间
+                            .setPriority(Notification.PRIORITY_DEFAULT) //设置该通知优先级//  .setAutoCancel(true)//设置这个标志当用户单击面板就可以让通知将自动取消
+                           // .setOngoing(false)//ture，设置他为一个正在进行的通知。他们通常是用来表示一个后台任务,用户积极参与(如播放音乐)或以某种方式正在等待,因此占用设备(如一个文件下载,同步操作,主动网络连接)
+                            .setDefaults(Notification.DEFAULT_VIBRATE)//向通知添加声音、闪灯和振动效果的最简单、最一致的方式是使用当前的用户默认设置，使用defaults属性，可以组合
+                                    //Notification.DEFAULT_ALL  Notification.DEFAULT_SOUND 添加声音 // requires VIBRATE permission
+                            .setSmallIcon(R.mipmap.jpush_notification_icon);//设置通知小ICON
+//                    .setVibrate(new long[] {0,300,500,700});实现效果：延迟0ms，然后振动300ms，在延迟500ms，接着在振动700ms。.setLights(0xff0000ff, 300, 0)
+                 //   （5）方法：.setSound(Uri sound)
+                    /**
+                     * Notification.DEFAULT_VIBRATE    //添加默认震动提醒  需要 VIBRATE permission
+                     Notification.DEFAULT_SOUND    // 添加默认声音提醒
+                     Notification.DEFAULT_LIGHTS// 添加默认三色灯提醒
+                     Notification.DEFAULT_ALL// 添加默认以上3种全部提醒
+                     //获取默认铃声
+                     .setDefaults(Notification.DEFAULT_SOUND)
+                     //获取自定义铃声
+                     .setSound(Uri.parse("file:///sdcard/xx/xx.mp3"))
+                     //获取Android多媒体库内的铃声
+                     .setSound(Uri.withAppendedPath(Audio.Media.INTERNAL_CONTENT_URI, "5"))
+                     */
+                }
                 //把号码，设备名，设备地址，连接手环状态，设备电量发送给服务器，服务器判断是否低电量，像APP发送消息（）推送,app接收短信并震动
+            }
+//            else if (intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
+//                //得到系统当前电量
+//                int level=intent.getIntExtra("level", 0);
+//                //取得系统总电量
+//                int total=intent.getIntExtra("scale", 100);
+////                textView.setText("当前电量："+(level*100)/total+"%");
+//                //当电量小于15%时触发
+//                if(level<15){
+////                    Toast.makeText(MainActivity.this, "当前电量已小于15%",Toast.LENGTH_LONG).show();
+//                }
+            else if (Intent.ACTION_BATTERY_LOW.equals(action)) {
+                //推送通知
+                Log.e("battery", "手机电量不足，请充电！");
+                mVibrator.vibrate(2000);
             }
         }
     };
+
+    //通过setContentIntent(PendingIntent intent)方法中的意图设置对应的flags
+    public PendingIntent getDefalutIntent(int flags) {
+        PendingIntent pendingIntent = PendingIntent.getActivity(AppUtils.getBaseContext(), 1, new Intent(), flags);
+        return pendingIntent;
+    }
+    //初始化
+    private boolean isFirstOpenAPK = false;
+    private int currentDay = 1;
+    private int lastDay = 0;
+    private String currentDayString = "2016822";
+    private String lastDayString = "2016821";
+    private static final int NEW_DAY_MSG = 3;
+    //判断是否是新的一天
+    private void JudgeNewDayWhenResume() {
+        isFirstOpenAPK = sp.getBoolean(GlobalVariable.FIRST_OPEN_APK, true);
+        editor.putBoolean(GlobalVariable.FIRST_OPEN_APK, false);
+        editor.commit();
+        lastDay = sp.getInt(GlobalVariable.LAST_DAY_NUMBER_SP, 0);
+        lastDayString = sp.getString(GlobalVariable.LAST_DAY_CALLENDAR_SP,
+                CalendarUtils.getCalendar(-1));
+        Calendar c = Calendar.getInstance();
+        currentDay = c.get(Calendar.DAY_OF_YEAR);
+        currentDayString = CalendarUtils.getCalendar(0);
+
+        if (isFirstOpenAPK) {
+            lastDay = currentDay;
+            lastDayString = currentDayString;
+            editor = sp.edit();
+            editor.putInt(GlobalVariable.LAST_DAY_NUMBER_SP, lastDay);
+            editor.putString(GlobalVariable.LAST_DAY_CALLENDAR_SP,
+                    lastDayString);
+            editor.commit();
+        } else {
+
+            if (currentDay != lastDay) {
+                if ((lastDay + 1) == currentDay || currentDay == 1) { // 连续的日期
+                   myHandler.sendEmptyMessage(NEW_DAY_MSG);
+                } else {
+                    mySQLOperate.insertLastDayStepSQL(lastDayString);
+                    mySQLOperate.updateSleepSQL();
+                    resetValues();
+                }
+                lastDay = currentDay;
+                lastDayString = currentDayString;
+                editor.putInt(GlobalVariable.LAST_DAY_NUMBER_SP, lastDay);
+                editor.putString(GlobalVariable.LAST_DAY_CALLENDAR_SP,
+                        lastDayString);
+                editor.commit();
+            } else {
+                Log.d("b1offline", "currentDay == lastDay");
+            }
+        }
+
+    }
+
+    private void resetValues() {
+        editor.putInt(GlobalVariable.YC_PED_UNFINISH_HOUR_STEP_SP, 0);
+        editor.putInt(GlobalVariable.YC_PED_UNFINISH_HOUR_VALUE_SP, 0);
+        editor.putInt(GlobalVariable.YC_PED_LAST_HOUR_STEP_SP, 0);
+        editor.commit();
+    }
+
     /**
      * 第一个参数，心率值
      * 第二个参数当前心率值得状态 1.测试中 2.测试完成
@@ -520,7 +655,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         public void onRateChange(int rate, int status) {
             tempRate = rate;
             tempStatus = status;
-            RATE_STATUS=tempRate;
+            RATE_STATUS = tempRate;
             Log.e("wyj", "onRateChange =" + tempRate);
             myHandler.sendEmptyMessage(UPDATA_REAL_RATE_MSG);
         }
@@ -546,7 +681,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.sendEmptyMessage(UPDATE_STEP_UI_MSG);
         }
     };
-
+/**
+ * 返回某天心率测试的详情
+ */
+    private void queryRateInfo(){
+       //mySQLOperate.saveRate();
+    }
     /**
      * 返回今天的步数、距离、卡路里的集合
      */
@@ -636,8 +776,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.sendEmptyMessage(DISCONNECT_MSG);
         } else if (status == ICallbackStatus.CONNECTED_STATUS) {
             myHandler.sendEmptyMessage(CONNECTED_MSG);
-        } else if (result == true) {//表示计步状态,在老人清醒时，每隔15分钟上床一次手机坐标
-        } else if (result == false) {//表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
+           if (result == true) {//表示计步状态,在老人清醒时，每隔15分钟上传一次手机坐标
+
+
+            }
+           else if (result == false) {//表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
+
+        }
         }
     }
 

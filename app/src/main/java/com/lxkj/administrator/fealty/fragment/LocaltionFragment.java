@@ -3,10 +3,16 @@ package com.lxkj.administrator.fealty.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.InfoWindow;
+import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.OverlayOptions;
@@ -26,13 +32,14 @@ public class LocaltionFragment extends BaseFragment {
     @ViewInject(R.id.bmapView)
     private MapView mapView;
     private double lat, lon;
+    private String describle;
 
     // private
     @Override
     protected void init() {
         //获取BaiduMap对象
         mBaiduMap = mapView.getMap();
-        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
+        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);//设置普通地图
         //开启交通图
         mBaiduMap.setTrafficEnabled(true);
     }
@@ -46,19 +53,21 @@ public class LocaltionFragment extends BaseFragment {
     protected void initData() {
 
     }
-
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
         lat = arguments.getDouble("lat");
         lon = arguments.getDouble("lon");
-        Log.e("baidumapData", lat + "::" + lon);
-        setMarker();
-
+        describle = arguments.getString("describle");
+        LatLng point = new LatLng(lat, lon);
+        Log.e("baidumapData", lat + "::" + lon + describle);
+        setMarker(point);//设置标注
+        showTextView(describle, point);//弹出窗体覆盖物
+        setMapStatus(point);//设置中心坐标
     }
-    private void setMarker() {
-        //定义Maker坐标点
-        LatLng point = new LatLng(39.963175, 116.400244);
+    private void setMarker(LatLng point) {
+//        //定义Maker坐标点
+//        LatLng point = new LatLng(lat, lon);
         //构建Marker图标
         BitmapDescriptor bitmap = BitmapDescriptorFactory
                 .fromResource(R.mipmap.dingwei);
@@ -68,6 +77,28 @@ public class LocaltionFragment extends BaseFragment {
                 .icon(bitmap);
         //在地图上添加Marker，并显示
         mBaiduMap.addOverlay(option);
+    }
+
+    //弹出窗覆盖物
+    private void showTextView(String str, LatLng point) {
+        TextView textView = new TextView(getActivity().getApplicationContext());
+        textView.setText(str);
+        //定义用于显示该InfoWindow的坐标点
+       // LatLng pt = new LatLng(lat, lon);
+        //创建InfoWindow , 传入 view， 地理坐标， y 轴偏移量
+        InfoWindow mInfoWindow = new InfoWindow(textView, point, -47);
+        //显示InfoWindow
+        mBaiduMap.showInfoWindow(mInfoWindow);
+    }
+
+    //设置新的中心点
+    private void setMapStatus(LatLng point) {
+      //  LatLng center = new LatLng(lat, lon);
+        //定义地图状态
+        MapStatus status = new MapStatus.Builder().target(point).zoom(18).build();
+        //定义MapStatusUpdate对象，以便描述地图状态将要发生的变化
+        MapStatusUpdate mMapStatusUpdate = MapStatusUpdateFactory.newMapStatus(status);
+        mBaiduMap.setMapStatus(mMapStatusUpdate);
     }
 
     /**
@@ -85,9 +116,10 @@ public class LocaltionFragment extends BaseFragment {
      */
     @Override
     public void onResume() {
-        super.onResume();
+        mapView.setVisibility(View.VISIBLE);
         //在activity执行onResume时执行mMapView. onResume ()，实现地图生命周期管理
         mapView.onResume();
+        super.onResume();
     }
 
     /**
@@ -95,9 +127,10 @@ public class LocaltionFragment extends BaseFragment {
      */
     @Override
     public void onPause() {
-        super.onPause();
+        mapView.setVisibility(View.INVISIBLE);
         //在activity执行onPause时执行mMapView. onPause ()，实现地图生命周期管理
         mapView.onPause();
+        super.onPause();
     }
 //    //构造纹理资源
 //    BitmapDescriptor custom1 = BitmapDescriptorFactory
