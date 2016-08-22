@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:background="@color/MainBackGround"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/bar" />
+
+    <View
+        android:id="@+id/viewshehi"
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:layout_marginTop="48dp"
+        android:background="#DCDCDc" />
+
+    <RelativeLayout
+        android:id="@+id/relativelayoutshezhi"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_below="@id/viewshehi"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"
+        android:background="#ffffff"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/shezhitv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:drawableLeft="@mipmap/lingsheng"
+            android:drawablePadding="10dp"
+            android:paddingLeft="15dp"
+            android:text="消息提醒"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/iv_leftshezhi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="25dp"
+            android:layout_marginTop="15dp"
+            android:src="@mipmap/fanhui" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/viewshehi1"
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:layout_below="@id/relativelayoutshezhi"
+        android:background="#DCDCDc" />
+
+    <LinearLayout
+        android:id="@+id/linearlayoutshezhi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/viewshehi1"
+        android:background="#ffffff"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/relativelayout"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/activity_reset_tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:drawableLeft="@mipmap/xinlv"
+                android:drawablePadding="10dp"
+                android:text="心率"
+                android:textSize="18sp"  />
+
+            <ImageView
+                android:id="@+id/shezhiiv3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="5dp"
+                android:src="@mipmap/fanhui" />
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/view3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EFEFF4" />
+
+        <RelativeLayout
+            android:id="@+id/relativelayout4"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/activity_reset_tv_password_title_again"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:drawableLeft="@mipmap/dingwei"
+                android:drawablePadding="12dp"
+                android:text="GPS"
+                android:textSize="18sp"/>
+
+            <ImageView
+                android:id="@+id/shezhiback3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="5dp"
+                android:src="@mipmap/fanhui" />
+        </RelativeLayout>
+        <View
+            android:id="@+id/view4"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:background="#DCDCDC" />
+        <RelativeLayout
+            android:id="@+id/relativelayoutshezhiziti"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_below="@id/view4"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="#ffffff"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/shezhitvziti"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:drawableLeft="@mipmap/zi"
+                android:drawablePadding="10dp"
+                android:paddingLeft="15dp"
+                android:text="字体大小"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/iv_leftshezhiziti"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="25dp"
+                android:layout_marginTop="8dp"
+                android:src="@mipmap/fanhui" />
+        </RelativeLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/background_light"
+        android:layout_below="@id/linearlayoutshezhi"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/fragment_mine_tv_exit"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/setting_item_background"
+            android:gravity="center"
+            android:text="退出登录"
+            android:textSize="18sp" />
+    </LinearLayout>
+</RelativeLayout>

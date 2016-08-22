@@ -92,7 +92,6 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     private double lat;
     private double lon;
     private String locationdescrible;
-    private MyLocationListener.CallBack mCallBack;
 
     @Override
     public void onGetBunndle(Bundle arguments) {
@@ -112,14 +111,6 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         mPpView.invalidate();
         horiView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         mRegisterReceiver();
-        mCallBack = new MyLocationListener.CallBack() {
-            @Override
-            public void callYou(double lat, double lon, String loctiondescrible) {
-                HealthDataFragement.this.lat = lat;
-                HealthDataFragement.this.lon = lon;
-                HealthDataFragement.this.locationdescrible = loctiondescrible;
-            }
-        };
     }
 
     private void mRegisterReceiver() {
@@ -132,9 +123,6 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     @Override
     public void onStop() {
         super.onStop();
-        getActivity().unregisterReceiver(mReceiver);
-        locService.unregisterListener(mListener); //注销掉监听
-        locService.stop(); //停止定位服务
         handler.removeCallbacks(runnable);
     }
 
@@ -142,8 +130,6 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     public void onDestroy() {
         super.onDestroy();
         getActivity().unregisterReceiver(mReceiver);
-        locService.unregisterListener(mListener); //注销掉监听
-        locService.stop(); //停止定位服务
         handler.removeCallbacks(runnable);
     }
 
@@ -151,10 +137,6 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     protected void initListener() {
         im_dingwei.setOnClickListener(this);
     }
-
-    LocationService locService;
-    LocationClientOption mOption;
-    MyLocationListener mListener;
 
     @Override
     protected void initData() {
@@ -170,20 +152,6 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
 
     @Override
     public void onStart() {
-
-        //数据初始化，如果identity是我,定位
-        if (identiy.equals("我的")) {
-            mListener = new MyLocationListener(tv_gps, mCallBack);
-            Log.e("sb", lon + "," + lat);
-            locService = ((BaseApplication) AppUtils.getBaseContext()).locationService;
-            //注册监听
-            locService.registerListener(mListener);
-            mOption = new LocationClientOption();
-            mOption = locService.getDefaultLocationClientOption();
-            mOption.setOpenAutoNotifyMode(60 * 1000 * 15, 100, LocationClientOption.LOC_SENSITIVITY_HIGHT);
-            locService.setLocationOption(mOption);
-            locService.start();// 定位SDK
-        }
         super.onStart();
     }
 
@@ -199,6 +167,7 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
                     RateOneDayInfo rateOneDayInfo = list_rate.get(i);
                     int temprate = rateOneDayInfo.getRate();
                     int time = rateOneDayInfo.getTime();
+                    Log.e("rateandtime", temprate + "::" + time);
                     map.put(time, temprate);
                 }
                 initChart(map);
@@ -276,11 +245,7 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
             case R.id.dingwei:
                 //跳转到百度地图
                 Log.e("baidumap", "zoudaoci");
-                Bundle bundle = new Bundle();
-                bundle.putDouble("lon", lon);
-                bundle.putDouble("lat", lat);
-                bundle.putString("describle", locationdescrible);
-                EventBus.getDefault().post(new NavFragmentEvent(new LocaltionFragment(), bundle));
+                EventBus.getDefault().post(new NavFragmentEvent(new LocaltionFragment()));
                 break;
             default:
                 break;
@@ -294,10 +259,20 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(HealthDataFragement.DATA_CHANGED)) {
                 int tempRate = intent.getIntExtra("tempRate", -1);
+                double lat = intent.getDoubleExtra("lat", 22.57);
+                double lon = intent.getDoubleExtra("lon", 113.87);
+                String address = intent.getStringExtra("address");
+                String describle = intent.getStringExtra("describle");
+                Bundle data = new Bundle();
+                data.putDouble("lat", lat);
+                data.putDouble("lon", lon);
+                data.putString("address", address);
+                data.putString("describle", describle);
+                data.putInt("tempRate", tempRate);
                 rate_status = tempRate;
                 Message msg = new Message();
                 msg.what = 0x21;
-                msg.obj = tempRate;
+                msg.setData(data);
                 handler.sendMessage(msg);
             }
         }
@@ -315,7 +290,6 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
                 minute = calendar.get(Calendar.MINUTE);
                 hour = calendar.get(Calendar.HOUR_OF_DAY);
                 //把心率和时间发给服务器
-                mySQLOperate.saveRate("rate_table_", hour, rate_status);
                 handler.postDelayed(runnable, 1000);
             }
         }
@@ -324,6 +298,7 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         @Override
         public void run() {
             if (minute == 0 && rate_status != 0) {
+                mySQLOperate.saveRate("rate_table_", hour, rate_status);
                 Map<String, String> map = CommonTools.getParameterMap(new String[]{"mobile", "heartRate", "uploadTime"}, SessionHolder.user.getMobile(), rate_status + "", hour + "");
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.INSERT_RATE, map, null, REQUEST_CODE_RATE, HealthDataFragement.this);
             }
@@ -337,14 +312,28 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
             super.handleMessage(msg);
             switch (msg.what) {
                 case 0x21:
-                    int rate = (int) msg.obj;
+                    Bundle data = msg.getData();
+                    int rate = data.getInt("tempRate");
+                    String address = data.getString("address");
+                    tv_gps.setText(address);
+                    String describle = data.getString("describle");
+                    double lat=data.getDouble("lat");
+                    double lon=data.getDouble("lon");
                     //如果心率不正常，报警信息上传,手机振动
-                    if (rate < 60) {
+                    if (rate < 60 && rate != 0) {
                         Vibrator vibrator = ((BaseApplication) getActivity().getApplication()).mVibrator;
                         vibrator.vibrate(2000);//如果心率异常振动两秒
                     }
                     mPpView.setFountText(rate + "");
                     mPpView.invalidate();
+                    //发送广播
+                    Intent intent = new Intent();
+                    intent.putExtra("tempRate", rate);
+                    intent.putExtra("lat", lat);
+                    intent.putExtra("lon",lon);
+                    intent.putExtra("describle",describle);
+                    intent.setAction(LocaltionFragment.RATE_CHANGED);
+                    getActivity().sendBroadcast(intent);
                     break;
                 case REQUEST_CODE_RATE:
                     break;

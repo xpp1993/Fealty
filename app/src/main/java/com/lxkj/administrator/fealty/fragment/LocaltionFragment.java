@@ -1,9 +1,17 @@
 package com.lxkj.administrator.fealty.fragment;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.baidu.mapapi.map.BaiduMap;
@@ -19,6 +27,7 @@ import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
+import com.lxkj.administrator.fealty.manager.SessionHolder;
 
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
@@ -33,6 +42,12 @@ public class LocaltionFragment extends BaseFragment {
     private MapView mapView;
     private double lat, lon;
     private String describle;
+    public static final String RATE_CHANGED = "com.lxkj.administrator.fealty.fragment.LocaltionFragment";
+    private Handler handler;
+    @ViewInject(R.id.xinlvshou)
+    private TextView showxinlv;
+    @ViewInject(R.id.iv_left)
+    private ImageView iv_left;
 
     // private
     @Override
@@ -42,35 +57,84 @@ public class LocaltionFragment extends BaseFragment {
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);//设置普通地图
         //开启交通图
         mBaiduMap.setTrafficEnabled(true);
+        handler = new Handler();
+        LatLng latLng=new LatLng(SessionHolder.lat,SessionHolder.lon);
+        Log.e("baidumapData", lat + "::" + lon + describle);
+        setMarker(latLng);//设置标注
+        if (SessionHolder.describleAddress!=null)
+        showTextView(SessionHolder.describleAddress,latLng);
+        setMapStatus(latLng);//设置中心坐标
+        registerRateChangedReceiver();
     }
-
     @Override
     protected void initListener() {
-
+        iv_left.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
     }
 
     @Override
     protected void initData() {
 
     }
-    @Override
-    public void onGetBunndle(Bundle arguments) {
-        super.onGetBunndle(arguments);
-        lat = arguments.getDouble("lat");
-        lon = arguments.getDouble("lon");
-        describle = arguments.getString("describle");
-        LatLng point = new LatLng(lat, lon);
-        Log.e("baidumapData", lat + "::" + lon + describle);
-        setMarker(point);//设置标注
-        showTextView(describle, point);//弹出窗体覆盖物
-        setMapStatus(point);//设置中心坐标
+    int tempRate = 80;
+    private RateReceiver mReceiver;
+
+    private void registerRateChangedReceiver() {
+        IntentFilter filter = new IntentFilter();
+        try {
+            if (mReceiver != null) {
+                getActivity().unregisterReceiver(mReceiver);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mReceiver = new RateReceiver();
+        filter.addAction(LocaltionFragment.RATE_CHANGED);
+        getActivity().registerReceiver(mReceiver, filter);
     }
+
+    //接收心率
+    private class RateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(LocaltionFragment.RATE_CHANGED)) {
+                tempRate = intent.getIntExtra("tempRate", -1);
+                lat = intent.getDoubleExtra("lat", 0.0);
+                lon = intent.getDoubleExtra("lon", 0.0);
+                SessionHolder.lat=lat;
+                SessionHolder.lon=lon;
+                describle = intent.getStringExtra("describle");
+                SessionHolder.describleAddress=describle;
+            }
+            handler.post(runnable);
+        }
+    }
+
+
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            showxinlv.setText(tempRate + "");
+            if (lat != 0) {
+                LatLng point = new LatLng(lat, lon);
+                Log.e("baidumapData", lat + "::" + lon + describle);
+                setMarker(point);//设置标注
+                showTextView(describle, point);//弹出窗体覆盖物
+                setMapStatus(point);//设置中心坐标
+            }
+        }
+    };
+
     private void setMarker(LatLng point) {
 //        //定义Maker坐标点
 //        LatLng point = new LatLng(lat, lon);
         //构建Marker图标
         BitmapDescriptor bitmap = BitmapDescriptorFactory
-                .fromResource(R.mipmap.dingwei);
+                .fromResource(R.mipmap.dingwei1gps);
         //构建MarkerOption，用于在地图上添加Marker
         OverlayOptions option = new MarkerOptions()
                 .position(point)
@@ -82,9 +146,14 @@ public class LocaltionFragment extends BaseFragment {
     //弹出窗覆盖物
     private void showTextView(String str, LatLng point) {
         TextView textView = new TextView(getActivity().getApplicationContext());
+        textView.setTextColor(getResources().getColor(R.color.gray));
+        textView.setBackgroundColor(getResources().getColor(R.color.cpb_white));
         textView.setText(str);
+        Drawable drawable = getResources().getDrawable(R.mipmap.dingwei);
+        drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
+        textView.setCompoundDrawables(drawable, null, null, null);
         //定义用于显示该InfoWindow的坐标点
-       // LatLng pt = new LatLng(lat, lon);
+        // LatLng pt = new LatLng(lat, lon);
         //创建InfoWindow , 传入 view， 地理坐标， y 轴偏移量
         InfoWindow mInfoWindow = new InfoWindow(textView, point, -47);
         //显示InfoWindow
@@ -93,7 +162,7 @@ public class LocaltionFragment extends BaseFragment {
 
     //设置新的中心点
     private void setMapStatus(LatLng point) {
-      //  LatLng center = new LatLng(lat, lon);
+        //  LatLng center = new LatLng(lat, lon);
         //定义地图状态
         MapStatus status = new MapStatus.Builder().target(point).zoom(18).build();
         //定义MapStatusUpdate对象，以便描述地图状态将要发生的变化
@@ -109,6 +178,8 @@ public class LocaltionFragment extends BaseFragment {
         super.onDestroy();
         //在activity执行onDestroy时执行mMapView.onDestroy()，实现地图生命周期管理
         mapView.onDestroy();
+        handler.removeCallbacks(runnable);
+        getActivity().unregisterReceiver(mReceiver);
     }
 
     /**
@@ -132,59 +203,5 @@ public class LocaltionFragment extends BaseFragment {
         mapView.onPause();
         super.onPause();
     }
-//    //构造纹理资源
-//    BitmapDescriptor custom1 = BitmapDescriptorFactory
-//            .fromResource(R.drawable.icon_road_red_arrow);
-//    BitmapDescriptor custom2 = BitmapDescriptorFactory
-//            .fromResource(R.drawable.icon_road_green_arrow);
-//    BitmapDescriptor custom3 = BitmapDescriptorFactory
-//            .fromResource(R.drawable.icon_road_blue_arrow);
-//    // 定义点
-//    LatLng pt1 = newLatLng(39.93923, 116.357428);
-//    LatLng pt2 = newLatLng(39.91923, 116.327428);
-//    LatLng pt3 = newLatLng(39.89923, 116.347428);
-//    LatLng pt4 = newLatLng(39.89923, 116.367428);
-//    LatLng pt5 = newLatLng(39.91923, 116.387428);
-//
-//    //构造纹理队列
-//    List<BitmapDescriptor>customList = newArrayList<BitmapDescriptor>();
-//    customList.add(custom1);
-//    customList.add(custom2);
-//    customList.add(custom3);
-//
-//    List<LatLng> points = newArrayList<LatLng>();
-//    List<Integer> index = newArrayList<Integer>();
-//    points.add(pt1);//点元素
-//    index.add(0);//设置该点的纹理索引
-//    points.add(pt2);//点元素
-//    index.add(0);//设置该点的纹理索引
-//    points.add(pt3);//点元素
-//    index.add(1);//设置该点的纹理索引
-//    points.add(pt4);//点元素
-//    index.add(2);//设置该点的纹理索引
-//    points.add(pt5);//点元素
-////构造对象
-//    OverlayOptionsooPolyline = newPolylineOptions().width(15).color(0xAAFF0000).points(points).customTextureList(customList).textureIndex(index);
-////添加到地图
-//    mBaiduMap.addOverlay(ooPolyline);
-//    效果图如下:
-// 构造折线点坐标
-//List<LatLng> points = new ArrayList<LatLng>();
-//    points.add(new LatLng(39.965,116.404));
-//    points.add(new LatLng(39.925,116.454));
-//    points.add(new LatLng(39.955,116.494));
-//    points.add(new LatLng(39.905,116.554));
-//    points.add(new LatLng(39.965,116.604));
-//
-//    //构建分段颜色索引数组
-//    List<Integer> colors = new ArrayList<>();
-//    colors.add(Integer.valueOf(Color.BLUE));
-//    colors.add(Integer.valueOf(Color.RED));
-//    colors.add(Integer.valueOf(Color.YELLOW));
-//    colors.add(Integer.valueOf(Color.GREEN));
-//
-//    OverlayOptions ooPolyline = new PolylineOptions().width(10)
-//            .colorsValues(colors).points(points);
-//    添加在地图中
-//    Polyline  mPolyline = (Polyline) mBaiduMap.addOverlay(ooPolyline);
+
 }

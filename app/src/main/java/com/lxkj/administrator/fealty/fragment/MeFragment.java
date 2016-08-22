@@ -24,15 +24,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONArray;
 import com.avast.android.dialogs.fragment.ListDialogFragment;
 import com.avast.android.dialogs.iface.IListDialogListener;
+import com.baidu.location.LocationClientOption;
 import com.leaking.slideswitch.SlideSwitch;
 import com.lxkj.administrator.fealty.R;
-import com.lxkj.administrator.fealty.adapter.LeDeviceListAdapter;
+import com.lxkj.administrator.fealty.baidugps.LocationService;
+import com.lxkj.administrator.fealty.baidugps.MyLocationListener;
 import com.lxkj.administrator.fealty.base.BaseApplication;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.bean.Contacts;
@@ -83,6 +84,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MeFragment extends BaseFragment implements View.OnClickListener, NetWorkAccessTools.RequestTaskListener, DeviceScanInterfacer, IListDialogListener, ICallback {
     @ViewInject(R.id.me_iv_left)
     private ImageView me_iv_left;
+    @ViewInject(R.id.me_iv_left2)
+    private ImageView me_shezhi;
     @ViewInject(R.id.me_headpic)
     private CircleImageView circleImageView;
     @ViewInject(R.id.me_username)
@@ -91,15 +94,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private TextView me_phone;
     @ViewInject(R.id.bluee_iv_left)
     private SlideSwitch bluee_iv_left;
-//    private TextView bluee_iv_left;
-
     @ViewInject(R.id.binded_action)
-    //  private SlideSwitch binded_action;
     private ImageView binded_action;
     public static final int REQUEST_USER_BYMIBILE = 0x01;
     private Handler myHandler = new MyHandler();
     private BLEServiceOperate mBLEServiceOperate;
-    private final int REQUEST_ENABLE_BT = 1;
     private boolean mScanning;
     private ArrayList<BluetoothDevice> mDevice;
     private String[] devicesInfo;
@@ -116,7 +115,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private SharedPreferences sp;
     private SharedPreferences.Editor editor;
     private final int CONNECTED = 1;
-    private final int CONNECTING = 2;
     private final int DISCONNECTED = 3;
     private int CURRENT_STATUS = DISCONNECTED;
     private WriteCommandToBLE mWriteCommand;
@@ -138,22 +136,42 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     String total_hour_str;
     int deep_hour, deep_minute, light_minute, light_hour;
     int RATE_STATUS;
+    @ViewInject(R.id.see_mygps_iv)
+    private ImageView see_myGPSINFO;
+    @ViewInject(R.id.bar_tv_title_center)
+    private TextView bar_biaoti;
+    @ViewInject(R.id.bar_view_left_line)
+    private ImageView bar_view_left_line;
     private static final String[] CONTACTOR_NEED = new String[]{    //联系人字段
             ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
             ContactsContract.CommonDataKinds.Phone.NUMBER,
             ContactsContract.Contacts.DISPLAY_NAME
     };
+    private double lat;
+    private double lon;
+    private String locationdescrible;
+    private String address;
+    private MyLocationListener.CallBack mCallback;
 
-    //    private LeDeviceListAdapter mLeDeviceListAdapter;
-//    private ListView listView=new ListView(AppUtils.getBaseContext());
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
+        bar_view_left_line.setVisibility(View.VISIBLE);
+        bar_biaoti.setVisibility(View.VISIBLE);
+        bar_biaoti.setText("我");
+        mCallback = new MyLocationListener.CallBack() {
+            @Override
+            public void callYou(double lat, double lon, String loctiondescrible, String address) {
+                MeFragment.this.lat = lat;
+                MeFragment.this.lon = lon;
+                MeFragment.this.locationdescrible = loctiondescrible;
+                MeFragment.this.address = address;
+            }
+        };
         //初始化个人资料显示
         initPersonalDataShow();
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_USER_BYMOBILE, params, null, MeFragment.REQUEST_USER_BYMIBILE, this);
-        // bluee_iv_left.setText("连接设备");
         sp = getActivity().getSharedPreferences(GlobalVariable.SettingSP, 0);
         editor = sp.edit();
         mySQLOperate = new UTESQLOperate(AppUtils.getBaseContext());
@@ -192,6 +210,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         me_iv_left.setOnClickListener(this);
 //        bluee_iv_left.setOnClickListener(this);
         binded_action.setOnClickListener(this);
+        see_myGPSINFO.setOnClickListener(this);
+        me_shezhi.setOnClickListener(this);
         bluee_iv_left.setSlideListener(new SlideSwitch.SlideListener() {
             @Override
             public void open() {
@@ -227,13 +247,22 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         Log.d("Tag", str);
         initPersonalDataShow();
     }
-
+    //2016-8-21 xpp add
+    @Override
+    public void onStop() {
+        super.onStop();
+        // getActivity().unregisterReceiver(mReceiver);
+        locService.unregisterListener(mListener); //注销掉监听
+        locService.stop(); //停止定位服务
+    }
     @Override
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
         mBLEServiceOperate.unBindService();// unBindService
         getActivity().unregisterReceiver(mReceiver);
+        locService.unregisterListener(mListener); //注销掉监听
+        locService.stop(); //停止定位服务
         if (runnable != null)
             myHandler.removeCallbacks(runnable);
         if (runnable1 != null)
@@ -263,6 +292,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list", "mobile"}, uploadContacts(contacts), SessionHolder.mobile);
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, MeFragment.this);
                 ToastUtils.showToastInUIThread("正在获取联系人列表....");
+                break;
+            case R.id.see_mygps_iv:
+                //跳转到百度地图
+                Bundle bundle = new Bundle();
+                bundle.putDouble("lon", lon);
+                bundle.putDouble("lat", lat);
+                bundle.putString("describle", locationdescrible);
+                EventBus.getDefault().post(new NavFragmentEvent(new Melucheng_fragment(), bundle));
+                break;
+            case R.id.me_iv_left2:
+                //跳入设置界面
+                EventBus.getDefault().post(new NavFragmentEvent(new Fragment_Shezhi()));
                 break;
             default:
                 break;
@@ -297,7 +338,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-//
+
+    //
 //    @Override
 //    public void onPause() {
 //        super.onResume();
@@ -305,13 +347,28 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 //        mDevice.clear();
 //
 //    }
+    LocationService locService;
+    LocationClientOption mOption;
+    MyLocationListener mListener;
 
     @Override
     public void onResume() {
         super.onResume();
+        //判断是否是新的一天
         JudgeNewDayWhenResume();
-    }
+        //开始定位
+        mListener = new MyLocationListener(mCallback);
+        Log.e("mefragment", lon + "," + lat);
+        locService = ((BaseApplication) AppUtils.getBaseContext()).locationService;
+        //注册监听
+        locService.registerListener(mListener);
+        mOption = new LocationClientOption();
+        mOption = locService.getDefaultLocationClientOption();
+        mOption.setOpenAutoNotifyMode(60 * 1000 * 15, 100, LocationClientOption.LOC_SENSITIVITY_HIGHT);
+        locService.setLocationOption(mOption);
 
+        locService.start();// 定位SDK
+    }
     @Override
     public void onRequestStart(int requestCode) {
 
@@ -356,7 +413,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public void onRequestFail(int requestCode, int errorNo) {
         ToastUtils.showToastInUIThread("网络连接错误，请检查重试！");
     }
-
     @Override
     public void LeScanCallback(final BluetoothDevice bluetoothDevice, final int j) {
 
@@ -396,9 +452,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 if (mScanning) {
                     mBLEServiceOperate.stopLeScan();
                     mScanning = false;
-                }//end
-//                mLeDeviceListAdapter.addDevice(bluetoothDevice);
-//                mLeDeviceListAdapter.notifyDataSetChanged();
+                }
             }
         });
     }
@@ -494,11 +548,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     ToastUtils.showToastInUIThread("数据已更新到服务器！");
                     break;
                 case NEW_DAY_MSG:
-                   // mySQLOperate.updateStepSQL();//新一天初始化步行数据库
-                  //  mySQLOperate.updateSleepSQL();//新一天初始化睡眠数据库
+                    // mySQLOperate.updateStepSQL();//新一天初始化步行数据库
+                    //  mySQLOperate.updateSleepSQL();//新一天初始化睡眠数据库
                     mySQLOperate.updateRateSQL();//新一天初始化心率数据库
                     //mySQLOperate.isDeleteRefreshTable();
-                  //  mySQLOperate.isDeleteRateTable(CalendarUtils.getCalendar(-1));
+                    //  mySQLOperate.isDeleteRateTable(CalendarUtils.getCalendar(-1));
                     resetValues();
                     break;
                 default:
@@ -513,11 +567,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         //做数据保存操作
         Log.e("wyj", "functionRateFinished");
     }
+
     /**
      * 电量和蓝牙版本接收
      */
-    Vibrator mVibrator = ((BaseApplication) getActivity().getApplication()).mVibrator;
-    NotificationManager notificationManager = ((BaseApplication) getActivity().getApplication()).notificationManager;//1.获取状态栏通知管理器
+    Vibrator mVibrator = ((BaseApplication) AppUtils.getBaseContext()).mVibrator;
+    NotificationManager notificationManager = ((BaseApplication) AppUtils.getBaseContext()).notificationManager;//1.获取状态栏通知管理器
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
         @Override
@@ -538,17 +593,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(MeFragment.this.getActivity());
                     //3.对Build进行配置
                     mBuilder.setContentTitle("测试标题")//设置通知栏标题
-                            .setContentText("测试内容") //<span style="font-family: Arial;">/设置通知栏显示内容</span>
+                            .setContentText("手环电量不足！") //<span style="font-family: Arial;">/设置通知栏显示内容</span>
                             .setContentIntent(getDefalutIntent(Notification.FLAG_AUTO_CANCEL)) //设置通知栏点击意图, 用户单击通知后自动消失
                             .setTicker("测试通知来啦") //通知首次出现在通知栏，带上升动画效果的
                             .setWhen(System.currentTimeMillis())//通知产生的时间，会在通知信息里显示，一般是系统获取到的时间
                             .setPriority(Notification.PRIORITY_DEFAULT) //设置该通知优先级//  .setAutoCancel(true)//设置这个标志当用户单击面板就可以让通知将自动取消
-                           // .setOngoing(false)//ture，设置他为一个正在进行的通知。他们通常是用来表示一个后台任务,用户积极参与(如播放音乐)或以某种方式正在等待,因此占用设备(如一个文件下载,同步操作,主动网络连接)
+                                    // .setOngoing(false)//ture，设置他为一个正在进行的通知。他们通常是用来表示一个后台任务,用户积极参与(如播放音乐)或以某种方式正在等待,因此占用设备(如一个文件下载,同步操作,主动网络连接)
                             .setDefaults(Notification.DEFAULT_VIBRATE)//向通知添加声音、闪灯和振动效果的最简单、最一致的方式是使用当前的用户默认设置，使用defaults属性，可以组合
                                     //Notification.DEFAULT_ALL  Notification.DEFAULT_SOUND 添加声音 // requires VIBRATE permission
-                            .setSmallIcon(R.mipmap.jpush_notification_icon);//设置通知小ICON
+                            .setSmallIcon(R.mipmap.baojing);//设置通知小ICON
 //                    .setVibrate(new long[] {0,300,500,700});实现效果：延迟0ms，然后振动300ms，在延迟500ms，接着在振动700ms。.setLights(0xff0000ff, 300, 0)
-                 //   （5）方法：.setSound(Uri sound)
+                    //   （5）方法：.setSound(Uri sound)
                     /**
                      * Notification.DEFAULT_VIBRATE    //添加默认震动提醒  需要 VIBRATE permission
                      Notification.DEFAULT_SOUND    // 添加默认声音提醒
@@ -564,16 +619,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 }
                 //把号码，设备名，设备地址，连接手环状态，设备电量发送给服务器，服务器判断是否低电量，像APP发送消息（）推送,app接收短信并震动
             }
-//            else if (intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
-//                //得到系统当前电量
-//                int level=intent.getIntExtra("level", 0);
-//                //取得系统总电量
-//                int total=intent.getIntExtra("scale", 100);
-////                textView.setText("当前电量："+(level*100)/total+"%");
-//                //当电量小于15%时触发
-//                if(level<15){
-////                    Toast.makeText(MainActivity.this, "当前电量已小于15%",Toast.LENGTH_LONG).show();
-//                }
             else if (Intent.ACTION_BATTERY_LOW.equals(action)) {
                 //推送通知
                 Log.e("battery", "手机电量不足，请充电！");
@@ -587,6 +632,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         PendingIntent pendingIntent = PendingIntent.getActivity(AppUtils.getBaseContext(), 1, new Intent(), flags);
         return pendingIntent;
     }
+
     //初始化
     private boolean isFirstOpenAPK = false;
     private int currentDay = 1;
@@ -594,6 +640,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private String currentDayString = "2016822";
     private String lastDayString = "2016821";
     private static final int NEW_DAY_MSG = 3;
+
     //判断是否是新的一天
     private void JudgeNewDayWhenResume() {
         isFirstOpenAPK = sp.getBoolean(GlobalVariable.FIRST_OPEN_APK, true);
@@ -618,11 +665,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
             if (currentDay != lastDay) {
                 if ((lastDay + 1) == currentDay || currentDay == 1) { // 连续的日期
-                   myHandler.sendEmptyMessage(NEW_DAY_MSG);
+                    myHandler.sendEmptyMessage(NEW_DAY_MSG);
                 } else {
-                    mySQLOperate.insertLastDayStepSQL(lastDayString);
-                    mySQLOperate.updateSleepSQL();
-                    resetValues();
+                   // mySQLOperate.insertLastDayStepSQL(lastDayString);
+                   // mySQLOperate.updateSleepSQL();
+                   // resetValues();
                 }
                 lastDay = currentDay;
                 lastDayString = currentDayString;
@@ -634,7 +681,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 Log.d("b1offline", "currentDay == lastDay");
             }
         }
-
     }
 
     private void resetValues() {
@@ -681,12 +727,14 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.sendEmptyMessage(UPDATE_STEP_UI_MSG);
         }
     };
-/**
- * 返回某天心率测试的详情
- */
-    private void queryRateInfo(){
-       //mySQLOperate.saveRate();
+
+    /**
+     * 返回某天心率测试的详情
+     */
+    private void queryRateInfo() {
+        //mySQLOperate.saveRate();
     }
+
     /**
      * 返回今天的步数、距离、卡路里的集合
      */
@@ -766,6 +814,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.postDelayed(runnable1, 1000);
         } else if (status == ICallbackStatus.OFFLINE_STEP_SYNC_OK) {//离线步数同步完成,发送同步睡眠数据指令
             myHandler.postDelayed(runnable2, 1000);
+            bundle.putDouble("lon", lon);
+            bundle.putDouble("lat", lat);
+            bundle.putString("describle", locationdescrible);
+            bundle.putString("address", address);
         } else if (status == ICallbackStatus.OFFLINE_SLEEP_SYNC_OK) {//离线睡眠同步完成，发送请求电量指令,开始测试心率指令
             myHandler.postDelayed(runnable3, 1000 * 30);//发送心率测试开始
             myHandler.postDelayed(runnable4, 1000 * 15);//请求手环电量
@@ -776,16 +828,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.sendEmptyMessage(DISCONNECT_MSG);
         } else if (status == ICallbackStatus.CONNECTED_STATUS) {
             myHandler.sendEmptyMessage(CONNECTED_MSG);
-           if (result == true) {//表示计步状态,在老人清醒时，每隔15分钟上传一次手机坐标
+            if (result == true) {//表示计步状态,在老人清醒时，每隔15分钟上传一次手机坐标
 
+            } else if (result == false) {//表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
 
             }
-           else if (result == false) {//表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
-
-        }
         }
     }
-
     /**
      * 同步蓝牙端时间指令
      */
@@ -817,6 +866,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             if (mBluetoothLeService != null) {
                 mWriteCommand.syncAllSleepData();
             }
+        }
+    };
+    /**
+     * GPS定位相关
+     */
+    private Runnable runnable6=new Runnable() {
+        @Override
+        public void run() {
+            //开始定位
+            locService.start();
         }
     };
     /**

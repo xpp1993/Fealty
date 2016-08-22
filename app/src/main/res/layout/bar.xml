@@ -25,7 +25,8 @@
         android:layout_marginTop="10dp"
         android:layout_toRightOf="@id/bar_iv_left"
         android:background="@color/Transparent"
-        android:visibility="gone" />
+        android:visibility="gone"
+        />
 
     <TextView
         android:id="@+id/bar_tv_title_left"
@@ -36,7 +37,8 @@
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/bar_view_left_line"
         android:text="标题位置1"
-        android:visibility="gone" />
+        android:visibility="gone"
+        />
 
     <TextView
         android:id="@+id/bar_tv_title_center"

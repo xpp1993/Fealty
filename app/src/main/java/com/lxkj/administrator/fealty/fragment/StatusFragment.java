@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.adapter.HeathMonitoringAdapter;
 import com.lxkj.administrator.fealty.base.BaseFragment;
@@ -20,6 +21,7 @@ import com.lxkj.administrator.fealty.widget.JazzyViewPager;
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +41,11 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     HealthDataFragement healthDataFragement;
     String identity;
     int tempRate;
-    private final int REQUEST_CODE_UPDATA_USERIFO_INTERNET=0x23;
+    private final int REQUEST_CODE_UPDATA_USERIFO_INTERNET = 0x23;
+    private double lat;
+    private double lon;
+    private String locationdescrible;
+    private String address;
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
@@ -47,21 +53,26 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         mJazzy.setPageMargin(30);
         //网络获取数据
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
-        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null,REQUEST_CODE_UPDATA_USERIFO_INTERNET,this );
+        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null, REQUEST_CODE_UPDATA_USERIFO_INTERNET, this);
     }
     @Override
     protected void initListener() {
 
     }
+
     // 用EventBus 来导航,订阅者
     public void onEventMainThread(Bundle event) {
         String identity = event.getString("IF_CONNECTED");
-      tempRate = event.getInt("tempRate");
+        tempRate = event.getInt("tempRate");
+        address=event.getString("address");
+        lat=event.getDouble("lat");
+        lon=event.getDouble("lon");
+        locationdescrible=event.getString("describle");
         Bundle bundle = new Bundle();
         if (!"".equals(identity) && identity != null) {
             if (healthDataFragement == null) {
-            healthDataFragement = new HealthDataFragement();
-              //  healthDataFragement = (HealthDataFragement) HealthDataFragement.instantiate(AppUtils.getBaseContext(), HealthDataFragement.class.getName());
+                healthDataFragement = new HealthDataFragement();
+                //  healthDataFragement = (HealthDataFragement) HealthDataFragement.instantiate(AppUtils.getBaseContext(), HealthDataFragement.class.getName());
                 SportData sportData = (SportData) event.getSerializable("sportdata");
                 SleepData sleepData = (SleepData) event.getSerializable("sleepData");
                 bundle.putString("identity", identity);
@@ -74,22 +85,28 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                 mJazzy.setAdapter(adapter);
             }
             Log.e("816", tempRate + "");
-          //  EventBus.getDefault().post(tempRate);
             Intent intent = new Intent();
-            intent.putExtra("tempRate",tempRate);
-            intent.setAction(HealthDataFragement.DATA_CHANGED);
-            getActivity().sendBroadcast(intent);
+                intent.putExtra("tempRate", tempRate);
+                intent.putExtra("address",address);
+                intent.putExtra("lat", lat);
+                intent.putExtra("lon",lon);
+                intent.putExtra("describle",locationdescrible);
+                intent.setAction(HealthDataFragement.DATA_CHANGED);
+                getActivity().sendBroadcast(intent);
         }
     }
+
     @Override
     protected void initData() {
 
     }
+
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
 
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
