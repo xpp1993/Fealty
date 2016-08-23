@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -45,6 +46,7 @@ import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
+import com.lxkj.administrator.fealty.utils.MySqliteHelper;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
 import com.yc.peddemo.sdk.BLEServiceOperate;
@@ -68,6 +70,7 @@ import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -152,6 +155,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private String locationdescrible;
     private String address;
     private MyLocationListener.CallBack mCallback;
+    private MySqliteHelper helper;
 
     @Override
     protected void init() {
@@ -161,11 +165,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         bar_biaoti.setText("我");
         mCallback = new MyLocationListener.CallBack() {
             @Override
-            public void callYou(double lat, double lon, String loctiondescrible, String address) {
+            public void callYou(double lat, double lon, String loctiondescrible, String address, MySqliteHelper helper) {
                 MeFragment.this.lat = lat;
                 MeFragment.this.lon = lon;
                 MeFragment.this.locationdescrible = loctiondescrible;
                 MeFragment.this.address = address;
+                MeFragment.this.helper = helper;
+                Log.e("xpp", loctiondescrible);
+                if (address != null) {
+                    locService.stop();
+                }
+                myHandler.postDelayed(runnable6, 1000 * 60 * 3);
             }
         };
         //初始化个人资料显示
@@ -226,7 +236,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     startActivityForResult(enableBtIntent, REQUEST_ENABLE);
                 }
                 scanLeDevice(true);
-
             }
 
             @Override
@@ -247,6 +256,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         Log.d("Tag", str);
         initPersonalDataShow();
     }
+
     //2016-8-21 xpp add
     @Override
     public void onStop() {
@@ -255,6 +265,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         locService.unregisterListener(mListener); //注销掉监听
         locService.stop(); //停止定位服务
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -275,6 +286,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.removeCallbacks(runnable4);
         if (runnable5 != null)
             myHandler.removeCallbacks(runnable5);
+        if (runnable6 != null)
+            myHandler.removeCallbacks(runnable6);
+        if (helper != null) {
+            helper.close();
+        }
         mBLEServiceOperate.disConnect();
     }
 
@@ -294,12 +310,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 ToastUtils.showToastInUIThread("正在获取联系人列表....");
                 break;
             case R.id.see_mygps_iv:
-                //跳转到百度地图
-                Bundle bundle = new Bundle();
-                bundle.putDouble("lon", lon);
-                bundle.putDouble("lat", lat);
-                bundle.putString("describle", locationdescrible);
-                EventBus.getDefault().post(new NavFragmentEvent(new Melucheng_fragment(), bundle));
+                Melucheng_fragment melucheng_fragment = new Melucheng_fragment();
+                melucheng_fragment.setHelper(helper);
+                EventBus.getDefault().post(new NavFragmentEvent(melucheng_fragment));
                 break;
             case R.id.me_iv_left2:
                 //跳入设置界面
@@ -309,6 +322,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 break;
         }
     }
+
     //开始扫描设备
 
     private void scanLeDevice(final boolean enable) {
@@ -339,21 +353,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    //
-//    @Override
-//    public void onPause() {
-//        super.onResume();
-//        scanLeDevice(false);
-//        mDevice.clear();
-//
-//    }
     LocationService locService;
     LocationClientOption mOption;
     MyLocationListener mListener;
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
         //判断是否是新的一天
         JudgeNewDayWhenResume();
         //开始定位
@@ -366,9 +372,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         mOption = locService.getDefaultLocationClientOption();
         mOption.setOpenAutoNotifyMode(60 * 1000 * 15, 100, LocationClientOption.LOC_SENSITIVITY_HIGHT);
         locService.setLocationOption(mOption);
-
         locService.start();// 定位SDK
     }
+
     @Override
     public void onRequestStart(int requestCode) {
 
@@ -413,6 +419,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public void onRequestFail(int requestCode, int errorNo) {
         ToastUtils.showToastInUIThread("网络连接错误，请检查重试！");
     }
+
     @Override
     public void LeScanCallback(final BluetoothDevice bluetoothDevice, final int j) {
 
@@ -523,7 +530,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     if (tempStatus == GlobalVariable.RATE_TEST_FINISH) {
                         bundle.putInt("tempRate", RATE_STATUS);
                         EventBus.getDefault().post(bundle);
-
 //                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "heartRate"}, SessionHolder.user.getMobile(), "", tempRate + "");
 //                        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_SLEEP_SPORT, params, null, REQUEST_CODE_SPORTDATA_SLEEPDATA, MeFragment.this);
                     }
@@ -553,7 +559,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     mySQLOperate.updateRateSQL();//新一天初始化心率数据库
                     //mySQLOperate.isDeleteRefreshTable();
                     //  mySQLOperate.isDeleteRateTable(CalendarUtils.getCalendar(-1));
-                    resetValues();
+                    // resetValues();
                     break;
                 default:
                     break;
@@ -618,8 +624,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                      */
                 }
                 //把号码，设备名，设备地址，连接手环状态，设备电量发送给服务器，服务器判断是否低电量，像APP发送消息（）推送,app接收短信并震动
-            }
-            else if (Intent.ACTION_BATTERY_LOW.equals(action)) {
+            } else if (Intent.ACTION_BATTERY_LOW.equals(action)) {
                 //推送通知
                 Log.e("battery", "手机电量不足，请充电！");
                 mVibrator.vibrate(2000);
@@ -667,9 +672,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 if ((lastDay + 1) == currentDay || currentDay == 1) { // 连续的日期
                     myHandler.sendEmptyMessage(NEW_DAY_MSG);
                 } else {
-                   // mySQLOperate.insertLastDayStepSQL(lastDayString);
-                   // mySQLOperate.updateSleepSQL();
-                   // resetValues();
+                    // mySQLOperate.insertLastDayStepSQL(lastDayString);
+                    // mySQLOperate.updateSleepSQL();
+                    // resetValues();
                 }
                 lastDay = currentDay;
                 lastDayString = currentDayString;
@@ -835,6 +840,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             }
         }
     }
+
     /**
      * 同步蓝牙端时间指令
      */
@@ -866,16 +872,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             if (mBluetoothLeService != null) {
                 mWriteCommand.syncAllSleepData();
             }
-        }
-    };
-    /**
-     * GPS定位相关
-     */
-    private Runnable runnable6=new Runnable() {
-        @Override
-        public void run() {
-            //开始定位
-            locService.start();
         }
     };
     /**
@@ -914,6 +910,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         public void run() {
             Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "total_hour_str", "light_hour", "light_minute", "deep_hour", "deep_minute", "calories", "distance", "step"}, SessionHolder.user.getMobile(), total_hour_str, light_hour + "", light_minute + "", deep_hour + "", deep_minute + "", calories + "", distance + "", step + "");
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_SLEEP_SPORT, params, null, REQUEST_CODE_SPORTDATA_SLEEPDATA, MeFragment.this);
+        }
+    };
+    /**
+     * GPS定位相关
+     */
+    private Runnable runnable6 = new Runnable() {
+        @Override
+        public void run() {
+            //开始定位
+            locService.start();
+            myHandler.postDelayed(this, 1000 * 60 * 3);
         }
     };
 

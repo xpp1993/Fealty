@@ -286,9 +286,14 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_TIME_TICK)) {
-                Calendar calendar = Calendar.getInstance();
-                minute = calendar.get(Calendar.MINUTE);
-                hour = calendar.get(Calendar.HOUR_OF_DAY);
+//                Calendar calendar = Calendar.getInstance();
+//                minute = calendar.get(Calendar.MINUTE);
+//                hour = calendar.get(Calendar.HOUR_OF_DAY);
+                //获取系统当前时间
+                java.sql.Timestamp time = new java.sql.Timestamp(new java.util.Date().getTime());
+                hour = time.getHours();//时
+                minute = time.getMinutes();//分
+                System.out.println(time.getSeconds());//秒
                 //把心率和时间发给服务器
                 handler.postDelayed(runnable, 1000);
             }
@@ -317,8 +322,8 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
                     String address = data.getString("address");
                     tv_gps.setText(address);
                     String describle = data.getString("describle");
-                    double lat=data.getDouble("lat");
-                    double lon=data.getDouble("lon");
+                    double lat = data.getDouble("lat");
+                    double lon = data.getDouble("lon");
                     //如果心率不正常，报警信息上传,手机振动
                     if (rate < 60 && rate != 0) {
                         Vibrator vibrator = ((BaseApplication) getActivity().getApplication()).mVibrator;
@@ -330,8 +335,8 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
                     Intent intent = new Intent();
                     intent.putExtra("tempRate", rate);
                     intent.putExtra("lat", lat);
-                    intent.putExtra("lon",lon);
-                    intent.putExtra("describle",describle);
+                    intent.putExtra("lon", lon);
+                    intent.putExtra("describle", describle);
                     intent.setAction(LocaltionFragment.RATE_CHANGED);
                     getActivity().sendBroadcast(intent);
                     break;

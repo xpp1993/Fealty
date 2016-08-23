@@ -33,7 +33,6 @@ public abstract class BaseFragment extends Fragment {
         onGetBunndle(getArguments());
         return view;
     }
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
