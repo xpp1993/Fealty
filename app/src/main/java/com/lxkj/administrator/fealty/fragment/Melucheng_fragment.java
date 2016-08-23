@@ -63,7 +63,7 @@ public class Melucheng_fragment extends BaseFragment {
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);//设置普通地图
         //开启交通图
         mBaiduMap.setTrafficEnabled(true);
-        str = new String[]{String.valueOf(System.currentTimeMillis() / (1000 * 60) - 30)};
+        str = new String[]{String.valueOf(System.currentTimeMillis() - 1000*60*30)};
         helper = getHelper();
     }
 
@@ -94,7 +94,6 @@ public class Melucheng_fragment extends BaseFragment {
     @Override
     protected void initData() {
         db = helper.getReadableDatabase();
-        str = new String[]{String.valueOf(System.currentTimeMillis() / (1000 * 60) - 30)};
         /**
          * 从数据库中获取半个小时内的GPS信息
          *条件为:time+x>当前时间（假设x为30分钟）

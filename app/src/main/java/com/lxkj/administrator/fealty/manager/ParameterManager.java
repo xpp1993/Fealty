@@ -31,4 +31,5 @@ public class ParameterManager {
     public static final String INSERT_RATE="http://192.168.8.133:8080/cuffapi/heart/insert_user_heart";
     public static final String SELECT_USER_CURRENT_HEART= "http://192.168.8.133:8080/cuffapi/current_heart/select_user_current_heart";
     public static final String GPS_UPLOAD_URL="http://192.168.8.133:8080/cuffapi/gps/operation_user_gps";
+    public static final String  GET_GPS_FROM_URL="http://192.168.8.133:8080/cuffapi/gps/select_user_gps";
 }

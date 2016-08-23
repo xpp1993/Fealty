@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public final class DecodeManager {
     /**
@@ -28,52 +29,22 @@ public final class DecodeManager {
         Message msg = new Message();
         Bundle data = new Bundle();
         msg.what = messageWhat;
-        //  insertRecInformation(data, jsonObject);
+        insertRecInformation(data, jsonObject);
 
         if (isRequestOK(jsonObject)) {//请求服务器成功
-            int code = jsonObject.optInt("code");
-            String desc = jsonObject.optString("message");
-            String check_code = jsonObject.optString("check_code");
+//            int code = jsonObject.optInt("code");
+//            String desc = jsonObject.optString("message");
+//            String check_code = jsonObject.optString("check_code");
             String seesion = jsonObject.optString("data");
             String id = seesion.substring(0, seesion.indexOf("@"));
-            data.putString("check_code", check_code);
-            data.putInt("code", code);
-            data.putString("desc", desc);
+//            data.putString("check_code", check_code);
+//            data.putInt("code", code);
+//            data.putString("desc", desc);
             data.putString("id", id);
         }
         msg.setData(data);
         handler.sendMessage(msg);
     }
-//    public static void decodeCheckSession(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
-//        Log.v("decodeCheckSession", jsonObject.toString());
-//        Message msg = new Message();
-//        Bundle data = new Bundle();
-//        msg.what = messageWhat;
-//        insertRecInformation(data, jsonObject);
-//
-//        if (isRequestOK(jsonObject)) {//请求服务器成功
-//            JSONObject sessionUpdate = jsonObject.optJSONObject("session_update");
-//            if (sessionUpdate != null) {
-//                data.putString("session_id", sessionUpdate.optString("session_id"));
-//                data.putString("sess_key", sessionUpdate.optString("sess_key"));
-//                data.putString("login_time", sessionUpdate.optString("login_time"));
-//            }
-//
-//            JSONObject contact = jsonObject.optJSONObject("contact");
-//            if (contact != null) {
-//                data.putString("checksum", contact.optString("checksum"));
-//                data.putString("checksum_extra", contact.optString("checksum_extra"));
-//            }
-//
-//            JSONObject config_update = jsonObject.optJSONObject("config_update");
-//            if (config_update != null) {
-//                data.putInt("splash_time", config_update.optInt("splash_time"));
-//                data.putInt("bg_update_time", config_update.optInt("bg_update_time"));
-//            }
-//        }
-//        msg.setData(data);
-//        handler.sendMessage(msg);
-//    }
 
     /**
      * 解码 注册确认
@@ -112,7 +83,6 @@ public final class DecodeManager {
         Bundle data = new Bundle();
         msg.what = messageWhat;
         insertRecInformation(data, jsonObject);
-
         if (isRequestOK(jsonObject)) {
             int identity = jsonObject.optInt("identity", 0);
             int binded = jsonObject.optInt("binded", 0);
@@ -131,28 +101,65 @@ public final class DecodeManager {
         handler.sendMessage(msg);
     }
 
-//    /**
-//     * 解析 发布信息
-//     *
-//     * @param jsonObject
-//     * @param handler
-//     * @throws JSONException
-//     */
-//    public static void decodeIssueMessage(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
-//        Log.v("decodeIssueMessage", jsonObject.toString());
-//        Message msg = new Message();
-//        Bundle data = new Bundle();
-//        msg.what = messageWhat;
-//        insertRecInformation(data, jsonObject);
-//
-//        if (isRequestOK(jsonObject)) {
-//            int post_id = jsonObject.getInt("post_id");
-//
-//            data.putInt("post_id", post_id);
-//        }
-//        msg.setData(data);
-//        handler.sendMessage(msg);
-//    }
+    /**
+     * 解析 GPS信息
+     *
+     * @param jsonObject
+     * @param handler
+     * @throws JSONException
+     */
+    public static void decodeGPSMessage(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
+        Log.v("decodeIssueMessage", jsonObject.toString());
+        Message msg = new Message();
+        Bundle data = new Bundle();
+        msg.what = messageWhat;
+        insertRecInformation(data, jsonObject);
+/**
+ * {
+ "success": true,
+ "code": 1,
+ "desc": "查询心率成功",
+ "json": {
+ "pageSize": 20,
+ "totalCount": 0,
+ "pageNo": 1,
+ "start": 0,
+ "limit": 20,
+ "gpsMsg_list": [
+ {
+ "pageSize": 20,
+ "totalCount": 0,
+ "pageNo": 1,
+ "start": 0,
+ "limit": 20,
+ "lat": "1",
+ "lon": "1",
+ "locationdescrible": "江西",
+ "address": "南昌",
+ "parentPhone": "18907084338"
+ }
+ ]
+ }
+ }
+ */
+        if (isRequestOK(jsonObject)) {
+            HashMap<String,String[]> result = new HashMap<>();
+            JSONArray jsonArray = jsonObject.getJSONObject("json").getJSONArray("gpsMsg_list");
+            for (int i = 0; i < jsonArray.length(); i++) {
+//                Object object = jsonArray.get(i);
+                JSONObject object = jsonArray.getJSONObject(i);
+                String lat = object.optString("lat");
+                String lon = object.optString("lon");
+                String locationdescrible = object.optString("locationdescrible");
+                String address = object.optString("address");
+                String parentPhone = object.optString("parentPhone");
+                result.put(parentPhone,new String[]{lat,lon,locationdescrible,address});
+            }
+            data.putSerializable("result",result);
+        }
+        msg.setData(data);
+        handler.sendMessage(msg);
+    }
 
     /**
      * 解析 通用jsonObject
@@ -167,34 +174,8 @@ public final class DecodeManager {
         Message msg = new Message();
         Bundle data = new Bundle();
         msg.what = messageWhat;
-         insertRecInformation(data, jsonObject);
-//        int code = jsonObject.optInt("code");
-//        String desc = jsonObject.optString("desc");
-//        data.putInt("code", code);
-//        data.putString("desc", desc);
-//        msg.setData(data);
-//        handler.sendMessage(msg);
+        insertRecInformation(data, jsonObject);
     }
-
-    /**
-     * 解析 通用jsonObject ,附带post_id
-     *
-     * @param jsonObject
-     * @param messageWhat
-     * @param handler
-     * @throws JSONException
-     */
-//    public static void decodeCommonWithPostId(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
-//        Log.v("decodeCommonWithPostId", jsonObject.toString());
-//        Message msg = new Message();
-//        Bundle data = new Bundle();
-//        msg.what = messageWhat;
-//        insertRecInformation(data, jsonObject);
-//        HashMap<String, String> params = (HashMap<String, String>) jsonObject.get("params");
-//        data.putInt("post_id", Integer.valueOf(params.get("post_id")));
-//        msg.setData(data);
-//        handler.sendMessage(msg);
-//    }
 
     /**
      * 解析 个人资料查询
@@ -214,7 +195,7 @@ public final class DecodeManager {
             JSONObject jsonObject1 = jsonObject.getJSONObject("json").getJSONObject("user");
             String mobile = jsonObject1.getString("mobile");
             String nickName = jsonObject1.getString("nickName");
-            String headFile = jsonObject1.optString("headFile","");
+            String headFile = jsonObject1.optString("headFile", "");
             String sex = String.valueOf(jsonObject1.optInt("sex", 0) == 0 ? "" : jsonObject1.getInt("sex"));
             String birthday = jsonObject1.optString("birthday", "");
             data.putString("mobile", mobile);
@@ -317,7 +298,7 @@ public final class DecodeManager {
                     JSONObject friendJsonObject = old_people_list.getJSONObject(i);
                     String nickname = friendJsonObject.getString("nickName");
                     String mobile = friendJsonObject.optString("mobile");
-                    Log.e("moblie",mobile);
+                    Log.e("moblie", mobile);
                     String userpic = friendJsonObject.optString("headFile");
                     UserInfo user = new UserInfo();
                     user.setNickName(nickname);
@@ -331,6 +312,7 @@ public final class DecodeManager {
         msg.setData(data);
         handler.sendMessage(msg);
     }
+
     public static void decodeComment(JSONObject jsonObject, int messageWhat,
                                      Handler handler) throws JSONException {
         Log.v("decodeComment", jsonObject.toString());
@@ -706,15 +688,9 @@ public final class DecodeManager {
     private static void insertRecInformation(Bundle bundle, JSONObject jsonObject) throws JSONException {
         int code = jsonObject.getInt("code");
         String desc = jsonObject.getString("desc");
-        //  String retinfo_dev = jsonObject.optString("retinfo_dev");
         bundle.putInt("code", code);
         bundle.putString("desc", desc);
-        // bundle.putString("retinfo_dev", retinfo_dev);
         bundle.putSerializable("params", (HashMap<String, String>) (jsonObject.opt("params")));
-        //维护服务器时间段
-        //    Long timestamp = jsonObject.optLong("timestamp", 0);
-//        if (timestamp != 0) {
-//            SessionHolder.serviceTime = timestamp * 1000;
-//        }
+
     }
 }

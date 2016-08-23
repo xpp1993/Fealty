@@ -4,10 +4,12 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.lxkj.administrator.fealty.fragment.HealthDataFragement;
+import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.widget.JazzyViewPager;
 
@@ -56,4 +58,16 @@ public class HeathMonitoringAdapter extends FragmentPagerAdapter {
 
     }
 
+
+    public void addFragment(HealthDataFragement fragment){
+        for(HealthDataFragement healthDataFragement:fragments){
+            if(healthDataFragement.getArguments().getString("parentPhone").equals(fragment.getArguments().getString("parentPhone")))
+                return ;
+        }
+        if(TextUtils.equals(fragment.getArguments().getString("parentPhone"), SessionHolder.user.getMobile())){
+            fragments.add(0,fragment);
+        }else{
+            fragments.add(fragment);
+        }
+    }
 }
