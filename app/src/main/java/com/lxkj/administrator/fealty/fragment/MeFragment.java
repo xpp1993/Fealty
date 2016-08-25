@@ -184,7 +184,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     bundle.putString("address", address);
                     EventBus.getDefault().post(bundle);//把定位数据数据返回到首页，且上传到服务器
                 }
-                myHandler.postDelayed(runnable6, 1000 * 60 * 3);
+
             }
         };
         //初始化个人资料显示
@@ -385,9 +385,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         locService.registerListener(mListener);
         mOption = new LocationClientOption();
         mOption = locService.getDefaultLocationClientOption();
-        mOption.setOpenAutoNotifyMode(60 * 1000 * 15, 100, LocationClientOption.LOC_SENSITIVITY_HIGHT);
+        mOption.setOpenAutoNotifyMode(60 * 1000 *30, 100, LocationClientOption.LOC_SENSITIVITY_HIGHT);
         locService.setLocationOption(mOption);
         locService.start();// 定位SDK
+       // myHandler.postDelayed(runnable6, 1000 * 60 * 5);
     }
 
     @Override
@@ -923,7 +924,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         public void run() {
             //开始定位
             locService.start();
-            myHandler.postDelayed(this, 1000 * 60 * 3);
+            myHandler.postDelayed(this, 1000 * 60 * 5);
         }
     };
 

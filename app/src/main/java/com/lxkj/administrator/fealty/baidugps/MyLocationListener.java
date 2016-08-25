@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -32,8 +33,8 @@ public class MyLocationListener implements BDLocationListener, NetWorkAccessTool
     private String locationdescrible;
     private String address;
     private CallBack mCallBack;
-    private MySqliteHelper helper;
-    private SQLiteDatabase db;
+    private MySqliteHelper helper=new MySqliteHelper(AppUtils.getBaseContext());
+    private SQLiteDatabase db=helper.getReadableDatabase();
     public static final int GPS_UPLOAD_CODE = 0x21;
 
     public MyLocationListener(CallBack mCallBack) {
@@ -121,14 +122,13 @@ public class MyLocationListener implements BDLocationListener, NetWorkAccessTool
          *删除数据
          * 删除数据库中条件为time<当前时间-x（假如x=30分钟) 的数据
          */
-        helper = new MySqliteHelper(AppUtils.getBaseContext());
-        db = helper.getReadableDatabase();
-        currentTime = System.currentTimeMillis();
+        //currentTime = System.currentTimeMillis();
+        currentTime= SystemClock.uptimeMillis();
         ContentValues values = toContentValues(currentTime, String.valueOf(lat), String.valueOf(lon));
         long _id = db.insert("gps", null, values);
-        Log.e("_id", _id + "");
+        Log.e("_id", _id + "  "+currentTime);
         String[] str = new String[]{String.valueOf(currentTime - 1000 * 60*30)};
-        long _id1 = db.delete("gps", "time < ?", str);
+        long _id1 = db.delete("gps", "time < "+(currentTime - 1000 * 60*30), null);
         Log.e("_id", _id1 + "");
     }
     // 将数据封装为ContentValues

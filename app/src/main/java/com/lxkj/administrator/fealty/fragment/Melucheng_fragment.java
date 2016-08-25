@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -68,13 +69,14 @@ public class Melucheng_fragment extends BaseFragment {
         colors = new ArrayList<>();
     }
 
+    long curentTime;
+
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
         double lat = arguments.getDouble("lat");
         double lon = arguments.getDouble("lon");
-        long curentTime = arguments.getLong("currentTime");
-        str = new String[]{String.valueOf(curentTime - 1000 * 60 * 30)};
+        curentTime = arguments.getLong("currentTime");
         LatLng poin = new LatLng(lat, lon);
         setMapStatus(poin);
         Runnable_query runnable_query = new Runnable_query();
@@ -85,6 +87,7 @@ public class Melucheng_fragment extends BaseFragment {
         //1.查询语句,耗时操作
         new Thread(runnable_query).start();
     }
+    //在地图上添加Marker，并显示
 
     private void setMarker(LatLng point) {
         //构建Marker图标
@@ -94,7 +97,6 @@ public class Melucheng_fragment extends BaseFragment {
         OverlayOptions option = new MarkerOptions()
                 .position(point)
                 .icon(bitmap);
-        //在地图上添加Marker，并显示
         mBaiduMap.addOverlay(option);
     }
 
@@ -129,7 +131,7 @@ public class Melucheng_fragment extends BaseFragment {
 
         @Override
         public void run() {
-            cursor = db.query("gps", new String[]{"_id,time,lat,lon"}, "time > ?", str, null, null, null, null);
+            cursor = db.query("gps", new String[]{"_id,time,lat,lon"}, "time > " + (Melucheng_fragment.this.curentTime - 1000 * 60*30), null, null, null, null, null);
             //不断移动光标，遍历结果集
             while (cursor.moveToNext()) {
                 //获取，第三列和第四列的值 ，lat  and lon
@@ -146,11 +148,10 @@ public class Melucheng_fragment extends BaseFragment {
             }
             for (int i = 1; i < points.size(); i++) {
                 //构建分段颜色索引数组
-                colors.add(Integer.valueOf(Color.GREEN));
+                colors.add(Integer.valueOf(getResources().getColor(R.color.MainTheme)));
             }
             OverlayOptions ooPolyline = new PolylineOptions().width(10).colorsValues(colors).points(points);//在走过的路上划线
             //显示在地图上
-            //  Polyline mPolyline = (Polyline) mBaiduMap.addOverlay(ooPolyline);
             mBaiduMap.addOverlay(ooPolyline);
         }
     }
