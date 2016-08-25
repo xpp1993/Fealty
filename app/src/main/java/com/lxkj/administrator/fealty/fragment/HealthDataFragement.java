@@ -129,15 +129,16 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                 bundle.putString("locationdescrible", describle);
                 bundle.putDouble("lat", lat);
                 bundle.putDouble("lon", lon);
-                EventBus.getDefault().post(new NavFragmentEvent(new LocaltionFragment(),bundle));
+                EventBus.getDefault().post(new NavFragmentEvent(new LocaltionFragment(), bundle));
                 break;
             default:
                 break;
         }
     }
+
     double lat = 0.0;
     double lon = 0.0;
-    String describle=null;
+    String describle = null;
 
     private class MyHandler extends Handler {
         @Override
@@ -154,10 +155,27 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     String lonStr = GPSData.getString("lon");
                     lon = Double.parseDouble(lonStr);
                     describle = GPSData.getString("locationdescrible");
+                    Log.e("setGPS", describle);
                     break;
                 case REQURST_HANDLER_SlEEPDATA://处理睡眠数据
+                    Bundle sleepData=msg.getData();
+                    String light_hour=sleepData.getString("light_hour");
+                    String light_minute=sleepData.getString("light_minute");
+                    String deep_hour=sleepData.getString("deep_hour");
+                    String deep_minute=sleepData.getString("deep_minute");
+                    String total_hour_str=sleepData.getString("total_hour_str");
+                    shuimiantotal.setText("睡眠  " + total_hour_str + "小时");
+                    shuimiandetail2.setText("浅度睡眠" + light_hour + "小时" + light_minute + "分钟");
+                    shuimiandetail.setText("深度度睡眠" + deep_hour + "小时" + deep_minute + "分钟");
                     break;
                 case REQURST_HANDLER_SPORTDATA://处理运动数据
+                    Bundle stepData = msg.getData();
+                    String calories = stepData.getString("calories");
+                    String steps = stepData.getString("step");
+                    String distance = stepData.getString("distance");
+                    yundongtotal.setText("运动  " + distance + "公里");
+                    yundongdetail.setText("消耗" + calories + "卡路里");
+                    yundongdetail2.setText("步行" + steps + "步");
                     break;
                 case REQURST_HANDLER_IDENTITY://处理身份标识
                     String indentity = (String) msg.obj;
@@ -204,7 +222,6 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         sleepData.putString("light_hour", light_hour);
         sleepData.putString("light_minute", light_minute);
         sleepData.putString("deep_hour", deep_hour);
-        sleepData.putString("deep_minute", deep_minute);
         sleepData.putString("deep_minute", deep_minute);
         sleepData.getString("total_hour_str", total_hour_str);
         if (TextUtils.isEmpty(total_hour_str)) {

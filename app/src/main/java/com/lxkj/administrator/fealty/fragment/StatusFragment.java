@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -80,7 +81,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         healthDataFragement.setArguments(bundle);
         adapter.addFragment(healthDataFragement);
         adapter.notifyDataSetChanged();
-      //  healthDataFragement.setIdentity("我的");
+        //  healthDataFragement.setIdentity("我的");
     }
 
     @Override
@@ -95,9 +96,44 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         double lat = event.getDouble("lat");
         String describle = event.getString("describle");
         String address = event.getString("address");
-        for(HealthDataFragement healthDataFragement:fragments){
-            if (healthDataFragement.getArguments().getString("parentPhone").equals(phoneNumber)){
-                healthDataFragement.setGPSData(String.valueOf(lat),String.valueOf(lon),describle,address);
+        for (HealthDataFragement healthDataFragement : fragments) {
+            if (healthDataFragement.getArguments().getString("parentPhone").equals(phoneNumber)) {
+                healthDataFragement.setGPSData(String.valueOf(lat), String.valueOf(lon), describle, address);
+            }
+        }
+    }
+/**
+ *  写一个广播，接收心率数据
+ */
+
+    /**
+     * 写一个event方法接收运动数据
+     */
+    public void onEventMainThread(SportData sportData) {
+        String phoneNumber = sportData.getParentphone();
+        String distance = new DecimalFormat("0.00").format(sportData.getDistance()); // 保留2位小数，带前导零
+        String steps = String.valueOf(sportData.getSteps());
+        String calories = String.valueOf(sportData.getCalories());
+        Log.e("eventsport", phoneNumber + "\n" + distance + "\n" + calories + "\n" + steps);
+        for (HealthDataFragement healthDataFragement : fragments) {
+            if (healthDataFragement.getArguments().getString("parentPhone").equals(phoneNumber)) {
+                healthDataFragement.setSportData(calories, steps, distance);
+            }
+        }
+    }
+    /**
+     * 写一个event方法接收睡眠数据
+     */
+    public void onEventMainThread(SleepData sleepData) {
+        String total_time = sleepData.getTotal_hour_str();
+        String deep_hour = String.valueOf(sleepData.getDeep_hour());
+        String deep_minute = String.valueOf(sleepData.getDeep_minute());
+        String light_hour = String.valueOf(sleepData.getLight_hour());
+        String light_minute = String.valueOf(sleepData.getLight_minute());
+        String phoneNumber = sleepData.getParentPhone();//电话号码给睡眠数据做标识
+        for (HealthDataFragement healthDataFragement : fragments) {
+            if (healthDataFragement.getArguments().getString("parentPhone").equals(phoneNumber)) {
+                healthDataFragement.setSleepData(light_hour, light_minute, deep_hour, deep_minute, total_time);
             }
         }
     }

@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public class SleepData implements Serializable {
    private int deep_hour,deep_minute , light_hour , light_minute , active_count ;
-    private String total_hour_str;
+    private String total_hour_str,parentPhone;
 
     public SleepData(int deep_hour, int deep_minute, int light_hour, int light_minute, int active_count, String total_hour_str) {
         this.deep_hour = deep_hour;
@@ -16,6 +16,25 @@ public class SleepData implements Serializable {
         this.light_minute = light_minute;
         this.active_count = active_count;
         this.total_hour_str = total_hour_str;
+    }
+
+    public String getParentPhone() {
+        return parentPhone;
+    }
+
+    public void setParentPhone(String parentPhone) {
+        this.parentPhone = parentPhone;
+    }
+
+    public SleepData(int deep_hour, int deep_minute, int light_hour, int light_minute, int active_count, String total_hour_str, String parentPhone) {
+        this.deep_hour = deep_hour;
+        this.deep_minute = deep_minute;
+        this.light_hour = light_hour;
+        this.light_minute = light_minute;
+        this.active_count = active_count;
+        this.total_hour_str = total_hour_str;
+        this.parentPhone = parentPhone;
+
     }
 
     public SleepData() {
@@ -78,6 +97,7 @@ public class SleepData implements Serializable {
                 ", light_minute=" + light_minute +
                 ", active_count=" + active_count +
                 ", total_hour_str='" + total_hour_str + '\'' +
+                ", parentPhone='" + parentPhone + '\'' +
                 '}';
     }
 }

@@ -64,8 +64,6 @@ public class HeathMonitoringAdapter extends FragmentPagerAdapter {
         }
 
     }
-
-
 //    public void addFragment(HealthDataFragement fragment){
 //        for(HealthDataFragement healthDataFragement:fragments){
 //            if(healthDataFragement.getArguments().getString("parentPhone").equals(fragment.getArguments().getString("parentPhone"))){
