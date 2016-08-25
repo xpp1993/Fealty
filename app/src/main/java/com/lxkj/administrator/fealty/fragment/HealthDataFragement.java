@@ -194,9 +194,9 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     mPpView.postInvalidate();
                     break;
                 case REQURST_HANDLER_CURRENT_RATE://处理当前心率
-//                   int currentRate = (int) msg.obj;
-//                    mPpView.setFountText(currentRate+"");
-//                    mPpView.invalidate();
+                    int currentRate = msg.arg1;
+                    mPpView.setFountText(currentRate + "");
+                    mPpView.invalidate();
                     //把实时心率传到定位页面
                     break;
                 default:
@@ -204,6 +204,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
             }
         }
     }
+
     private void initChart(TreeMap<Integer, Integer> map) {
         mLineChart03View.reset(map);
         mLineChart03View_left.reset(map);
@@ -217,8 +218,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
             if (intent.getAction().equals(HealthDataFragement.RATE_CHANGED)) {
                 int tempRate = intent.getIntExtra("tempRate", -1);
                 Message msg = Message.obtain();
-                msg.what =REQURST_HANDLER_CURRENT_RATE;//监听到心率改变
-                msg.obj = tempRate;
+                msg.what = REQURST_HANDLER_CURRENT_RATE;//监听到心率改变
+                msg.arg1 = tempRate;
                 handler.sendMessage(msg);
             }
         }
