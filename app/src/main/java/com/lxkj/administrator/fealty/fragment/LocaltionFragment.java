@@ -1,19 +1,15 @@
 package com.lxkj.administrator.fealty.fragment;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
@@ -40,15 +36,12 @@ public class LocaltionFragment extends BaseFragment {
     private BaiduMap mBaiduMap;//百度地图
     @ViewInject(R.id.bmapView)
     private MapView mapView;
-    private double lat, lon;
-    private String describle;
     public static final String RATE_CHANGED = "com.lxkj.administrator.fealty.fragment.LocaltionFragment";
     private Handler handler;
     @ViewInject(R.id.xinlvshou)
     private TextView showxinlv;
     @ViewInject(R.id.iv_left)
     private ImageView iv_left;
-
     // private
     @Override
     protected void init() {
@@ -58,14 +51,27 @@ public class LocaltionFragment extends BaseFragment {
         //开启交通图
         mBaiduMap.setTrafficEnabled(true);
         handler = new Handler();
-        LatLng latLng=new LatLng(SessionHolder.lat,SessionHolder.lon);
-        Log.e("baidumapData", lat + "::" + lon + describle);
-        setMarker(latLng);//设置标注
-        if (SessionHolder.describleAddress!=null)
-        showTextView(SessionHolder.describleAddress,latLng);
-        setMapStatus(latLng);//设置中心坐标
+        //    LatLng latLng = new LatLng(SessionHolder.lat, SessionHolder.lon);
+        //
+//        setMarker(latLng);//设置标注
+//        showTextView(SessionHolder.describleAddress, latLng);
+//        setMapStatus(latLng);//设置中心坐标
         registerRateChangedReceiver();
     }
+
+    @Override
+    public void onGetBunndle(Bundle arguments) {
+        super.onGetBunndle(arguments);
+        double lat = arguments.getDouble("lat");
+        double lon = arguments.getDouble("lon");
+        String desctible = arguments.getString("locationdescrible");
+        LatLng latLng = new LatLng(lat, lon);
+        Log.e("baidumapData", lat + "::" + lon + desctible);
+        setMarker(latLng);//设置标注
+        showTextView(desctible, latLng);
+        setMapStatus(latLng);//设置中心坐标
+    }
+
     @Override
     protected void initListener() {
         iv_left.setOnClickListener(new View.OnClickListener() {
@@ -80,6 +86,7 @@ public class LocaltionFragment extends BaseFragment {
     protected void initData() {
 
     }
+
     int tempRate = 80;
     private RateReceiver mReceiver;
 
@@ -103,12 +110,12 @@ public class LocaltionFragment extends BaseFragment {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(LocaltionFragment.RATE_CHANGED)) {
                 tempRate = intent.getIntExtra("tempRate", -1);
-                lat = intent.getDoubleExtra("lat", 0.0);
-                lon = intent.getDoubleExtra("lon", 0.0);
-                SessionHolder.lat=lat;
-                SessionHolder.lon=lon;
-                describle = intent.getStringExtra("describle");
-                SessionHolder.describleAddress=describle;
+//                lat = intent.getDoubleExtra("lat", 0.0);
+//                lon = intent.getDoubleExtra("lon", 0.0);
+//                SessionHolder.lat=lat;
+//                SessionHolder.lon=lon;
+//                describle = intent.getStringExtra("describle");
+//                SessionHolder.describleAddress=describle;
             }
             handler.post(runnable);
         }
@@ -119,13 +126,13 @@ public class LocaltionFragment extends BaseFragment {
         @Override
         public void run() {
             showxinlv.setText(tempRate + "");
-            if (lat != 0) {
-                LatLng point = new LatLng(lat, lon);
-                Log.e("baidumapData", lat + "::" + lon + describle);
-                setMarker(point);//设置标注
-                showTextView(describle, point);//弹出窗体覆盖物
-                setMapStatus(point);//设置中心坐标
-            }
+//            if (lat != 0) {
+//                LatLng point = new LatLng(lat, lon);
+//                Log.e("baidumapData", lat + "::" + lon + describle);
+//                setMarker(point);//设置标注
+//                showTextView(describle, point);//弹出窗体覆盖物
+//                setMapStatus(point);//设置中心坐标
+//            }
         }
     };
 

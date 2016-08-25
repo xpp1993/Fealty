@@ -76,7 +76,7 @@ public class MyLocationListener implements BDLocationListener, NetWorkAccessTool
                 Log.e("sb", sb.toString());
             }
             if (mCallBack != null && helper != null) {
-                mCallBack.callYou(lat, lon, locationdescrible, address, helper);
+                mCallBack.callYou(lat, lon, locationdescrible, address, helper,currentTime);
             }
         }
     }
@@ -113,25 +113,24 @@ public class MyLocationListener implements BDLocationListener, NetWorkAccessTool
     }
 
     public interface CallBack {
-        void callYou(double lat, double lon, String locationdescrible, String address, MySqliteHelper helper);
+        void callYou(double lat, double lon, String locationdescrible, String address, MySqliteHelper helper,long currentTime);
     }
-
+    long currentTime;
     private void addDataToSQLite(double lat, double lon) {
-        long currentTime = System.currentTimeMillis();
-        helper = new MySqliteHelper(AppUtils.getBaseContext());
-        db = helper.getReadableDatabase();
-        ContentValues values = toContentValues(currentTime, String.valueOf(lat), String.valueOf(lon));
-        long _id = db.insert("gps", null, values);
-        Log.e("_id", _id + "");
         /**
          *删除数据
          * 删除数据库中条件为time<当前时间-x（假如x=30分钟) 的数据
          */
-        String[] str = new String[]{String.valueOf(System.currentTimeMillis() - 1000 * 60 * 30)};
+        helper = new MySqliteHelper(AppUtils.getBaseContext());
+        db = helper.getReadableDatabase();
+        currentTime = System.currentTimeMillis();
+        ContentValues values = toContentValues(currentTime, String.valueOf(lat), String.valueOf(lon));
+        long _id = db.insert("gps", null, values);
+        Log.e("_id", _id + "");
+        String[] str = new String[]{String.valueOf(currentTime - 1000 * 60*30)};
         long _id1 = db.delete("gps", "time < ?", str);
         Log.e("_id", _id1 + "");
     }
-
     // 将数据封装为ContentValues
     public ContentValues toContentValues(long time, String lat,
                                          String lon) {

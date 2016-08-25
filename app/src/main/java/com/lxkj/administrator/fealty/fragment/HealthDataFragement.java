@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.HorizontalScrollView;
@@ -52,7 +53,7 @@ import de.greenrobot.event.EventBus;
  * Created by Administrator on 2016/8/4.
  */
 @ContentView(R.layout.fragment_healthdata)
-public class HealthDataFragement extends BaseFragment implements NetWorkAccessTools.RequestTaskListener, View.OnClickListener {
+public class HealthDataFragement extends BaseFragment implements View.OnClickListener {
     @ViewInject(R.id.shuimiantotal)
     private TextView shuimiantotal;
     @ViewInject(R.id.shuimiandetail)
@@ -65,12 +66,6 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     private TextView yundongdetail;
     @ViewInject(R.id.yundongdetail2)
     private TextView yundongdetail2;
-    private String identiy;
-    private int steps;
-    private int calroies;
-    private float distance;
-    private int deep_hour, deep_minute, light_hour, light_minute;
-    private String total_hour_str;
     @ViewInject(R.id.horizontalScrollView1)
     private HorizontalScrollView horiView;
     @ViewInject(R.id.pp)
@@ -83,54 +78,31 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
     private TextView tv_gps;
     @ViewInject(R.id.dingwei)
     private ImageView im_dingwei;
-    private HealthDataReceiver mReceiver = null;
-    public static final String DATA_CHANGED = "com.lxkj.administrator.fealty.fragment";
-    int rate_status;
-    private MyHandler handler = new MyHandler();
-    public static final int REQUEST_CODE_RATE = 0x22;//把测试的心率数据上传到服务器
-    TreeMap<Integer, Integer> map = new TreeMap<>();
-    private double lat;
-    private double lon;
-    private String locationdescrible;
-
-    @Override
-    public void onGetBunndle(Bundle arguments) {
-        super.onGetBunndle(arguments);
-        identiy = arguments.getString("identity");
-        SportData sportData = (SportData) arguments.getSerializable("sportData");
-        SleepData sleepData = (SleepData) arguments.getSerializable("sleepData");
-        //加载数据
-        loadData(sportData, sleepData);
-    }
+    private MyHandler handler;
+    TreeMap<Integer, Integer> map;
+    private final int REQURST_HANDLER_GPSDATA = 0x21;
+    private final int REQURST_HANDLER_SlEEPDATA = 0x22;
+    private final int REQURST_HANDLER_SPORTDATA = 0x23;
+    private final int REQURST_HANDLER_IDENTITY = 0x24;
+    private final int REQURST_HANDLER_CURRENT_RATE = 0x25;
 
     @Override
     protected void init() {
+        handler = new MyHandler();
+        map = new TreeMap<>();
         //设置horizontalScrollvView拉到头和尾的时候没有阴影颜色
-        registeHealthDataChangedReceiver();
-        mPpView.setFountText(rate_status + "");
-        mPpView.invalidate();
         horiView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        mRegisterReceiver();
     }
 
-    private void mRegisterReceiver() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_TIME_TICK);
-        getActivity().registerReceiver(receiver, filter);
-    }
-
-    //2016-8-21 xpp add
     @Override
     public void onStop() {
         super.onStop();
-        handler.removeCallbacks(runnable);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        getActivity().unregisterReceiver(mReceiver);
-        handler.removeCallbacks(runnable);
+
     }
 
     @Override
@@ -143,100 +115,9 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
 
     }
 
-    private void initChart(TreeMap<Integer, Integer> map) {
-        mLineChart03View.reset(map);
-        mLineChart03View_left.reset(map);
-        mLineChart03View.postInvalidate();
-        mLineChart03View_left.postInvalidate();
-    }
-
     @Override
     public void onStart() {
         super.onStart();
-    }
-
-    private void loadData(SportData sportData, SleepData sleepData) {
-        if (identiy != null && !"".equals(identiy)) {
-            //画心率折线图
-            /*
-     * 获取一天各测试时间点和心率值
-	 */
-            List<RateOneDayInfo> list_rate = mySQLOperate.queryRateOneDayDetailInfo(CalendarUtils.getCalendar(0));//查询今天的心率值
-            if (list_rate != null && list_rate.size() > 0) {
-                for (int i = 0; i < list_rate.size(); i++) {
-                    RateOneDayInfo rateOneDayInfo = list_rate.get(i);
-                    int temprate = rateOneDayInfo.getRate();
-                    int time = rateOneDayInfo.getTime();
-                    Log.e("rateandtime", temprate + "::" + time);
-                    map.put(time, temprate);
-                }
-                initChart(map);
-            }
-            mPpView.setFirstText(identiy);
-            mPpView.postInvalidate();
-        }
-        if (sportData != null) {
-            steps = sportData.getSteps();
-            calroies = sportData.getCalories();
-            distance = sportData.getDistance();
-            yundongtotal.setText("运动  " + new java.text.DecimalFormat("0.00").format(distance) + "公里");
-            yundongdetail.setText("消耗" + calroies + "卡路里");
-            yundongdetail2.setText("步行" + steps + "步");
-        }
-        if (sleepData != null) {
-            deep_hour = sleepData.getDeep_hour();
-            deep_minute = sleepData.getDeep_minute();
-            light_hour = sleepData.getLight_hour();
-            light_minute = sleepData.getLight_minute();
-            total_hour_str = sleepData.getTotal_hour_str();
-            shuimiantotal.setText("睡眠  " + total_hour_str + "小时");
-            shuimiandetail2.setText("浅度睡眠" + light_hour + "小时" + light_minute + "分钟");
-            shuimiandetail.setText("深度度睡眠" + deep_hour + "小时" + deep_minute + "分钟");
-        }
-    }
-
-    private void registeHealthDataChangedReceiver() {
-        IntentFilter filter = new IntentFilter();
-        try {
-            if (mReceiver != null) {
-                getActivity().unregisterReceiver(mReceiver);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        mReceiver = new HealthDataReceiver();
-        filter.addAction(HealthDataFragement.DATA_CHANGED);
-        getActivity().registerReceiver(mReceiver, filter);
-    }
-
-    @Override
-    public void onRequestStart(int requestCode) {
-
-    }
-
-    @Override
-    public void onRequestLoading(int requestCode, long current, long count) {
-
-    }
-
-    @Override
-    public void onRequestSuccess(JSONObject jsonObject, int requestCode) {
-        switch (requestCode) {
-            case REQUEST_CODE_RATE:
-                try {
-                    DecodeManager.decodeCommon(jsonObject, requestCode, handler);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void onRequestFail(int requestCode, int errorNo) {
-
     }
 
     @Override
@@ -244,105 +125,131 @@ public class HealthDataFragement extends BaseFragment implements NetWorkAccessTo
         switch (v.getId()) {
             case R.id.dingwei:
                 //跳转到百度地图
-                Log.e("baidumap", "zoudaoci");
-                EventBus.getDefault().post(new NavFragmentEvent(new LocaltionFragment()));
+                Bundle bundle = new Bundle();
+                bundle.putString("locationdescrible", describle);
+                bundle.putDouble("lat", lat);
+                bundle.putDouble("lon", lon);
+                EventBus.getDefault().post(new NavFragmentEvent(new LocaltionFragment(),bundle));
                 break;
             default:
                 break;
         }
     }
-
-    //广播接受者
-    class HealthDataReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(HealthDataFragement.DATA_CHANGED)) {
-                int tempRate = intent.getIntExtra("tempRate", -1);
-                double lat = intent.getDoubleExtra("lat", 22.57);
-                double lon = intent.getDoubleExtra("lon", 113.87);
-                String address = intent.getStringExtra("address");
-                String describle = intent.getStringExtra("describle");
-                Bundle data = new Bundle();
-                data.putDouble("lat", lat);
-                data.putDouble("lon", lon);
-                data.putString("address", address);
-                data.putString("describle", describle);
-                data.putInt("tempRate", tempRate);
-                rate_status = tempRate;
-                Message msg = new Message();
-                msg.what = 0x21;
-                msg.setData(data);
-                handler.sendMessage(msg);
-            }
-        }
-    }
-
-    int hour;
-    int minute;
-    //监听系统时间的广播
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_TIME_TICK)) {
-//                Calendar calendar = Calendar.getInstance();
-//                minute = calendar.get(Calendar.MINUTE);
-//                hour = calendar.get(Calendar.HOUR_OF_DAY);
-                //获取系统当前时间
-                java.sql.Timestamp time = new java.sql.Timestamp(new java.util.Date().getTime());
-                hour = time.getHours();//时
-                minute = time.getMinutes();//分
-                System.out.println(time.getSeconds());//秒
-                //把心率和时间发给服务器
-                handler.postDelayed(runnable, 1000);
-            }
-        }
-    };
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            if (minute == 0 && rate_status != 0) {
-                mySQLOperate.saveRate("rate_table_", hour, rate_status);
-                Map<String, String> map = CommonTools.getParameterMap(new String[]{"mobile", "heartRate", "uploadTime"}, SessionHolder.user.getMobile(), rate_status + "", hour + "");
-                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.INSERT_RATE, map, null, REQUEST_CODE_RATE, HealthDataFragement.this);
-            }
-        }
-    };
-    private UTESQLOperate mySQLOperate = new UTESQLOperate(AppUtils.getBaseContext());//数据库操作类
+    double lat = 0.0;
+    double lon = 0.0;
+    String describle=null;
 
     private class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
-                case 0x21:
-                    Bundle data = msg.getData();
-                    int rate = data.getInt("tempRate");
-                    String address = data.getString("address");
+                case REQURST_HANDLER_GPSDATA://处理GPS数据
+                    Bundle GPSData = msg.getData();
+                    String address = GPSData.getString("address");
                     tv_gps.setText(address);
-                    String describle = data.getString("describle");
-                    double lat = data.getDouble("lat");
-                    double lon = data.getDouble("lon");
-                    //如果心率不正常，报警信息上传,手机振动
-                    if (rate < 60 && rate != 0) {
-                        Vibrator vibrator = ((BaseApplication) getActivity().getApplication()).mVibrator;
-                        vibrator.vibrate(2000);//如果心率异常振动两秒
-                    }
-                    mPpView.setFountText(rate + "");
-                    mPpView.invalidate();
-                    //发送广播
-                    Intent intent = new Intent();
-                    intent.putExtra("tempRate", rate);
-                    intent.putExtra("lat", lat);
-                    intent.putExtra("lon", lon);
-                    intent.putExtra("describle", describle);
-                    intent.setAction(LocaltionFragment.RATE_CHANGED);
-                    getActivity().sendBroadcast(intent);
+                    //把lon ,lat ,地址描述传到GPs定位页面显示在百度地图上
+                    String latstr = GPSData.getString("lat");
+                    lat = Double.parseDouble(latstr);
+                    String lonStr = GPSData.getString("lon");
+                    lon = Double.parseDouble(lonStr);
+                    describle = GPSData.getString("locationdescrible");
                     break;
-                case REQUEST_CODE_RATE:
+                case REQURST_HANDLER_SlEEPDATA://处理睡眠数据
+                    break;
+                case REQURST_HANDLER_SPORTDATA://处理运动数据
+                    break;
+                case REQURST_HANDLER_IDENTITY://处理身份标识
+                    String indentity = (String) msg.obj;
+                    mPpView.setFirstText(indentity);
+                    mPpView.postInvalidate();
+                    break;
+                case REQURST_HANDLER_CURRENT_RATE://处理当前心率
+                    String currentRate = (String) msg.obj;
+                    mPpView.setFountText(currentRate);
+                    mPpView.invalidate();
+                    //把实时心率传到定位页面
+                    break;
+                default:
                     break;
             }
         }
+    }
+
+    private void initChart(TreeMap<Integer, Integer> map) {
+        mLineChart03View.reset(map);
+        mLineChart03View_left.reset(map);
+        mLineChart03View.postInvalidate();
+        mLineChart03View_left.postInvalidate();
+    }
+
+    //提供给外界设置GPS数据的方法,lat,lon,locationdescrible,address
+    public void setGPSData(String lat, String lon, String locationdescrible, String address) {
+        Bundle GPSData = new Bundle();
+        GPSData.putString("lat", lat);
+        GPSData.putString("lon", lon);
+        GPSData.putString("locationdescrible", locationdescrible);
+        GPSData.putString("address", address);
+        if (TextUtils.isEmpty(address))
+            return;
+        Message message = Message.obtain();
+        message.what = REQURST_HANDLER_GPSDATA;
+        message.setData(GPSData);
+        handler.sendMessage(message);
+    }
+
+    //提供给外界设置睡眠数据的方法,light_hour, light_minute, deep_hour, deep_minute, total_hour_str
+    public void setSleepData(String light_hour, String light_minute, String deep_hour, String deep_minute, String total_hour_str) {
+        Bundle sleepData = new Bundle();
+        sleepData.putString("light_hour", light_hour);
+        sleepData.putString("light_minute", light_minute);
+        sleepData.putString("deep_hour", deep_hour);
+        sleepData.putString("deep_minute", deep_minute);
+        sleepData.putString("deep_minute", deep_minute);
+        sleepData.getString("total_hour_str", total_hour_str);
+        if (TextUtils.isEmpty(total_hour_str)) {
+            return;
+        }
+        Message message = Message.obtain();
+        message.what = REQURST_HANDLER_SlEEPDATA;
+        message.setData(sleepData);
+        handler.sendMessage(message);
+    }
+
+    //提供给外界设置运动数据的方法,calories, step, distance
+    public void setSportData(String calories, String step, String distance) {
+        Bundle sportData = new Bundle();
+        sportData.putString("calories", calories);
+        sportData.putString("step", step);
+        sportData.putString("distance", distance);
+        if (TextUtils.isEmpty(distance) && TextUtils.isEmpty(step) && TextUtils.isEmpty(calories)) {
+            return;
+        }
+        Message message = Message.obtain();
+        message.what = REQURST_HANDLER_SPORTDATA;
+        message.setData(sportData);
+        handler.sendMessage(message);
+    }
+
+    //提供给外界设置身份标识的方法,identity, currentHeart
+    public void setIdentity(String identity) {
+        if (TextUtils.isEmpty(identity)) {
+            return;
+        }
+        Message message = Message.obtain();
+        message.obj = identity;
+        message.what = REQURST_HANDLER_IDENTITY;
+        handler.sendMessage(message);
+    }
+
+    //提供给外界设置当前心率的方法,currentHeart
+    public void setCurentRate(String currentHeart) {
+        Message message = Message.obtain();
+        message.obj = currentHeart;
+        if (TextUtils.isEmpty(currentHeart)) {
+            return;
+        }
+        message.what = REQURST_HANDLER_CURRENT_RATE;
+        handler.sendMessage(message);
     }
 }

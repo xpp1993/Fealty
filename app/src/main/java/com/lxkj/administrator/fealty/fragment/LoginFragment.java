@@ -71,10 +71,9 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
 
     @Override
     protected void init() {
-      //  EventBus.getDefault().register(this);
+        //  EventBus.getDefault().register(this);
         showPassword = false;
         handler = new MyHandler();
-
 
     }
 
@@ -86,7 +85,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
     @Override
     public void onDestroy() {
         super.onDestroy();
-      //  EventBus.getDefault().unregister(this);
+        //  EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -209,23 +208,29 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                 ToastUtils.showToastInUIThread("网络连接错误！");
             }
         }
+
     }
+
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
-        switch (requestCode) {
-            case REQUEST_CODE_LOGIN_COMMIT:
-                Message msg = new Message();
-                msg.what = MESSAGE_WHAT_LOGIN_LOGINFAIL;
-                Bundle data = new Bundle();
-                data.putString("message", "与服务器连接失败");
-                msg.setData(data);
-                handler.sendMessage(msg);
-                break;
-            default:
-                ToastUtils.showToastInUIThread("网络连接失败");
-                break;
+        try {
+            switch (requestCode) {
+                case REQUEST_CODE_LOGIN_COMMIT:
+                    Message msg = new Message();
+                    msg.what = MESSAGE_WHAT_LOGIN_LOGINFAIL;
+                    Bundle data = new Bundle();
+                    data.putString("message", "与服务器连接失败");
+                    msg.setData(data);
+                    handler.sendMessage(msg);
+                    break;
+                default:
+                    ToastUtils.showToastInUIThread("网络连接失败");
+                    break;
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+            ToastUtils.showToastInUIThread("服务器返回错误");
         }
-
     }
 
     class MyHandler extends Handler {

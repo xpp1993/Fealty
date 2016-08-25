@@ -132,7 +132,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public static final int REQUEST_CODE_UPLOAD_CONTACTS = 0X20;//上传通讯录
     public static final int REQUEST_CODE_SPORTDATA_SLEEPDATA = 0x10;//把运动数据睡眠数据上传到服务器
     public static final int REQUEST_CODE_RATE = 0x22;//把测试的心率数据上传到服务器
-    private Bundle bundle;
+    //  private Bundle bundle;
     private String phone;
     int step, calories;
     float distance;
@@ -156,6 +156,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private String address;
     private MyLocationListener.CallBack mCallback;
     private MySqliteHelper helper;
+    private long currentTime;
 
     @Override
     protected void init() {
@@ -165,15 +166,23 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         bar_biaoti.setText("我");
         mCallback = new MyLocationListener.CallBack() {
             @Override
-            public void callYou(double lat, double lon, String loctiondescrible, String address, MySqliteHelper helper) {
+            public void callYou(double lat, double lon, String loctiondescrible, String address, MySqliteHelper helper,long currentTime) {
                 MeFragment.this.lat = lat;
                 MeFragment.this.lon = lon;
                 MeFragment.this.locationdescrible = loctiondescrible;
                 MeFragment.this.address = address;
                 MeFragment.this.helper = helper;
+                MeFragment.this.currentTime=currentTime;
                 Log.e("xpp", loctiondescrible);
                 if (address != null) {
                     locService.stop();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("parentPhone", SessionHolder.user.getMobile());
+                    bundle.putDouble("lon", lon);
+                    bundle.putDouble("lat", lat);
+                    bundle.putString("describle", locationdescrible);
+                    bundle.putString("address", address);
+                    EventBus.getDefault().post(bundle);//把定位数据数据返回到首页，且上传到服务器
                 }
                 myHandler.postDelayed(runnable6, 1000 * 60 * 3);
             }
@@ -187,7 +196,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         mySQLOperate = new UTESQLOperate(AppUtils.getBaseContext());
         mHandler = new Handler();
         mDevice = new ArrayList<>();
-        bundle = new Bundle();
+        //  bundle = new Bundle();
         mBLEServiceOperate = BLEServiceOperate.getInstance(AppUtils.getBaseContext());// 用于BluetoothLeService实例化准备,必须
         mRegisterReceiver();
     }
@@ -310,9 +319,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 ToastUtils.showToastInUIThread("正在获取联系人列表....");
                 break;
             case R.id.see_mygps_iv:
+                //跳转到百度地图
                 Melucheng_fragment melucheng_fragment = new Melucheng_fragment();
                 melucheng_fragment.setHelper(helper);
-                EventBus.getDefault().post(new NavFragmentEvent(melucheng_fragment));
+                Bundle bundle = new Bundle();
+                bundle.putDouble("lat", MeFragment.this.lat);
+                bundle.putDouble("lon", MeFragment.this.lon);
+                bundle.putLong("currentTime",currentTime);
+                melucheng_fragment.setArguments(bundle);
+                EventBus.getDefault().post(new NavFragmentEvent(melucheng_fragment,bundle));
                 break;
             case R.id.me_iv_left2:
                 //跳入设置界面
@@ -505,7 +520,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     ToastUtils.showToastInUIThread("服务器繁忙");
                     break;
                 case DISCONNECT_MSG:
-                    //  bluee_iv_left.setText("未连接");
                     CURRENT_STATUS = DISCONNECTED;
                     bluee_iv_left.setSlideable(true);
                     ToastUtils.showToastInUIThread("未连接或者是连接失败！");
@@ -516,20 +530,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     Log.i(TAG, "connectResute0=" + connectResute0);
                     break;
                 case CONNECTED_MSG:
-                    //  bluee_iv_left.setText("已连接");
                     mBluetoothLeService.setRssiHandler(myHandler);
                     CURRENT_STATUS = CONNECTED;
                     bluee_iv_left.setSlideable(false);
-                    bundle.putString("IF_CONNECTED", "我的");
-                    // bluee_iv_left.setSlideable(false);
                     ToastUtils.showToastInUIThread("已连接");
                     break;
                 case UPDATA_REAL_RATE_MSG://处理接收到的心率数据
                     Log.d("tempRate", tempRate + "");
                     //如果测试完成
                     if (tempStatus == GlobalVariable.RATE_TEST_FINISH) {
-                        bundle.putInt("tempRate", RATE_STATUS);
-                        EventBus.getDefault().post(bundle);
+//                        bundle.putInt("tempRate", RATE_STATUS);
+//                        EventBus.getDefault().post(bundle);
 //                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "heartRate"}, SessionHolder.user.getMobile(), "", tempRate + "");
 //                        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_SLEEP_SPORT, params, null, REQUEST_CODE_SPORTDATA_SLEEPDATA, MeFragment.this);
                     }
@@ -657,7 +668,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         Calendar c = Calendar.getInstance();
         currentDay = c.get(Calendar.DAY_OF_YEAR);
         currentDayString = CalendarUtils.getCalendar(0);
-
         if (isFirstOpenAPK) {
             lastDay = currentDay;
             lastDayString = currentDayString;
@@ -750,7 +760,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             calories = stepInfo.getCalories();//卡路里
             distance = stepInfo.getDistance();//距离
             SportData sportData = new SportData(step, calories, distance);
-            bundle.putSerializable("sportdata", sportData);
+            //    bundle.putSerializable("sportdata", sportData);
             //上传到服务器
         } else {
             Log.e("stepData", stepInfo + "");
@@ -796,7 +806,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             total_hour_str = df1.format(total_hour);
             SleepData sleepData = new SleepData(deep_hour, deep_minute, light_hour, light_minute, active_count, total_hour_str);
             //把这些数据上传到服务器
-            bundle.putSerializable("sleepData", sleepData);
+            //  bundle.putSerializable("sleepData", sleepData);
             if (total_hour_str.equals("0.0")) {
                 total_hour_str = "0";
             }
@@ -815,29 +825,22 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     @Override
     public void OnResult(boolean result, int status) {
         Log.i(TAG, "result=" + result + ",status=" + status);
-        if (status == ICallbackStatus.SYNC_TIME_OK) {// 设置时间操作完成，发送同步计步数据指令
-            myHandler.postDelayed(runnable1, 1000);
-        } else if (status == ICallbackStatus.OFFLINE_STEP_SYNC_OK) {//离线步数同步完成,发送同步睡眠数据指令
+        if (status == ICallbackStatus.CONNECTED_STATUS) {
+            myHandler.sendEmptyMessage(CONNECTED_MSG);
+            if (result == true) {//表示计步状态,在老人清醒时，每隔15分钟上传一次手机坐标
+            } else if (result == false) {//表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
+            }
+        } else if (status == ICallbackStatus.DISCONNECT_STATUS) {
+            myHandler.sendEmptyMessage(DISCONNECT_MSG);
+        } else if (status == ICallbackStatus.SYNC_TIME_OK) {// 设置时间操作完成，发送同步睡眠数据数据指令
             myHandler.postDelayed(runnable2, 1000);
-            bundle.putDouble("lon", lon);
-            bundle.putDouble("lat", lat);
-            bundle.putString("describle", locationdescrible);
-            bundle.putString("address", address);
+        } else if (status == ICallbackStatus.OFFLINE_STEP_SYNC_OK) {//离线睡眠同步完成,发送同步运动数据指令
+            myHandler.postDelayed(runnable1, 1000);
         } else if (status == ICallbackStatus.OFFLINE_SLEEP_SYNC_OK) {//离线睡眠同步完成，发送请求电量指令,开始测试心率指令
             myHandler.postDelayed(runnable3, 1000 * 30);//发送心率测试开始
             myHandler.postDelayed(runnable4, 1000 * 15);//请求手环电量
             myHandler.postDelayed(runnable5, 1000);//把数据上传到服务器
-            EventBus.getDefault().post(bundle);
         } else if (status == ICallbackStatus.GET_BLE_BATTERY_OK) {
-        } else if (status == ICallbackStatus.DISCONNECT_STATUS) {
-            myHandler.sendEmptyMessage(DISCONNECT_MSG);
-        } else if (status == ICallbackStatus.CONNECTED_STATUS) {
-            myHandler.sendEmptyMessage(CONNECTED_MSG);
-            if (result == true) {//表示计步状态,在老人清醒时，每隔15分钟上传一次手机坐标
-
-            } else if (result == false) {//表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
-
-            }
         }
     }
 
