@@ -492,7 +492,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             mBLEServiceOperate.connect(deviceAddress);//连接手环
         }
     }
-
     private class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -581,7 +580,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             }
         }
     }
-
     private void functionRateFinished() {
         mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_STOP);//发送心率测试关闭
         //执行上传收集到的心率测试数据，上传成功后清空
@@ -717,9 +715,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         public void onRateChange(int rate, int status) {
             tempRate = rate;
             tempStatus = status;
-            RATE_STATUS = tempRate;
+            Intent intent=new Intent();
+            intent.putExtra("tempRate", tempRate);
+            intent.setAction(HealthDataFragement.RATE_CHANGED);
+            getActivity().sendBroadcast(intent);
+//            RATE_STATUS = tempRate;
             Log.e("wyj", "onRateChange =" + tempRate);
-            myHandler.sendEmptyMessage(UPDATA_REAL_RATE_MSG);
+            //myHandler.sendEmptyMessage(UPDATA_REAL_RATE_MSG);
         }
     };
     /**
@@ -802,7 +804,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             }
         } else {
             Log.d("getSleepInfo", "sleepTimeInfo =" + sleepTimeInfo);
-
         }
     }
 
@@ -877,7 +878,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private Runnable runnable3 = new Runnable() {
         @Override
         public void run() {
-
             mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_START);
             Log.e("wyj", "start to rate");
             myHandler.postDelayed(new Runnable() {

@@ -85,6 +85,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     private final int REQURST_HANDLER_SPORTDATA = 0x23;
     private final int REQURST_HANDLER_IDENTITY = 0x24;
     private final int REQURST_HANDLER_CURRENT_RATE = 0x25;
+    public static final String RATE_CHANGED = "com.lxkj.administrator.fealty.fragment.HealthDataFragment";
+    private HealthRateReceiver mReceiver = null;
 
     @Override
     protected void init() {
@@ -102,7 +104,16 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     @Override
     public void onDestroy() {
         super.onDestroy();
+        getActivity().unregisterReceiver(mReceiver);
+    }
 
+    @Override
+    public void onGetBunndle(Bundle arguments) {
+        super.onGetBunndle(arguments);
+        if (TextUtils.equals(arguments.getString("parentPhone"), SessionHolder.user.getMobile())) {
+            //注册广播接收实时心率
+            registeHealthRateChangedReceiver();
+        }
     }
 
     @Override
@@ -158,12 +169,12 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     Log.e("setGPS", describle);
                     break;
                 case REQURST_HANDLER_SlEEPDATA://处理睡眠数据
-                    Bundle sleepData=msg.getData();
-                    String light_hour=sleepData.getString("light_hour");
-                    String light_minute=sleepData.getString("light_minute");
-                    String deep_hour=sleepData.getString("deep_hour");
-                    String deep_minute=sleepData.getString("deep_minute");
-                    String total_hour_str=sleepData.getString("total_hour_str");
+                    Bundle sleepData = msg.getData();
+                    String light_hour = sleepData.getString("light_hour");
+                    String light_minute = sleepData.getString("light_minute");
+                    String deep_hour = sleepData.getString("deep_hour");
+                    String deep_minute = sleepData.getString("deep_minute");
+                    String total_hour_str = sleepData.getString("total_hour_str");
                     shuimiantotal.setText("睡眠  " + total_hour_str + "小时");
                     shuimiandetail2.setText("浅度睡眠" + light_hour + "小时" + light_minute + "分钟");
                     shuimiandetail.setText("深度度睡眠" + deep_hour + "小时" + deep_minute + "分钟");
@@ -183,9 +194,9 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     mPpView.postInvalidate();
                     break;
                 case REQURST_HANDLER_CURRENT_RATE://处理当前心率
-                    String currentRate = (String) msg.obj;
-                    mPpView.setFountText(currentRate);
-                    mPpView.invalidate();
+//                   int currentRate = (int) msg.obj;
+//                    mPpView.setFountText(currentRate+"");
+//                    mPpView.invalidate();
                     //把实时心率传到定位页面
                     break;
                 default:
@@ -193,12 +204,38 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
             }
         }
     }
-
     private void initChart(TreeMap<Integer, Integer> map) {
         mLineChart03View.reset(map);
         mLineChart03View_left.reset(map);
         mLineChart03View.postInvalidate();
         mLineChart03View_left.postInvalidate();
+    }
+    //广播接受者
+    class HealthRateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(HealthDataFragement.RATE_CHANGED)) {
+                int tempRate = intent.getIntExtra("tempRate", -1);
+                Message msg = Message.obtain();
+                msg.what =REQURST_HANDLER_CURRENT_RATE;//监听到心率改变
+                msg.obj = tempRate;
+                handler.sendMessage(msg);
+            }
+        }
+    }
+    //注册广播的方法
+    private void registeHealthRateChangedReceiver() {
+        IntentFilter filter = new IntentFilter();
+        try {
+            if (mReceiver != null) {
+                getActivity().unregisterReceiver(mReceiver);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mReceiver = new HealthRateReceiver();
+        filter.addAction(HealthDataFragement.RATE_CHANGED);
+        getActivity().registerReceiver(mReceiver, filter);
     }
 
     //提供给外界设置GPS数据的方法,lat,lon,locationdescrible,address
