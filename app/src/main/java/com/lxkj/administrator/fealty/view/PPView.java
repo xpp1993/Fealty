@@ -45,7 +45,7 @@ public class PPView extends View {
 
     private Paint mPaint;
 
-    private String firstText = "";
+    private String firstText = "我的";
     private String secondText = "健康";
     private String thirdText = "实时心率";
     private String fountText = "80";

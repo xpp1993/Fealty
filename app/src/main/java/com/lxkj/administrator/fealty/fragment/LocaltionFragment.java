@@ -1,4 +1,5 @@
 package com.lxkj.administrator.fealty.fragment;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
@@ -42,6 +44,7 @@ public class LocaltionFragment extends BaseFragment {
     private TextView showxinlv;
     @ViewInject(R.id.iv_left)
     private ImageView iv_left;
+
     // private
     @Override
     protected void init() {
@@ -185,8 +188,10 @@ public class LocaltionFragment extends BaseFragment {
         super.onDestroy();
         //在activity执行onDestroy时执行mMapView.onDestroy()，实现地图生命周期管理
         mapView.onDestroy();
-        handler.removeCallbacks(runnable);
-        getActivity().unregisterReceiver(mReceiver);
+        if (runnable != null)
+            handler.removeCallbacks(runnable);
+        if (mReceiver!= null)
+            getActivity().unregisterReceiver(mReceiver);
     }
 
     /**

@@ -99,7 +99,12 @@ public class UserInfo implements Serializable{
     public String toString() {
         return "UserInfo{" +
                 "mobile='" + mobile + '\'' +
+                ", gender='" + gender + '\'' +
                 ", nickName='" + nickName + '\'' +
+                ", username='" + username + '\'' +
+                ", birthday='" + birthday + '\'' +
+                ", userpic='" + userpic + '\'' +
+                ", identity='" + identity + '\'' +
                 ", password='" + password + '\'' +
                 '}';
     }

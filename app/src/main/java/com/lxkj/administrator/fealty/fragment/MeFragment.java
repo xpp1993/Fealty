@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -209,7 +208,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         me_username.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
         me_phone.setText(TextUtils.isEmpty(SessionHolder.user.getMobile()) ? "未设置" : "手机号:" + SessionHolder.user.getMobile());
     }
+    //开启线程执行图片加载图片
+    private class LoadImage implements Runnable {
 
+        @Override
+        public void run() {
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+        }
+
+    }
     private void mRegisterReceiver() {
         IntentFilter mFilter = new IntentFilter();
         mFilter.addAction(GlobalVariable.READ_BATTERY_ACTION);//监测手环电量
@@ -716,7 +723,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             tempRate = rate;
             tempStatus = status;
             Intent intent=new Intent();
-            intent.putExtra("tempRate", tempRate);
+            intent.putExtra("tempRate", rate);
             intent.setAction(HealthDataFragement.RATE_CHANGED);
             getActivity().sendBroadcast(intent);
 //            RATE_STATUS = tempRate;
@@ -731,6 +738,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
         @Override
         public void onSleepChange() {
+            //表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
             myHandler.sendEmptyMessage(UPDATE_SLEEP_UI_MSG);
         }
     };
@@ -742,7 +750,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         public void onStepChange(int steps, float distance, int calories) {
             Log.d("onStepHandler", "steps =" + steps + ",distance =" + distance
                     + ",calories =" + calories);
-            //  myHandler.sendEmptyMessage(UPDATE_STEP_UI_MSG);
+            SportData sportData=new SportData();
+            sportData.setCalories(calories);
+            sportData.setSteps(steps);
+            sportData.setDistance(distance);
+            sportData.setParentphone(SessionHolder.user.getMobile());
+            EventBus.getDefault().post(sportData);
+           //  myHandler.sendEmptyMessage(UPDATE_STEP_UI_MSG);
         }
     };
 
@@ -819,9 +833,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         Log.i(TAG, "result=" + result + ",status=" + status);
         if (status == ICallbackStatus.CONNECTED_STATUS) {
             myHandler.sendEmptyMessage(CONNECTED_MSG);
-            if (result == true) {//表示计步状态,在老人清醒时，每隔15分钟上传一次手机坐标
-            } else if (result == false) {//表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
-            }
+//            if (result == true) {//表示计步状态,在老人清醒时，每隔15分钟上传一次手机坐标
+//            } else if (result == false) {//表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
+//            }
         } else if (status == ICallbackStatus.DISCONNECT_STATUS) {
             myHandler.sendEmptyMessage(DISCONNECT_MSG);
         } else if (status == ICallbackStatus.SYNC_TIME_OK) {// 设置时间操作完成，发送同步睡眠数据数据指令

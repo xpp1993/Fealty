@@ -152,7 +152,7 @@
         <!-- Required. AppKey copied from Portal -->
         <meta-data
             android:name="JPUSH_APPKEY"
-            android:value="3c029b6935383c41a51adb39" />
+            android:value="a80329b7ceab92d42c5eb9bb" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
