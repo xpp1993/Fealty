@@ -5,18 +5,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
-import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
 import com.lxkj.administrator.fealty.utils.MySqliteHelper;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
-import com.lxkj.administrator.fealty.utils.ToastUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;

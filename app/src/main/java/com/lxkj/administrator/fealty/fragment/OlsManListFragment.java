@@ -12,7 +12,6 @@ import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.adapter.OldmanListviewAdpter;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.bean.UserInfo;
-import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.ui.picker.CustomHeaderAndFooterPicker;

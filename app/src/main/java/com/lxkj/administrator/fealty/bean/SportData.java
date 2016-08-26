@@ -9,11 +9,32 @@ public class SportData implements Serializable {
     private int steps;
     private int calories;
     private float distance;
+    private String Parentphone;//用电话号码给运动数据做标识
 
     public SportData(int steps, int calories, float distance) {
         this.steps = steps;
         this.calories = calories;
         this.distance = distance;
+    }
+
+    public void setDistance(float distance) {
+        this.distance = distance;
+    }
+
+    public String getParentphone() {
+        return Parentphone;
+    }
+
+    public void setParentphone(String parentphone) {
+        Parentphone = parentphone;
+    }
+
+    public SportData(int steps, int calories, float distance, String parentphone) {
+
+        this.steps = steps;
+        this.calories = calories;
+        this.distance = distance;
+        Parentphone = parentphone;
     }
 
     public SportData() {
@@ -49,6 +70,7 @@ public class SportData implements Serializable {
                 "steps=" + steps +
                 ", calories=" + calories +
                 ", distance=" + distance +
+                ", Parentphone='" + Parentphone + '\'' +
                 '}';
     }
 }
