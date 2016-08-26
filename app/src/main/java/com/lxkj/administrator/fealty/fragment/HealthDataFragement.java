@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -14,17 +15,36 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.baidu.location.LocationClientOption;
 import com.lxkj.administrator.fealty.R;
+import com.lxkj.administrator.fealty.baidugps.LocationService;
+import com.lxkj.administrator.fealty.baidugps.MyLocationListener;
+import com.lxkj.administrator.fealty.base.BaseApplication;
 import com.lxkj.administrator.fealty.base.BaseFragment;
+import com.lxkj.administrator.fealty.bean.SleepData;
+import com.lxkj.administrator.fealty.bean.SportData;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
+import com.lxkj.administrator.fealty.manager.DecodeManager;
+import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
+import com.lxkj.administrator.fealty.utils.AppUtils;
+import com.lxkj.administrator.fealty.utils.CommonTools;
+import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.view.LineChart03View;
 import com.lxkj.administrator.fealty.view.LineChart03View_left;
 import com.lxkj.administrator.fealty.view.PPView;
+import com.yc.peddemo.sdk.UTESQLOperate;
+import com.yc.peddemo.utils.CalendarUtils;
+import com.yc.pedometer.info.RateOneDayInfo;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import de.greenrobot.event.EventBus;
@@ -67,7 +87,6 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     private final int REQURST_HANDLER_CURRENT_RATE = 0x25;
     public static final String RATE_CHANGED = "com.lxkj.administrator.fealty.fragment.HealthDataFragment";
     private HealthRateReceiver mReceiver = null;
-
     @Override
     protected void init() {
         handler = new MyHandler();
@@ -75,7 +94,6 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         //设置horizontalScrollvView拉到头和尾的时候没有阴影颜色
         horiView.setOverScrollMode(View.OVER_SCROLL_NEVER);
     }
-
     @Override
     public void onStop() {
         super.onStop();
@@ -84,6 +102,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (mReceiver!=null)
         getActivity().unregisterReceiver(mReceiver);
     }
 
@@ -178,13 +197,16 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     mPpView.setFountText(currentRate + "");
                     mPpView.invalidate();
                     //把实时心率传到定位页面
+                    Intent intent=new Intent();
+                    intent.putExtra("tempRate", currentRate);
+                    intent.setAction(LocaltionFragment.RATE_CHANGED);
+                    getActivity().sendBroadcast(intent);
                     break;
                 default:
                     break;
             }
         }
     }
-
     private void initChart(TreeMap<Integer, Integer> map) {
         mLineChart03View.reset(map);
         mLineChart03View_left.reset(map);
@@ -233,7 +255,6 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         message.setData(GPSData);
         handler.sendMessage(message);
     }
-
     //提供给外界设置睡眠数据的方法,light_hour, light_minute, deep_hour, deep_minute, total_hour_str
     public void setSleepData(String light_hour, String light_minute, String deep_hour, String deep_minute, String total_hour_str) {
         Bundle sleepData = new Bundle();
@@ -241,7 +262,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         sleepData.putString("light_minute", light_minute);
         sleepData.putString("deep_hour", deep_hour);
         sleepData.putString("deep_minute", deep_minute);
-        sleepData.getString("total_hour_str", total_hour_str);
+        sleepData.putString("total_hour_str", total_hour_str);
         if (TextUtils.isEmpty(total_hour_str)) {
             return;
         }

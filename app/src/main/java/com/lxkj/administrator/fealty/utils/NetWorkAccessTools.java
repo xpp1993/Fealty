@@ -242,7 +242,6 @@ public class NetWorkAccessTools {
             imageLoader.get(imageURL, listener);
         }
     }
-
     /**
      *
      */

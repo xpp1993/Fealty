@@ -55,7 +55,7 @@ public class QuickFragmentTabHost extends TabHost
     private Context mContext;
     private FragmentManager mFragmentManager;
     private int mContainerId;
-    private TabHost.OnTabChangeListener mOnTabChangeListener;
+    private OnTabChangeListener mOnTabChangeListener;
     private TabInfo mLastTab;
     private boolean mAttached;
 
@@ -72,7 +72,7 @@ public class QuickFragmentTabHost extends TabHost
         }
     }
 
-    static class DummyTabFactory implements TabHost.TabContentFactory {
+    static class DummyTabFactory implements TabContentFactory {
         private final Context mContext;
 
         public DummyTabFactory(Context context) {
@@ -113,8 +113,8 @@ public class QuickFragmentTabHost extends TabHost
                     + " curTab=" + curTab + "}";
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR
-                = new Parcelable.Creator<SavedState>() {
+        public static final Creator<SavedState> CREATOR
+                = new Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);
             }
@@ -152,7 +152,7 @@ public class QuickFragmentTabHost extends TabHost
         if (findViewById(android.R.id.tabs) == null) {
             LinearLayout ll = new LinearLayout(context);
             ll.setOrientation(LinearLayout.VERTICAL);
-            addView(ll, new FrameLayout.LayoutParams(
+            addView(ll, new LayoutParams(
                     ViewGroup.LayoutParams.FILL_PARENT,
                     ViewGroup.LayoutParams.FILL_PARENT));
 
@@ -224,7 +224,7 @@ public class QuickFragmentTabHost extends TabHost
         mOnTabChangeListener = l;
     }
 
-    public void addTab(TabHost.TabSpec tabSpec, Class<?> clss, Bundle args) {
+    public void addTab(TabSpec tabSpec, Class<?> clss, Bundle args) {
         tabSpec.setContent(new DummyTabFactory(mContext));
         String tag = tabSpec.getTag();
 

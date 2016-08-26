@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -41,12 +42,11 @@ public class Melucheng_fragment extends BaseFragment {
     private BaiduMap mBaiduMap;//百度地图
     @ViewInject(R.id.mapView)
     private MapView mapView;
-    private double lat;
-    private double lon;
     private MySqliteHelper helper;
     private SQLiteDatabase db;
     String[] str;//查询条件
-    List<LatLng> points = new ArrayList<LatLng>();
+    List<LatLng> points;
+    List<Integer> colors;
 
     public void setHelper(MySqliteHelper helper) {
         Melucheng_fragment.this.helper = helper;
@@ -63,9 +63,31 @@ public class Melucheng_fragment extends BaseFragment {
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);//设置普通地图
         //开启交通图
         mBaiduMap.setTrafficEnabled(true);
-        str = new String[]{String.valueOf(System.currentTimeMillis() - 1000*60*30)};
         helper = getHelper();
+        db = helper.getReadableDatabase();
+        points = new ArrayList<>();
+        colors = new ArrayList<>();
     }
+
+    long curentTime;
+
+    @Override
+    public void onGetBunndle(Bundle arguments) {
+        super.onGetBunndle(arguments);
+        double lat = arguments.getDouble("lat");
+        double lon = arguments.getDouble("lon");
+        curentTime = arguments.getLong("currentTime");
+        LatLng poin = new LatLng(lat, lon);
+        setMapStatus(poin);
+        Runnable_query runnable_query = new Runnable_query();
+        /**
+         * 从数据库中获取半个小时内的GPS信息
+         *条件为:time+x>当前时间（假设x为30分钟）
+         */
+        //1.查询语句,耗时操作
+        new Thread(runnable_query).start();
+    }
+    //在地图上添加Marker，并显示
 
     private void setMarker(LatLng point) {
         //构建Marker图标
@@ -75,8 +97,17 @@ public class Melucheng_fragment extends BaseFragment {
         OverlayOptions option = new MarkerOptions()
                 .position(point)
                 .icon(bitmap);
-        //在地图上添加Marker，并显示
         mBaiduMap.addOverlay(option);
+    }
+
+    //设置新的中心点
+    private void setMapStatus(LatLng point) {
+        //  LatLng center = new LatLng(lat, lon);
+        //定义地图状态
+        MapStatus status = new MapStatus.Builder().target(point).zoom(18).build();
+        //定义MapStatusUpdate对象，以便描述地图状态将要发生的变化
+        MapStatusUpdate mMapStatusUpdate = MapStatusUpdateFactory.newMapStatus(status);
+        mBaiduMap.setMapStatus(mMapStatusUpdate);
     }
 
     @Override
@@ -93,38 +124,36 @@ public class Melucheng_fragment extends BaseFragment {
 
     @Override
     protected void initData() {
-        db = helper.getReadableDatabase();
-        /**
-         * 从数据库中获取半个小时内的GPS信息
-         *条件为:time+x>当前时间（假设x为30分钟）
-         */
-        //1.查询语句
-        cursor = db.query("gps",new String[]{"_id,time,lat,lon"}, "time >= ?", str, null, null, null, null);
-        //不断移动光标，遍历结果集
-        while (cursor.moveToNext()) {
-            //获取，第三列和第四列的值 ，lat  and lon
-            long time = cursor.getLong(1);
-            lat = Double.parseDouble(cursor.getString(2));
-            lon = Double.parseDouble(cursor.getString(3));
-            point = new LatLng(lat, lon);
-            points.add(point);//放入List
-            Log.e("info", lat + "?" + lon + "?" + time);
+
+    }
+
+    private class Runnable_query implements Runnable {
+
+        @Override
+        public void run() {
+            cursor = db.query("gps", new String[]{"_id,time,lat,lon"}, "time > " + (Melucheng_fragment.this.curentTime - 1000 * 60*30), null, null, null, null, null);
+            //不断移动光标，遍历结果集
+            while (cursor.moveToNext()) {
+                //获取，第三列和第四列的值 ，lat  and lon
+                long time = cursor.getLong(1);
+                double lat = Double.parseDouble(cursor.getString(2));
+                double lon = Double.parseDouble(cursor.getString(3));
+                LatLng point = new LatLng(lat, lon);
+                setMarker(point);
+                points.add(point);//放入List
+                Log.e("info", lat + "?" + lon + "?" + time);
+            }
+            if (points.size() < 2) {
+                return;
+            }
+            for (int i = 1; i < points.size(); i++) {
+                //构建分段颜色索引数组
+                colors.add(Integer.valueOf(getResources().getColor(R.color.MainTheme)));
+            }
+            OverlayOptions ooPolyline = new PolylineOptions().width(10).colorsValues(colors).points(points);//在走过的路上划线
+            //显示在地图上
+            mBaiduMap.addOverlay(ooPolyline);
         }
-        if (points.size() > 0) {
-            setMarker(point);
-        }
-        if (points.size() < 2) {
-            return;
-        }
-        List<Integer> colors = null;
-        for (int i = 1; i < points.size(); i++) {
-            //构建分段颜色索引数组
-            colors = new ArrayList<>();
-            colors.add(Integer.valueOf(Color.GREEN));
-        }
-        OverlayOptions ooPolyline = new PolylineOptions().width(10).colorsValues(colors).points(points);//在走过的路上划线
-        //显示在地图上
-        Polyline mPolyline = (Polyline) mBaiduMap.addOverlay(ooPolyline);
     }
 
     /**

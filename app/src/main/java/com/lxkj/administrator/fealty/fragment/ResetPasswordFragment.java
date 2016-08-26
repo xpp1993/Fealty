@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
+import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;

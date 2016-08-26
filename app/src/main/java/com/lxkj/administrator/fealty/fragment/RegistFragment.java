@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
+import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.ui.MyRadioGroup;
 import com.lxkj.administrator.fealty.utils.AppUtils;
@@ -32,6 +33,7 @@ import com.lxkj.administrator.fealty.utils.CommonTools;
 import com.lxkj.administrator.fealty.utils.ExampleUtil;
 import com.lxkj.administrator.fealty.utils.FormatCheck;
 import com.lxkj.administrator.fealty.utils.ImageUtil;
+import com.lxkj.administrator.fealty.utils.MReceiver;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
 
