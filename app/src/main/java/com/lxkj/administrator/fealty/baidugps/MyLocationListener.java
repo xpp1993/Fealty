@@ -114,7 +114,11 @@ public class MyLocationListener implements BDLocationListener, NetWorkAccessTool
     }
 
     public interface CallBack {
+<<<<<<< HEAD
         void callYou(double lat, double lon, String locationdescrible, String address, MySqliteHelper helper, long currentTime);
+=======
+        void callYou(double lat, double lon, String locationdescrible, String address, MySqliteHelper helper,long currentTime);
+>>>>>>> d4fa19f037d1a8c342f50a9b8c3a15928f453fcd
     }
     long currentTime;
     private void addDataToSQLite(double lat, double lon) {
