@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EFEFF3"
+    android:clipToPadding="true"
+    android:fitsSystemWindows="true">
+
+    <include layout="@layout/bar" />
+
+    <TextView
+        android:id="@+id/zhengcang"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="48dp"
+        android:drawableLeft="@mipmap/dian2"
+        android:drawablePadding="5dp"
+        android:gravity="center_vertical"
+        android:text="正常心率范围为60-120次/分钟" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/zhengcang"
+        android:background="#ffffff"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:id="@+id/baojinfanwei"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/fanwei_tv"
+                style="@style/self_info_layout_tv_title"
+                android:text="正常报警上下限" />
+
+            <ImageView
+                android:id="@+id/fanwei_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="9dp"
+                android:src="@mipmap/fanhui" />
+
+            <TextView
+                android:id="@+id/fanwei_tvshow"
+                style="@style/self_info_layout_tv_title"
+                android:layout_toLeftOf="@id/fanwei_iv"
+                android:paddingRight="5dp"
+                android:text="次/分钟" />
+
+            <TextView
+                android:id="@+id/fanwei_show"
+                style="@style/self_info_layout_tv_title"
+                android:layout_toLeftOf="@id/fanwei_tvshow"
+                android:paddingRight="5dp"
+                android:text="60-120" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EFEFF4" />
+
+        <RelativeLayout
+            android:id="@+id/jiancetime"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/jiancetime_tv"
+                style="@style/self_info_layout_tv_title"
+                android:text="间测时间" />
+
+            <ImageView
+                android:id="@+id/iv_jiancetime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="9dp"
+                android:src="@mipmap/fanhui" />
+
+            <TextView
+                android:id="@+id/jiancetime_tvshow"
+                style="@style/self_info_layout_tv_title"
+                android:layout_toLeftOf="@id/iv_jiancetime"
+                android:paddingRight="5dp"
+                android:text="分钟/次" />
+
+            <TextView
+                android:id="@+id/jaincetime_show"
+                style="@style/self_info_layout_tv_title"
+                android:layout_toLeftOf="@id/jiancetime_tvshow"
+                android:paddingRight="5dp"
+                android:text="3" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:background="#EFEFF3" />
+
+        <RelativeLayout
+            android:id="@+id/sport_xinlv"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/sport_tv_xinlv"
+                style="@style/self_info_layout_tv_title"
+                android:text="运动时心率" />
+
+            <ImageView
+                android:id="@+id/iv_leftsport_xinlv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="9dp"
+                android:src="@mipmap/fanhui" />
+
+            <TextView
+                android:id="@+id/sporttvshow_xinlv"
+                style="@style/self_info_layout_tv_title"
+                android:layout_toLeftOf="@id/iv_leftsport_xinlv"
+                android:paddingRight="5dp"
+                android:text="次/分钟" />
+
+            <TextView
+                android:id="@+id/sport_show"
+                style="@style/self_info_layout_tv_title"
+                android:layout_toLeftOf="@id/sporttvshow_xinlv"
+                android:paddingRight="5dp"
+                android:text="90-120" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EFEFF3" />
+        <RelativeLayout
+            android:id="@+id/sleep_xinlv"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/sleep_tv_xinlv"
+                style="@style/self_info_layout_tv_title"
+                android:text="睡眠时心率" />
+
+            <ImageView
+                android:id="@+id/iv_leftsleep_xinlv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="9dp"
+                android:src="@mipmap/fanhui" />
+
+            <TextView
+                android:id="@+id/sleeptvshow_xinlv"
+                style="@style/self_info_layout_tv_title"
+                android:layout_toLeftOf="@id/iv_leftsleep_xinlv"
+                android:paddingRight="5dp"
+                android:text="次/分钟" />
+
+            <TextView
+                android:id="@+id/sleepxinlv_show"
+                style="@style/self_info_layout_tv_title"
+                android:layout_toLeftOf="@id/sleeptvshow_xinlv"
+                android:paddingRight="5dp"
+                android:text="80-100" />
+        </RelativeLayout>
+
+    </LinearLayout>
+</RelativeLayout>
+

@@ -21,6 +21,7 @@ import com.lxkj.administrator.fealty.baidugps.LocationService;
 import com.lxkj.administrator.fealty.baidugps.MyLocationListener;
 import com.lxkj.administrator.fealty.base.BaseApplication;
 import com.lxkj.administrator.fealty.base.BaseFragment;
+import com.lxkj.administrator.fealty.bean.RateListData;
 import com.lxkj.administrator.fealty.bean.SleepData;
 import com.lxkj.administrator.fealty.bean.SportData;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
@@ -85,8 +86,11 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     private final int REQURST_HANDLER_SPORTDATA = 0x23;
     private final int REQURST_HANDLER_IDENTITY = 0x24;
     private final int REQURST_HANDLER_CURRENT_RATE = 0x25;
+    private final int REQURST_HANDLER_LIST_RATE = 0x26;
     public static final String RATE_CHANGED = "com.lxkj.administrator.fealty.fragment.HealthDataFragment";
     private HealthRateReceiver mReceiver = null;
+    private int RATE_STATUS = 80;//保存心率
+
     @Override
     protected void init() {
         handler = new MyHandler();
@@ -94,6 +98,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         //设置horizontalScrollvView拉到头和尾的时候没有阴影颜色
         horiView.setOverScrollMode(View.OVER_SCROLL_NEVER);
     }
+
     @Override
     public void onStop() {
         super.onStop();
@@ -102,8 +107,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mReceiver!=null)
-        getActivity().unregisterReceiver(mReceiver);
+        if (mReceiver != null)
+            getActivity().unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -139,6 +144,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                 bundle.putString("locationdescrible", describle);
                 bundle.putDouble("lat", lat);
                 bundle.putDouble("lon", lon);
+                bundle.putInt("rate", RATE_STATUS);
                 EventBus.getDefault().post(new NavFragmentEvent(new LocaltionFragment(), bundle));
                 break;
             default:
@@ -194,13 +200,25 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     break;
                 case REQURST_HANDLER_CURRENT_RATE://处理当前心率
                     int currentRate = msg.arg1;
+                    RATE_STATUS = currentRate;
                     mPpView.setFountText(currentRate + "");
                     mPpView.invalidate();
                     //把实时心率传到定位页面
-                    Intent intent=new Intent();
+                    Intent intent = new Intent();
                     intent.putExtra("tempRate", currentRate);
                     intent.setAction(LocaltionFragment.RATE_CHANGED);
                     getActivity().sendBroadcast(intent);
+                    break;
+                case REQURST_HANDLER_LIST_RATE://画心率折线图
+                    TreeMap<Integer, Integer> map = new TreeMap<>();
+                    List<RateListData> list = (List<RateListData>) msg.obj;
+                    for (int i = 0; i < list.size(); i++) {
+                        RateListData listData = list.get(i);
+                        int rate_time = Integer.parseInt(listData.getTime());
+                        map.put(rate_time, listData.getRate());
+                    }
+                    initChart(map);
+
                     break;
                 default:
                     break;
@@ -213,6 +231,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         mLineChart03View.postInvalidate();
         mLineChart03View_left.postInvalidate();
     }
+
     //广播接受者
     class HealthRateReceiver extends BroadcastReceiver {
         @Override
@@ -226,6 +245,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
             }
         }
     }
+
     //注册广播的方法
     private void registeHealthRateChangedReceiver() {
         IntentFilter filter = new IntentFilter();
@@ -255,6 +275,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         message.setData(GPSData);
         handler.sendMessage(message);
     }
+
     //提供给外界设置睡眠数据的方法,light_hour, light_minute, deep_hour, deep_minute, total_hour_str
     public void setSleepData(String light_hour, String light_minute, String deep_hour, String deep_minute, String total_hour_str) {
         Bundle sleepData = new Bundle();
@@ -308,4 +329,13 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         message.what = REQURST_HANDLER_CURRENT_RATE;
         handler.sendMessage(message);
     }
+
+    //提供给外界设置折线图中心率的方法,currentHeart
+    public void setRateListData(List<RateListData> listData) {
+        Message message = Message.obtain();
+        message.what = REQURST_HANDLER_LIST_RATE;
+        message.obj = listData;
+        handler.sendMessage(message);
+    }
+
 }

@@ -281,6 +281,10 @@ public final class DecodeManager {
         msg.what = messageWhat;
         insertRecInformation(data, jsonObject);
         if (isRequestOK(jsonObject)) {
+            int code = jsonObject.optInt("code",1);
+            String desc = jsonObject.optString("desc","");
+            data.putInt("code", code);
+            data.putString("desc", desc);
             JSONArray old_people_list = jsonObject.optJSONObject("json").optJSONArray("old_people_list");
             if (old_people_list != null && old_people_list.length() > 0) {
                 ArrayList<UserInfo> friends = new ArrayList<UserInfo>();

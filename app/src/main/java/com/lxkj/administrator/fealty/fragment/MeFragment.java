@@ -8,11 +8,13 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONArray;
@@ -37,6 +40,7 @@ import com.lxkj.administrator.fealty.baidugps.MyLocationListener;
 import com.lxkj.administrator.fealty.base.BaseApplication;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.bean.Contacts;
+import com.lxkj.administrator.fealty.bean.RateListData;
 import com.lxkj.administrator.fealty.bean.SleepData;
 import com.lxkj.administrator.fealty.bean.SportData;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
@@ -48,6 +52,7 @@ import com.lxkj.administrator.fealty.utils.CommonTools;
 import com.lxkj.administrator.fealty.utils.MySqliteHelper;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
+import com.lxkj.administrator.fealty.utils.XinLvSqliteHelper;
 import com.yc.peddemo.sdk.BLEServiceOperate;
 import com.yc.peddemo.sdk.BluetoothLeService;
 import com.yc.peddemo.sdk.DataProcessing;
@@ -72,6 +77,7 @@ import org.xutils.view.annotation.ViewInject;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -83,10 +89,14 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 @ContentView(R.layout.fragement_me)
 public class MeFragment extends BaseFragment implements View.OnClickListener, NetWorkAccessTools.RequestTaskListener, DeviceScanInterfacer, IListDialogListener, ICallback {
-    @ViewInject(R.id.me_iv_left)
-    private ImageView me_iv_left;
-    @ViewInject(R.id.me_iv_left2)
-    private ImageView me_shezhi;
+    @ViewInject(R.id.fragment_me_details)
+    private RelativeLayout fragment_me_details;
+    @ViewInject(R.id.relative_shezhi)
+    private RelativeLayout me_shezhi;
+    @ViewInject(R.id.relative_about)
+    private RelativeLayout relative_about;//关于我们
+    @ViewInject(R.id.relative_binded)
+    private RelativeLayout binded_action;
     @ViewInject(R.id.me_headpic)
     private CircleImageView circleImageView;
     @ViewInject(R.id.me_username)
@@ -95,8 +105,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private TextView me_phone;
     @ViewInject(R.id.bluee_iv_left)
     private SlideSwitch bluee_iv_left;
-    @ViewInject(R.id.binded_action)
-    private ImageView binded_action;
     public static final int REQUEST_USER_BYMIBILE = 0x01;
     private Handler myHandler = new MyHandler();
     private BLEServiceOperate mBLEServiceOperate;
@@ -121,23 +129,19 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private WriteCommandToBLE mWriteCommand;
     private String TAG = "xpp";
     private Handler mHandler;
-    private int tempRate = 75;
-    private int tempStatus;
+    //    private int tempRate = 75;
+//    private int tempStatus;
     private DataProcessing mDataProcessing;
     private final int UPDATA_REAL_RATE_MSG = 20;//处理心率监测数据
     private final int UPDATE_STEP_UI_MSG = 0;//同步计步数据
     private final int UPDATE_SLEEP_UI_MSG = 23;//同步睡眠数据
     public static final int REQUEST_CODE_UPLOAD_CONTACTS = 0X20;//上传通讯录
     public static final int REQUEST_CODE_SPORTDATA_SLEEPDATA = 0x10;//把运动数据睡眠数据上传到服务器
-    public static final int REQUEST_CODE_RATE = 0x22;//把测试的心率数据上传到服务器
+    public static final int REQUEST_CODE_CURRENTRATE = 0x22;//把测试的心率数据上传到服务器
     private String phone;
-    int step, calories;
-    float distance;
-    String total_hour_str;
-    int deep_hour, deep_minute, light_minute, light_hour;
-    int RATE_STATUS;
-    @ViewInject(R.id.see_mygps_iv)
-    private ImageView see_myGPSINFO;
+    public static final int GPS_UPLOAD_CODE = 0x11;
+    @ViewInject(R.id.relative_location)
+    private RelativeLayout see_myGPSINFO;
     @ViewInject(R.id.bar_tv_title_center)
     private TextView bar_biaoti;
     @ViewInject(R.id.bar_view_left_line)
@@ -154,6 +158,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private MyLocationListener.CallBack mCallback;
     private MySqliteHelper helper;
     private long currentTime;
+    @ViewInject(R.id.jiancebaojing)
+    private SlideSwitch jiancebaojing;//监测报警信息
+    XinLvSqliteHelper xinlvhelper;
+    SQLiteDatabase xinlvdb;
 
     @Override
     protected void init() {
@@ -178,7 +186,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     bundle.putDouble("lat", lat);
                     bundle.putString("describle", locationdescrible);
                     bundle.putString("address", address);
-                    EventBus.getDefault().post(bundle);//把定位数据数据返回到首页，且上传到服务器
+                    EventBus.getDefault().post(bundle);//把定位数据数据返回到首页
                     myHandler.postDelayed(runnable6, 2000);//停止定位
                 }
             }
@@ -194,6 +202,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         mDevice = new ArrayList<>();
         mBLEServiceOperate = BLEServiceOperate.getInstance(AppUtils.getBaseContext());// 用于BluetoothLeService实例化准备,必须
         mRegisterReceiver();
+        xinlvhelper = new XinLvSqliteHelper(AppUtils.getBaseContext());
+        xinlvdb = xinlvhelper.getReadableDatabase();
     }
 
     /**
@@ -208,15 +218,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         me_username.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
         me_phone.setText(TextUtils.isEmpty(SessionHolder.user.getMobile()) ? "未设置" : "手机号:" + SessionHolder.user.getMobile());
     }
-    //开启线程执行图片加载图片
-    private class LoadImage implements Runnable {
 
-        @Override
-        public void run() {
-            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
-        }
-
-    }
     private void mRegisterReceiver() {
         IntentFilter mFilter = new IntentFilter();
         mFilter.addAction(GlobalVariable.READ_BATTERY_ACTION);//监测手环电量
@@ -227,10 +229,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     @Override
     protected void initListener() {
-        me_iv_left.setOnClickListener(this);
+        fragment_me_details.setOnClickListener(this);//跳转到个人信息页
         binded_action.setOnClickListener(this);
         see_myGPSINFO.setOnClickListener(this);
         me_shezhi.setOnClickListener(this);
+        relative_about.setOnClickListener(this);
         bluee_iv_left.setSlideListener(new SlideSwitch.SlideListener() {
             @Override
             public void open() {
@@ -251,6 +254,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             public void close() {
             }
         });
+        jiancebaojing.setSlideListener(new SlideSwitch.SlideListener() {
+            @Override
+            public void open() {
+                //跳转到报警模式设置页面
+                EventBus.getDefault().post(new NavFragmentEvent(new fragment_BaojinMode()));
+            }
+
+            @Override
+            public void close() {
+
+            }
+        });
     }
 
     @Override
@@ -258,7 +273,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         //判断是否是新的一天
         // JudgeNewDayWhenResume();
         startGps();//开始定位
-
     }
 
     // 用EventBus 来导航,订阅者
@@ -294,14 +308,25 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.removeCallbacks(runnable3);
         if (runnable4 != null)
             myHandler.removeCallbacks(runnable4);
-        if (runnable5 != null)
-            myHandler.removeCallbacks(runnable5);
+        if (runnable_updataGPS != null)
+            myHandler.removeCallbacks(runnable_updataGPS);
+        if (runnable_updataGPS2 != null)
+            myHandler.removeCallbacks(runnable_updataGPS2);
         if (runnable6 != null)
             myHandler.removeCallbacks(runnable6);
         if (runable_startGps != null)
             myHandler.removeCallbacks(runable_startGps);
         if (helper != null) {
             helper.close();
+        }
+        if (xinlvhelper != null) {
+            xinlvhelper.close();
+        }
+        if (xinlvdb != null) {
+            xinlvdb.close();
+        }
+        if (delatesqlite != null) {
+            myHandler.removeCallbacks(delatesqlite);
         }
         mBLEServiceOperate.disConnect();
     }
@@ -310,14 +335,14 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.me_iv_left:
-                EventBus.getDefault().post(new NavFragmentEvent(new MeSettingFragment()));
+                EventBus.getDefault().post(new NavFragmentEvent(new MeSettingFragment()));//跳转到个人信息详情页
                 break;
             case R.id.binded_action://绑定用户
                 //1.获取手机联系人
                 ArrayList<Contacts> contacts = (ArrayList<Contacts>) getContacts(AppUtils.getBaseContext());
                 //2.上传通讯录,返回通讯录中,注册过  的 用户列表
-                Log.e("telephoe", SessionHolder.mobile);
-                Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list", "mobile"}, uploadContacts(contacts), SessionHolder.mobile);
+                Log.e("telephoe", SessionHolder.user.getMobile());
+                Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list", "mobile"}, uploadContacts(contacts), SessionHolder.user.getMobile());
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, MeFragment.this);
                 ToastUtils.showToastInUIThread("正在获取联系人列表....");
                 break;
@@ -342,7 +367,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     }
 
     //开始扫描设备
-
     private void scanLeDevice(final boolean enable) {
         if (enable) {
             // Stops scanning after a pre-defined scan period.
@@ -425,7 +449,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 }
                 break;
             case REQUEST_CODE_SPORTDATA_SLEEPDATA:
-                // case REQUEST_CODE_RATE:
+            case REQUEST_CODE_CURRENTRATE://上传实时心率
+            case GPS_UPLOAD_CODE:
                 try {
                     DecodeManager.decodeCommon(jsonObject, requestCode, myHandler);
                 } catch (JSONException e) {
@@ -499,6 +524,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             mBLEServiceOperate.connect(deviceAddress);//连接手环
         }
     }
+
     private class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -527,7 +553,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 case DISCONNECT_MSG://报警并尝试连接
                     CURRENT_STATUS = DISCONNECTED;
                     bluee_iv_left.setSlideable(true);
-//                    ToastUtils.showToastInUIThread("未连接或者是连接失败！");
                     String lastConnectAddr0 = sp.getString(
                             GlobalVariable.LAST_CONNECT_DEVICE_ADDRESS_SP, "");
                     boolean connectResute0 = mBLEServiceOperate
@@ -540,22 +565,22 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     bluee_iv_left.setSlideable(false);
                     ToastUtils.showToastInUIThread("已连接");
                     break;
-                case UPDATA_REAL_RATE_MSG://处理接收到的心率数据
-                    Log.d("tempRate", tempRate + "");
-                    //如果测试完成
-                    if (tempStatus == GlobalVariable.RATE_TEST_FINISH) {
-//                        bundle.putInt("tempRate", RATE_STATUS);
-//                        EventBus.getDefault().post(bundle);
-//                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "heartRate"}, SessionHolder.user.getMobile(), "", tempRate + "");
-//                        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_SLEEP_SPORT, params, null, REQUEST_CODE_SPORTDATA_SLEEPDATA, MeFragment.this);
-                    }
+                case UPDATA_REAL_RATE_MSG://处理接收到的心率数据.把心率数据写入数据库
+                    // Log.d("tempRate", tempRate + "");
+                    Bundle rate_bundle = msg.getData();
+                    int rate = rate_bundle.getInt("rate");
+                    String rate_time = rate_bundle.getString("time");
+                    xinlvdb.insert("xinlv", null, toContentValues(rate_time, rate, SessionHolder.user.getMobile()));
+                    //上传到服务器
+                    Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "currentHeart"}, SessionHolder.user.getMobile(), rate_time, rate + "");
+                    NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.INSERT_CURRENTRATE, params, null, REQUEST_CODE_CURRENTRATE, MeFragment.this);
                     break;
 //                case UPDATE_SLEEP_UI_MSG://睡眠数据
 //                    querySleepInfo();
 //                    break;
 //                case UPDATE_STEP_UI_MSG://返回今天的步数、距离、卡路里的集合
 //                    queryStepInfo();
-                 //   break;
+                //   break;
                 case REQUEST_CODE_UPLOAD_CONTACTS://处理上传手机通讯录返回的数据
                     if (msg.getData().getInt("code") == 1) {//请求成功
                         if (msg.getData().getSerializable("old_people_list") != null) {
@@ -564,10 +589,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                             EventBus.getDefault().post(new NavFragmentEvent(new OlsManListFragment(), bundle));
                         }
                     }
-                    break;
-                case REQUEST_CODE_SPORTDATA_SLEEPDATA:
-//                case REQUEST_CODE_RATE:
-                    ToastUtils.showToastInUIThread("数据已更新到服务器！");
                     break;
                 case NEW_DAY_MSG:
                     mySQLOperate.updateStepSQL();//新一天初始化步行数据库
@@ -582,18 +603,71 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 case OFFLINE_SLEEP_SYNC_OK://同步了离线睡眠数据，显示,且上传服务器
                     querySleepInfo();
                     break;
+                case REQUEST_CODE_SPORTDATA_SLEEPDATA:
+                case REQUEST_CODE_CURRENTRATE://上传实时心率
+                case GPS_UPLOAD_CODE:
+                    if (msg.getData().getInt("code") == 1) {
+                        Log.e("upLoad:", msg.getData().getString("desc"));
+                        ToastUtils.showToastInUIThread("数据已更新到服务器！");
+                    }
+                    break;
                 default:
                     break;
             }
         }
     }
-    private void functionRateFinished() {
-        mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_STOP);//发送心率测试关闭
-        //执行上传收集到的心率测试数据，上传成功后清空
-        //做数据保存操作
-        Log.e("wyj", "functionRateFinished");
+
+    // 将数据封装为ContentValues,心率数据局放入数据库
+    public ContentValues toContentValues(String time, int rate, String phone) {
+        // 底部类似于Map
+        ContentValues values = new ContentValues();
+        // 将值跟列一起放到ConentValues里。
+        values.put("time", time);
+        values.put("rate", rate);
+        values.put("phone", phone);
+        return values;
     }
 
+    private void functionRateFinished() {
+        mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_STOP);//发送心率测试关闭
+        //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
+        Log.e("wyj", "functionRateFinished");
+        com.alibaba.fastjson.JSONObject object = new com.alibaba.fastjson.JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        List<RateListData> rateList = new ArrayList<>();
+        Map<String, List<RateListData>> map = new HashMap<>();
+        RateListData rateListData = null;
+        com.alibaba.fastjson.JSONObject jsonObject = null;
+        Cursor cursor = xinlvdb.query("xinlv", null, null, null, null, null, null, null);
+        while (cursor.moveToNext()) {
+            jsonObject = new com.alibaba.fastjson.JSONObject();
+            rateListData = new RateListData();
+            //获取，第二列和第三列的值 ，time,rate
+            String rate_time = cursor.getString(1);
+            int rate = cursor.getInt(2);
+            rateListData.setRate(rate);
+            rateListData.setTime(rate_time);
+            jsonObject.put("rate_time", rate_time);
+            jsonObject.put("rate", rate);
+            jsonArray.add(jsonObject);
+            rateList.add(rateListData);
+        }
+        cursor.close();
+        map.put(SessionHolder.user.getMobile(), rateList);
+        object.put("rate_list", jsonArray);
+        object.put("mobile", SessionHolder.user.getMobile());
+        String jsonString = object.toJSONString();
+        if (rateList.size() == 0) {
+            return;
+        }
+        //把心率发给首页
+        EventBus.getDefault().post(map);
+        //  myHandler.postDelayed(d)
+        //把心率json数据上传到服务器,上传到服务器之后，清空数据库
+//        Map<String, String> params = CommonTools.getParameterMap(new String[]{"rate_list", "mobile"}, jsonString, SessionHolder.user.getMobile());
+//        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, MeFragment.this);
+        myHandler.postDelayed(delatesqlite, 2000);//清空数据库
+    }
     /**
      * 电量和蓝牙版本接收
      */
@@ -658,7 +732,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         return pendingIntent;
     }
 
-
     private static final int NEW_DAY_MSG = 3;
     private static final int OFFLINE_STEP_SYNC_OK = 5;
     private static final int OFFLINE_SLEEP_SYNC_OK = 7;
@@ -720,15 +793,29 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private RateChangeListener mOnRateListener = new RateChangeListener() {
         @Override
         public void onRateChange(int rate, int status) {
-            tempRate = rate;
-            tempStatus = status;
-            Intent intent=new Intent();
+//           int  tempRate = rate;
+//           int tempStatus = status;
+            Intent intent = new Intent();
             intent.putExtra("tempRate", rate);
             intent.setAction(HealthDataFragement.RATE_CHANGED);
             getActivity().sendBroadcast(intent);
 //            RATE_STATUS = tempRate;
-            Log.e("wyj", "onRateChange =" + tempRate);
-            //myHandler.sendEmptyMessage(UPDATA_REAL_RATE_MSG);
+            Log.e("wyj", "onRateChange =" + rate);
+            //把心率测试数据写入数据库
+            //获取系统当前时间
+            java.sql.Timestamp time = new java.sql.Timestamp(new java.util.Date().getTime());
+            int hour = time.getHours();//时
+            int minute = time.getMinutes();//分
+            int second = time.getSeconds();//秒
+            String rate_time = hour + ":" + minute + ":" + second;//测到此刻心率的时间
+            Bundle rate_bundle = new Bundle();
+            rate_bundle.putString("time", rate_time);
+            rate_bundle.putInt("rate", rate);
+            Message message = Message.obtain();
+            message.what = UPDATA_REAL_RATE_MSG;
+            message.setData(rate_bundle);
+//          myHandler.sendEmptyMessage(UPDATA_REAL_RATE_MSG);
+            myHandler.sendMessage(message);
         }
     };
     /**
@@ -739,6 +826,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         @Override
         public void onSleepChange() {
             //表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
+            myHandler.postDelayed(runnable_updataGPS2, 1000 * 60 * 60 * 2);
+            //心率不正常，实时实时上传GPS信息。然后每隔三分钟上传一次。
             myHandler.sendEmptyMessage(UPDATE_SLEEP_UI_MSG);
         }
     };
@@ -750,22 +839,20 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         public void onStepChange(int steps, float distance, int calories) {
             Log.d("onStepHandler", "steps =" + steps + ",distance =" + distance
                     + ",calories =" + calories);
-            SportData sportData=new SportData();
+            SportData sportData = new SportData();
             sportData.setCalories(calories);
             sportData.setSteps(steps);
             sportData.setDistance(distance);
             sportData.setParentphone(SessionHolder.user.getMobile());
+            //把计步监听的结果上传服务器
+            updataSportData(steps, calories, distance);
             EventBus.getDefault().post(sportData);
-           //  myHandler.sendEmptyMessage(UPDATE_STEP_UI_MSG);
+            //  myHandler.sendEmptyMessage(UPDATE_STEP_UI_MSG);
+            //运动时每隔15分钟上传一次GPS
+            myHandler.postDelayed(runnable_updataGPS, 1000 * 60 * 15);
+            //心率不正常，实时实时上传GPS信息。然后每隔三分钟上传一次。
         }
     };
-
-    /**
-     * 返回某天心率测试的详情
-     */
-    private void queryRateInfo() {
-        //mySQLOperate.saveRate();
-    }
 
     /**
      * 返回今天的步数、距离、卡路里的集合
@@ -773,15 +860,26 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private void queryStepInfo() {
         StepInfo stepInfo = mySQLOperate.queryStepInfo(CalendarUtils.getCalendar(0));
         if (stepInfo != null) {
-            step = stepInfo.getStep();//运动的步数
-            calories = stepInfo.getCalories();//卡路里
-            distance = stepInfo.getDistance();//距离
+            int step = stepInfo.getStep();//运动的步数
+            int calories = stepInfo.getCalories();//卡路里
+            float distance = stepInfo.getDistance();//距离
             SportData sportData = new SportData(step, calories, distance, SessionHolder.user.getMobile());
+            //把这些数据上传到服务器
+            updataSportData(step, calories, distance);
             //发给首页显示
             EventBus.getDefault().post(sportData);
         } else {
             Log.e("stepData", stepInfo + "");
         }
+    }
+
+    //把运动数据上传到服务器
+    private void updataSportData(int step, int calories, float distance) {
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("step", step + "");
+        parameters.put("calories", calories + "");
+        parameters.put("distance", distance + "");
+        alterSelfData(parameters);
     }
 
     /**
@@ -800,18 +898,19 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             sleepTotalTime = sleepTimeInfo.getSleepTotalTime();
             double total_hour = ((float) sleepTotalTime / 60f);
             DecimalFormat df1 = new DecimalFormat("0.0"); // 保留1位小数，带前导零
-            deep_hour = deepTime / 60;
+            int deep_hour = deepTime / 60;
             Log.e("deep", deep_hour + "");
             // int deep_minute = (deepTime - deep_hour * 60);
-            deep_minute = deepTime % 60;
-            light_hour = lightTime / 60;
+            int deep_minute = deepTime % 60;
+            int light_hour = lightTime / 60;
             // int light_minute = (lightTime - light_hour * 60);
-            light_minute = lightTime % 60;
+            int light_minute = lightTime % 60;
             Log.e("light", light_hour + "");
             int active_count = awakeCount;
-            total_hour_str = df1.format(total_hour);
+            String total_hour_str = df1.format(total_hour);
             SleepData sleepData = new SleepData(deep_hour, deep_minute, light_hour, light_minute, active_count, total_hour_str, SessionHolder.user.getMobile());
             //把这些数据上传到服务器
+            updataSleepData(deep_hour, light_hour, light_minute, total_hour_str);
             EventBus.getDefault().post(sleepData);//把数据传到首页面
             if (total_hour_str.equals("0.0")) {
                 total_hour_str = "0";
@@ -819,6 +918,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         } else {
             Log.d("getSleepInfo", "sleepTimeInfo =" + sleepTimeInfo);
         }
+    }
+
+    //把睡眠数据上传到服务器
+    private void updataSleepData(int deep_hour, int light_hour, int light_minute, String total_hour_str) {
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("total_hour_str", total_hour_str);
+        parameters.put("light_hour", light_hour + "");
+        parameters.put("light_minute", light_minute + "");
+        parameters.put("deep_hour", deep_hour + "");
+        parameters.put("light_minute", light_minute + "");
+        alterSelfData(parameters);
     }
 
     /**
@@ -848,7 +958,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.sendEmptyMessage(OFFLINE_STEP_SYNC_OK);//把离线同步的运动数据发送给首页
             myHandler.postDelayed(runnable3, 1000 * 30);//发送心率测试开始
             myHandler.postDelayed(runnable4, 1000 * 15);//请求手环电量
-            myHandler.postDelayed(runnable5, 1000);//把数据上传到服务器
+            // myHandler.postDelayed(runnable5, 1000);//把数据上传到服务器
         } else if (status == ICallbackStatus.GET_BLE_BATTERY_OK) {
         }
     }
@@ -904,6 +1014,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }
     };
     /**
+     * 删除数据库内容
+     */
+    private Runnable delatesqlite = new Runnable() {
+        @Override
+        public void run() {
+            long xinlv_id = xinlvdb.delete("xinlv", null, null);
+            Log.e("xinlv_id", xinlv_id + "");
+        }
+    };
+    /**
      * 请求获取电量指令
      */
     private Runnable runnable4 = new Runnable() {
@@ -916,13 +1036,39 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.postDelayed(this, 1000 * 15);
         }
     };
-    private Runnable runnable5 = new Runnable() {
+    //运动时每15分钟上传一次GPS
+    private Runnable runnable_updataGPS = new Runnable() {
         @Override
         public void run() {
-            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "total_hour_str", "light_hour", "light_minute", "deep_hour", "deep_minute", "calories", "distance", "step"}, SessionHolder.user.getMobile(), total_hour_str, light_hour + "", light_minute + "", deep_hour + "", deep_minute + "", calories + "", distance + "", step + "");
-            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_SLEEP_SPORT, params, null, REQUEST_CODE_SPORTDATA_SLEEPDATA, MeFragment.this);
+            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, SessionHolder.user.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GPS_UPLOAD_URL, params, null, GPS_UPLOAD_CODE, MeFragment.this);
+            myHandler.postDelayed(this, 1000 * 60 * 15);
         }
     };
+    //睡眠时每两个小时上传一次GPS
+    private Runnable runnable_updataGPS2 = new Runnable() {
+        @Override
+        public void run() {
+            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, SessionHolder.user.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GPS_UPLOAD_URL, params, null, GPS_UPLOAD_CODE, MeFragment.this);
+            myHandler.postDelayed(this, 1000 * 60 * 60 * 2);
+        }
+    };
+
+    /**
+     * 上传睡眠和运动数据到服务器
+     */
+    private void alterSelfData(Map<String, String> parameters) {
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "total_hour_str", "light_hour", "light_minute", "deep_hour", "deep_minute", "calories", "distance", "step"}, SessionHolder.user.getMobile(), "", "", "", "", "", "", "", "");
+        params.putAll(parameters);
+        try {
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_SLEEP_SPORT, params, null, REQUEST_CODE_SPORTDATA_SLEEPDATA, MeFragment.this);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ToastUtils.showToastInUIThread("程序错误");
+        }
+    }
+
     /**
      * GPS定位相关
      */
@@ -1016,6 +1162,5 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 phones.close();
         }
         return contacts;
-
     }
 }

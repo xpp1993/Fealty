@@ -54,8 +54,8 @@ public class MyLocationListener implements BDLocationListener, NetWorkAccessTool
             //把数据放入数据库
             addDataToSQLite(lat, lon);
             //把数据上传服务器
-            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, SessionHolder.user.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
-            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GPS_UPLOAD_URL, params, null, MyLocationListener.GPS_UPLOAD_CODE, MyLocationListener.this);
+//            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, SessionHolder.user.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
+//            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GPS_UPLOAD_URL, params, null, MyLocationListener.GPS_UPLOAD_CODE, MyLocationListener.this);
             sb.append(lat + "::" + lon + "::" + address + "::" + locationdescrible);
             if (location.getLocType() == BDLocation.TypeGpsLocation) {// GPS定位结果
                 sb.append("gps定位成功");
@@ -114,11 +114,7 @@ public class MyLocationListener implements BDLocationListener, NetWorkAccessTool
     }
 
     public interface CallBack {
-<<<<<<< HEAD
         void callYou(double lat, double lon, String locationdescrible, String address, MySqliteHelper helper, long currentTime);
-=======
-        void callYou(double lat, double lon, String locationdescrible, String address, MySqliteHelper helper,long currentTime);
->>>>>>> d4fa19f037d1a8c342f50a9b8c3a15928f453fcd
     }
     long currentTime;
     private void addDataToSQLite(double lat, double lon) {

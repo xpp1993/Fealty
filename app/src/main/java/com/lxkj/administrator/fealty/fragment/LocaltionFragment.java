@@ -67,6 +67,8 @@ public class LocaltionFragment extends BaseFragment {
         super.onGetBunndle(arguments);
         double lat = arguments.getDouble("lat");
         double lon = arguments.getDouble("lon");
+        int rate=arguments.getInt("rate");
+        showxinlv.setText(rate+"");//初始化显示心率
         String desctible = arguments.getString("locationdescrible");
         LatLng latLng = new LatLng(lat, lon);
         Log.e("baidumapData", lat + "::" + lon + desctible);

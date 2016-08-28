@@ -28,7 +28,7 @@ public class ParameterManager {
     //性别标杆
     public static final String USER_SEX_CODE_MAN = "1", USER_SEX_CODE_WOMAN = "2";
     public static final String  SELECT_BIND_OLD ="http://192.168.8.133:8080/cuffapi/user/select_bind_old";
-    public static final String INSERT_RATE="http://192.168.8.133:8080/cuffapi/heart/insert_user_heart";
+    public static final String INSERT_CURRENTRATE="http://192.168.8.133:8080/cuffapi/heart/insert_user_heart";
     public static final String SELECT_USER_CURRENT_HEART= "http://192.168.8.133:8080/cuffapi/current_heart/select_user_current_heart";
     public static final String GPS_UPLOAD_URL="http://192.168.8.133:8080/cuffapi/gps/operation_user_gps";
     public static final String  GET_GPS_FROM_URL="http://192.168.8.133:8080/cuffapi/gps/select_user_gps";

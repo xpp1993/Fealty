@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:slideswitch="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EFEFF3"
+    android:clipToPadding="true"
+    android:fitsSystemWindows="true">
+
+    <include layout="@layout/bar" />
+
+    <View
+        android:id="@+id/viewvoid"
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:layout_marginTop="48dp"
+        android:background="#DCDCDc" />
+    <LinearLayout
+        android:id="@+id/linearbaojin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/viewvoid"
+        android:background="#ffffff"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/baojin"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/voice_tv"
+                style="@style/self_info_layout_tv_title"
+                android:text="声音" />
+
+            <com.leaking.slideswitch.SlideSwitch
+                android:id="@+id/voidbaojing"
+                android:layout_width="54dp"
+                android:layout_height="30dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="12dp"
+                slideswitch:isOpen="false"
+                slideswitch:shape="circle"
+                slideswitch:themeColor="#5DCDBF"></com.leaking.slideswitch.SlideSwitch>
+        </RelativeLayout>
+        <View
+            android:id="@+id/viewsheng"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EFEFF4" />
+        <RelativeLayout
+            android:id="@+id/relativelayout6"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/info"
+                style="@style/self_info_layout_tv_title"
+                android:text="震动" />
+            <com.leaking.slideswitch.SlideSwitch
+                android:id="@+id/zdbaojing"
+                android:layout_width="54dp"
+                android:layout_height="30dp"
+                slideswitch:isOpen="true"
+                slideswitch:shape="circle"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="12dp"
+                slideswitch:themeColor="#5DCDBF" >
+            </com.leaking.slideswitch.SlideSwitch>
+        </RelativeLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:background="#DCDCDc" />
+        <RelativeLayout
+            android:id="@+id/relativeyuyin"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/yunyin"
+                style="@style/self_info_layout_tv_title"
+                android:text="语音提示" />
+            <com.leaking.slideswitch.SlideSwitch
+                android:id="@+id/yuyinbaojing"
+                android:layout_width="54dp"
+                android:layout_height="30dp"
+                slideswitch:isOpen="false"
+                slideswitch:shape="circle"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="12dp"
+                slideswitch:themeColor="#5DCDBF" >
+            </com.leaking.slideswitch.SlideSwitch>
+        </RelativeLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:background="#DCDCDc" />
+        <RelativeLayout
+            android:id="@+id/relativetanc"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/tanchuang"
+                style="@style/self_info_layout_tv_title"
+                android:text="弹窗提醒" />
+            <com.leaking.slideswitch.SlideSwitch
+                android:id="@+id/tancbaojing"
+                android:layout_width="54dp"
+                android:layout_height="30dp"
+                slideswitch:isOpen="false"
+                slideswitch:shape="circle"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="12dp"
+                slideswitch:themeColor="#5DCDBF" >
+            </com.leaking.slideswitch.SlideSwitch>
+        </RelativeLayout>
+    </LinearLayout>
+</RelativeLayout>

@@ -10,6 +10,7 @@ import android.util.Log;
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.adapter.HeathMonitoringAdapter;
 import com.lxkj.administrator.fealty.base.BaseFragment;
+import com.lxkj.administrator.fealty.bean.RateListData;
 import com.lxkj.administrator.fealty.bean.SleepData;
 import com.lxkj.administrator.fealty.bean.SportData;
 import com.lxkj.administrator.fealty.manager.DecodeManager;
@@ -72,6 +73,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null, REQUEST_CODE_UPDATA_USERIFO_INTERNET, this);
         //2.
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_GPS_FROM_URL, params, null, REQUEST_CODE_UPDATA_GPS_INTERNET, this);
+        //写个循环每一段时间刷新一次页面
+        myHandler.postDelayed(LoadData, 1000 * 60 * 3);
     }
 
     private void initFragments() {
@@ -83,6 +86,19 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         adapter.notifyDataSetChanged();
         //  healthDataFragement.setIdentity("我的");
     }
+
+    private Runnable LoadData = new Runnable() {
+        @Override
+        public void run() {
+            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+
+            //1.
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null, REQUEST_CODE_UPDATA_USERIFO_INTERNET, StatusFragment.this);
+            //2.
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_GPS_FROM_URL, params, null, REQUEST_CODE_UPDATA_GPS_INTERNET, StatusFragment.this);
+            myHandler.postDelayed(this, 1000 * 60 * 3);
+        }
+    };
 
     @Override
     protected void initListener() {
@@ -102,9 +118,20 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
             }
         }
     }
-/**
- *  写一个广播，接收心率数据
- */
+
+    // 用EventBus 来导航,订阅者
+    public void onEventMainThread(Map<String, List<RateListData>> map) {
+        Iterator it = map.keySet().iterator();
+        while (it.hasNext()) {
+            String phoneNumber = (String) it.next();
+            Log.e("phoneNumber", phoneNumber);
+            for (HealthDataFragement healthDataFragement : fragments) {
+                if (healthDataFragement.getArguments().getString("parentPhone").equals(phoneNumber)) {
+                    healthDataFragement.setRateListData(map.get(phoneNumber));
+                }
+            }
+        }
+    }
 
     /**
      * 写一个event方法接收运动数据
@@ -121,6 +148,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
             }
         }
     }
+
     /**
      * 写一个event方法接收睡眠数据
      */
@@ -137,18 +165,18 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
             }
         }
     }
-
     @Override
     protected void initData() {
 
     }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        if (LoadData != null) {
+            myHandler.removeCallbacks(LoadData);
+        }
     }
-
     @Override
     public void onRequestStart(int requestCode) {
 

@@ -164,7 +164,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                 Log.v("RegistActivity", "onActivityResult:请求图片从从剪切器返回成功");
                 try {
                     circleImageView.setImageURI(Uri.fromFile(headImageFile));
-                    Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), "", SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
+                   // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), "", SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
+                   // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile()," "," "," "," ");
                     if (headImageFile != null && headImageFile.exists()) {
                         Map<String, String> map = new HashMap<>();
                         byte[] buffer = changeFileToByte(headImageFile);
@@ -383,7 +384,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
      * 修改个人资料
      */
     private void alterSelfData(Map<String, String> parameters) {
-        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), SessionHolder.user.getUserpic(), SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
+       // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), SessionHolder.user.getUserpic(), SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"},SessionHolder.user.getMobile()," "," "," ", " ");
         params.putAll(parameters);
         try {
 //            if (headImageFile != null && headImageFile.exists()) {

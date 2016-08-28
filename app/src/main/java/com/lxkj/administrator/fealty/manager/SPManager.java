@@ -13,7 +13,6 @@ public class SPManager {
     private static SharedPreferences mSharedPreferences;
     private SPManager() {
     }
-
     public static synchronized SPManager getSPManager(Context context) {
         mContext = context;
         mSharedPreferences = mContext.getSharedPreferences(ParameterManager.SESSION_CACHE_SP_NAME, mContext.MODE_PRIVATE);
@@ -22,18 +21,17 @@ public class SPManager {
         return spManager;
     }
 
-
     /**
      * sessionHolder 持久化
      */
-    public void persistenceSession() {
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("user", SessionHolder.user);
-        jsonObject.put("mobile", SessionHolder.mobile);
-        jsonObject.put("password", SessionHolder.password);
-        editor.putString(SESSION_HOLDER, jsonObject.toJSONString());
-        editor.commit();
-    }
+//    public void persistenceSession() {
+//        SharedPreferences.Editor editor = mSharedPreferences.edit();
+//        JSONObject jsonObject = new JSONObject();
+//        jsonObject.put("user", SessionHolder.user);
+//        jsonObject.put("mobile", SessionHolder.mobile);
+//        jsonObject.put("password", SessionHolder.password);
+//        editor.putString(SESSION_HOLDER, jsonObject.toJSONString());
+//        editor.commit();
+//    }
 
 }

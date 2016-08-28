@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipToPadding="true"
+    android:background="#EFEFF3"
     android:fitsSystemWindows="true">
     <include layout="@layout/bar" />
     <RelativeLayout
@@ -54,7 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="15dp"
         android:layout_below="@id/fragment_me_details"
-        android:background="#DCDCDC" />
+        android:background="#EFEFF3" />
     <LinearLayout
         android:id="@+id/linearlayout1"
         android:layout_width="match_parent"
@@ -63,7 +64,7 @@
         android:background="#ffffff"
         android:orientation="vertical">
         <RelativeLayout
-            android:id="@+id/relativelayout"
+            android:id="@+id/relative_shezhi"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_marginBottom="5dp"
@@ -93,7 +94,7 @@
             android:layout_height="1dp"
             android:background="#EFEFF4" />
         <RelativeLayout
-            android:id="@+id/relativelayout4"
+            android:id="@+id/relative_about"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_marginBottom="5dp"
@@ -120,9 +121,9 @@
             android:id="@+id/view4"
             android:layout_width="match_parent"
             android:layout_height="15dp"
-            android:background="#DCDCDC" />
+            android:background="#EFEFF3" />
         <RelativeLayout
-            android:id="@+id/relativelayout7"
+            android:id="@+id/relative_binded"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_marginBottom="5dp"
@@ -149,7 +150,7 @@
             android:layout_height="1dp"
             android:background="#EFEFF4" />
         <RelativeLayout
-            android:id="@+id/relativelayout5"
+            android:id="@+id/relative_location"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_marginBottom="5dp"
@@ -176,7 +177,7 @@
         android:layout_width="match_parent"
         android:layout_height="15dp"
         android:layout_below="@id/linearlayout1"
-        android:background="#DCDCDC" />
+        android:background="#EFEFF3" />
     <LinearLayout
         android:id="@+id/linearlayout2"
         android:layout_width="match_parent"

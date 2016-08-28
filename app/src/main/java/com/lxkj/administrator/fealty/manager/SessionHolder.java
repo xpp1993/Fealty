@@ -13,12 +13,12 @@ import cn.jpush.android.api.JPushInterface;
 import cn.jpush.android.api.TagAliasCallback;
 
 public final class SessionHolder {
-    public static String mobile;
-    public static String password;
-    public static UserInfo user;
-    public static double lat;
-    public  static  double lon;
-    public static String describleAddress;
+    public static String mobile;//电话
+    public static String password;//密码
+    public static UserInfo user;//用户类
+//    public static double lat;
+//    public  static  double lon;
+//    public static String describleAddress;
 
     /**
      * sessionHolder 初始化，并且持久化sessionHolder
@@ -26,9 +26,9 @@ public final class SessionHolder {
      *
      */
 
-    public static void initHolder(String mobile, UserInfo userMySelf) {
-        SessionHolder.mobile=mobile;
-        SessionHolder.user = userMySelf;
-    }
+//    public static void initHolder(String mobile, UserInfo userMySelf) {
+//        SessionHolder.mobile=mobile;
+//        SessionHolder.user = userMySelf;
+//    }
 
 }
