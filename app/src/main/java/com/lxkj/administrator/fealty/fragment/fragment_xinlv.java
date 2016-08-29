@@ -14,11 +14,14 @@ import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SPManager;
 import com.lxkj.administrator.fealty.ui.picker.CustomHeaderAndFooterPicker;
+import com.lxkj.administrator.fealty.ui.picker.HeaderAndFooterPicker;
 import com.lxkj.administrator.fealty.ui.picker.OptionPicker;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
+
+import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
 
@@ -84,9 +87,14 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.jiancetime://弹出dialog
-                CustomHeaderAndFooterPicker picker2 = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
-                        "3", "5", "7", "9", "15", "25", "30", "35", "40", "45", "50", "55"
-                }, "请选择心率间测时间：");
+//                CustomHeaderAndFooterPicker picker2 = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
+//                        "3", "5", "7", "9", "15", "25", "30", "35", "40", "45", "50", "55"
+//                }, "请选择心率间测时间：");
+                ArrayList list2 = new ArrayList();
+                for (int i = 1; i <= 59; i++) {
+                    list2.add(i);
+                }
+                HeaderAndFooterPicker picker2 = new HeaderAndFooterPicker(getActivity(), list2,"请选择心率间测时间：");
                 showhourNumber(picker2, "分钟/次", new OptionPicker.OnOptionPickListener() {
                     @Override
                     public void onOptionPicked(int position, String option) {
@@ -111,12 +119,11 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
     }
     /**
      * 显示dialog
-     *
-     * @param picker
+     *  @param picker
      * @param str
      * @param listener
      */
-    private void showhourNumber(CustomHeaderAndFooterPicker picker, String str, OptionPicker.OnOptionPickListener listener) {
+    private void showhourNumber(HeaderAndFooterPicker picker, String str, OptionPicker.OnOptionPickListener listener) {
         picker.setSelectedIndex(1);
         picker.setLabel(str);
         picker.setTopBackgroundColor(0xFFEEEEEE);

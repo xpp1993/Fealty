@@ -18,16 +18,16 @@ import java.util.Arrays;
 /**
  * Created by Administrator on 2016/8/13/0013.
  */
-public class CustomHeaderAndFooterPicker extends OptionPicker {
-
-    public CustomHeaderAndFooterPicker(Activity activity, String[] options) {
+public class HeaderAndFooterPicker extends OptionPicker {
+    private String head_str;
+    public HeaderAndFooterPicker(Activity activity, String[] options) {
         super(activity, options);
         this.options.addAll(Arrays.asList(options));
     }
-
-    public CustomHeaderAndFooterPicker(Activity activity, ArrayList<String> options) {
+    public HeaderAndFooterPicker(Activity activity, ArrayList<String> options, String str) {
         super(activity, options);
         this.options.addAll(options);
+        head_str=str;
     }
 
     //    @Nullable
@@ -42,8 +42,8 @@ public class CustomHeaderAndFooterPicker extends OptionPicker {
     protected View makeHeaderView() {
 
         View view = View.inflate(activity, R.layout.head_item, null);
-//        TextView textView = (TextView) view.findViewById(R.id.tv_head);
-//        textView.setText(head_str);
+        TextView textView = (TextView) view.findViewById(R.id.tv_head);
+        textView.setText(head_str);
         return view;//顶部视图
     }
 

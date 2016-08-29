@@ -15,6 +15,7 @@ import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SPManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.ui.picker.CustomHeaderAndFooterPicker;
+import com.lxkj.administrator.fealty.ui.picker.HeaderAndFooterPicker;
 import com.lxkj.administrator.fealty.ui.picker.OptionPicker;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
@@ -23,6 +24,7 @@ import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import de.greenrobot.event.EventBus;
@@ -84,18 +86,25 @@ public class fragment_ShezhiGPS extends BaseFragment implements View.OnClickList
     protected void initData() {
 
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.relative_sleep_gps://点击设置睡眠时多少小时上传一次GPS定位信息，弹出时间数字选择框
-                CustomHeaderAndFooterPicker picker = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
-                        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"
-                }, "请选择睡眠时定位时间：");
+                ArrayList list = new ArrayList();
+                for (int i = 1; i <= 24; i++) {
+                    list.add(i);
+                }
+//                CustomHeaderAndFooterPicker picker = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
+//                        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"
+//                }, "请选择睡眠时定位时间：");
+                HeaderAndFooterPicker picker = new HeaderAndFooterPicker(getActivity(), list,"请选择睡眠时定位时间：");
                 showhourNumber(picker, "小时/次", new OptionPicker.OnOptionPickListener() {
                     @Override
                     public void onOptionPicked(int position, String option) {
@@ -107,9 +116,14 @@ public class fragment_ShezhiGPS extends BaseFragment implements View.OnClickList
                 });
                 break;
             case R.id.sport_gps://点击设置运动时多少分钟上传一次GPS定位信息，弹出时间数字选择框
-                CustomHeaderAndFooterPicker picker1 = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
-                        "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"
-                }, "请选择运动时定位时间：");
+//                CustomHeaderAndFooterPicker picker1 = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
+//                        "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"
+//                }, "请选择运动时定位时间：");
+                ArrayList list1 = new ArrayList();
+                for (int i = 1; i <= 59; i++) {
+                    list1.add(i);
+                }
+                HeaderAndFooterPicker picker1 = new HeaderAndFooterPicker(getActivity(), list1,"请选择运动时定位时间：");
                 showhourNumber(picker1, "分钟/次", new OptionPicker.OnOptionPickListener() {
                     @Override
                     public void onOptionPicked(int position, String option) {
@@ -121,9 +135,14 @@ public class fragment_ShezhiGPS extends BaseFragment implements View.OnClickList
                 });
                 break;
             case R.id.jiancegps:
-                CustomHeaderAndFooterPicker picker2 = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
-                        "3", "5", "7", "9", "15", "25", "30", "35", "40", "45", "50", "55"
-                }, "请选择间测定位时间：");
+//                CustomHeaderAndFooterPicker picker2 = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
+//                        "3", "5", "7", "9", "15", "25", "30", "35", "40", "45", "50", "55"
+//                }, "请选择间测定位时间：");
+                ArrayList list2 = new ArrayList();
+                for (int i = 1; i <= 59; i++) {
+                    list2.add(i);
+                }
+                HeaderAndFooterPicker picker2 = new HeaderAndFooterPicker(getActivity(), list2,"请选择间测定位时间：");
                 showhourNumber(picker2, "分钟/次", new OptionPicker.OnOptionPickListener() {
                     @Override
                     public void onOptionPicked(int position, String option) {
@@ -144,12 +163,11 @@ public class fragment_ShezhiGPS extends BaseFragment implements View.OnClickList
 
     /**
      * 显示dialog
-     *
-     * @param picker
+     *  @param picker
      * @param str
      * @param listener
      */
-    private void showhourNumber(CustomHeaderAndFooterPicker picker, String str, OptionPicker.OnOptionPickListener listener) {
+    private void showhourNumber(HeaderAndFooterPicker picker, String str, OptionPicker.OnOptionPickListener listener) {
         picker.setSelectedIndex(1);
         picker.setLabel(str);
         picker.setTopBackgroundColor(0xFFEEEEEE);
