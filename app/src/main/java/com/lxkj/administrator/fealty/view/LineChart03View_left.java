@@ -2,6 +2,7 @@ package com.lxkj.administrator.fealty.view;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.TreeMap;
 
 import org.xclcharts.chart.LineChart;
@@ -118,26 +119,48 @@ public class LineChart03View_left extends GraphicalView {
         }
     }
 
-    public void reset(TreeMap<Integer, Integer> map) {
-        if (map != null) {
-            Iterator<Integer> valueIterator = map.values().iterator();
-            Iterator<Integer> keyIterator = map.keySet().iterator();
-            int  max = Integer.MIN_VALUE, min = Integer.MAX_VALUE;
-            while (valueIterator.hasNext()) {
-                int value = valueIterator.next();
-                max = max > value ? max : value;
-                min = min < value ? min : value;
-            }
-            //数据轴最大值
-            chart.getDataAxis().setAxisMax(max + 10);
-            //数据轴最小值
-            chart.getDataAxis().setAxisMin(min - 10 > 0 ? (min - 10) : 0);
-            //数据轴刻度间隔
-            chart.getDataAxis().setAxisSteps(10);
-            labels.clear();
-            while (keyIterator.hasNext()) {
-                labels.add(keyIterator.next() + "");
-            }
+//    public void reset(TreeMap<Integer, Integer> map) {
+//        if (map != null) {
+//            Iterator<Integer> valueIterator = map.values().iterator();
+//            Iterator<Integer> keyIterator = map.keySet().iterator();
+//            int  max = Integer.MIN_VALUE, min = Integer.MAX_VALUE;
+//            while (valueIterator.hasNext()) {
+//                int value = valueIterator.next();
+//                max = max > value ? max : value;
+//                min = min < value ? min : value;
+//            }
+//            //数据轴最大值
+//            chart.getDataAxis().setAxisMax(max + 10);
+//            //数据轴最小值
+//            chart.getDataAxis().setAxisMin(min - 10 > 0 ? (min - 10) : 0);
+//            //数据轴刻度间隔
+//            chart.getDataAxis().setAxisSteps(10);
+//            labels.clear();
+//            while (keyIterator.hasNext()) {
+//                labels.add(keyIterator.next() + "");
+//            }
+//        }
+//    }
+public void reset(Map<String, Integer> map) {
+    if (map != null) {
+        Iterator<Integer> valueIterator = map.values().iterator();
+        Iterator<String> keyIterator = map.keySet().iterator();
+        int  max = Integer.MIN_VALUE, min = Integer.MAX_VALUE;
+        while (valueIterator.hasNext()) {
+            int value = valueIterator.next();
+            max = max > value ? max : value;
+            min = min < value ? min : value;
+        }
+        //数据轴最大值
+        chart.getDataAxis().setAxisMax(max + 10);
+        //数据轴最小值
+        chart.getDataAxis().setAxisMin(min - 10 > 0 ? (min - 10) : 0);
+        //数据轴刻度间隔
+        chart.getDataAxis().setAxisSteps(10);
+        labels.clear();
+        while (keyIterator.hasNext()) {
+            labels.add(keyIterator.next() + "");
         }
     }
+}
 }

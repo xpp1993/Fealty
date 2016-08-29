@@ -44,6 +44,7 @@ import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -80,7 +81,6 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     @ViewInject(R.id.dingwei)
     private ImageView im_dingwei;
     private MyHandler handler;
-    TreeMap<Integer, Integer> map;
     private final int REQURST_HANDLER_GPSDATA = 0x21;
     private final int REQURST_HANDLER_SlEEPDATA = 0x22;
     private final int REQURST_HANDLER_SPORTDATA = 0x23;
@@ -94,7 +94,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     @Override
     protected void init() {
         handler = new MyHandler();
-        map = new TreeMap<>();
+        // map = new TreeMap<>();
         //设置horizontalScrollvView拉到头和尾的时候没有阴影颜色
         horiView.setOverScrollMode(View.OVER_SCROLL_NEVER);
     }
@@ -210,22 +210,27 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     getActivity().sendBroadcast(intent);
                     break;
                 case REQURST_HANDLER_LIST_RATE://画心率折线图
-                    TreeMap<Integer, Integer> map = new TreeMap<>();
+                  //  TreeMap<Integer, Integer> map = new TreeMap<>();
+                    Map<String,Integer>map=new HashMap<>();
                     List<RateListData> list = (List<RateListData>) msg.obj;
                     for (int i = 0; i < list.size(); i++) {
                         RateListData listData = list.get(i);
-                        int rate_time = Integer.parseInt(listData.getTime());
-                        map.put(rate_time, listData.getRate());
+                        try {
+//                            int rate_time = Integer.parseInt(listData.getTime());
+//                            map.put(rate_time, listData.getRate());
+                            map.put(listData.getTime(),listData.getRate());
+                        } catch (NumberFormatException e) {
+                        }
                     }
                     initChart(map);
-
                     break;
                 default:
                     break;
             }
         }
     }
-    private void initChart(TreeMap<Integer, Integer> map) {
+
+    private void initChart(Map<String, Integer> map) {
         mLineChart03View.reset(map);
         mLineChart03View_left.reset(map);
         mLineChart03View.postInvalidate();
@@ -333,6 +338,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     //提供给外界设置折线图中心率的方法,currentHeart
     public void setRateListData(List<RateListData> listData) {
         Message message = Message.obtain();
+        if (listData.size()==0)
+            return;
         message.what = REQURST_HANDLER_LIST_RATE;
         message.obj = listData;
         handler.sendMessage(message);

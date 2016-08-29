@@ -19,22 +19,36 @@ import java.util.Arrays;
  * Created by Administrator on 2016/8/13/0013.
  */
 public class CustomHeaderAndFooterPicker extends OptionPicker {
+    private String head_str;
 
-    public CustomHeaderAndFooterPicker(Activity activity, String[] options) {
+    public CustomHeaderAndFooterPicker(Activity activity, String[] options, String str) {
         super(activity, options);
         this.options.addAll(Arrays.asList(options));
+        head_str = str;
     }
+
     public CustomHeaderAndFooterPicker(Activity activity, ArrayList<String> options) {
         super(activity, options);
         this.options.addAll(options);
     }
+
+    //    @Nullable
+//    @Override
+//    protected View makeHeaderView() {
+//
+//      View view=  View.inflate(activity, R.layout.head_item,null);
+//        return view;//顶部视图
+//    }
     @Nullable
     @Override
     protected View makeHeaderView() {
 
-      View view=  View.inflate(activity, R.layout.head_item,null);
+        View view = View.inflate(activity, R.layout.head_item, null);
+        TextView textView = (TextView) view.findViewById(R.id.tv_head);
+        textView.setText(head_str);
         return view;//顶部视图
     }
+
     @Nullable
     @Override
     protected View makeFooterView() {

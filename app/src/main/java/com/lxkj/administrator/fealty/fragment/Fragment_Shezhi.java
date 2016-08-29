@@ -1,5 +1,6 @@
 package com.lxkj.administrator.fealty.fragment;
 
+import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -55,7 +56,9 @@ public class Fragment_Shezhi extends BaseFragment implements View.OnClickListene
     protected void initData() {
 
     }
-
+    // 用EventBus 来导航,订阅者
+    public void onEventMainThread(Bundle event) {
+    }
     @Override
     public void onClick(View v) {
         int id = v.getId();

@@ -190,7 +190,7 @@
                 style="@style/self_info_layout_tv_title"
                 android:layout_toLeftOf="@id/sleeptvshow_xinlv"
                 android:paddingRight="5dp"
-                android:text="80-100" />
+                android:text="60-100" />
         </RelativeLayout>
 
     </LinearLayout>

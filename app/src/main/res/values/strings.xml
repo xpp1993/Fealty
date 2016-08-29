@@ -14,4 +14,6 @@
         <item>RotateDown</item>
         <item>Accordion</item>
     </string-array>
+    <string name="head_item">您要绑定的用户是你的：</string>
+    <string name="head_gps">多长时间定位一次？</string>
 </resources>

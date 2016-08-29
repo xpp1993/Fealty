@@ -151,10 +151,41 @@ public class LineChart03View extends GraphicalView {
             Log.e(TAG, e.toString());
         }
     }
-    public void reset(TreeMap<Integer, Integer> map) {
+//    public void reset(TreeMap<Integer, Integer> map) {
+//        if (map != null) {
+//            Iterator<Integer> valueIterator = map.values().iterator();
+//            Iterator<Integer> keyIterator = map.keySet().iterator();
+//            int  max = Integer.MIN_VALUE, min = Integer.MAX_VALUE;
+//            LinkedList<Double> dataSeries2 = new LinkedList<Double>();
+//            LineData lineData2 = new LineData("", dataSeries2, Color.rgb(93,205,191));
+//            lineData2.setDotStyle(XEnum.DotStyle.DOT);
+//            lineData2.getPlotLine().getDotPaint().setColor(Color.rgb(93,205,191));
+//            lineData2.setLabelVisible(true);
+//            while (valueIterator.hasNext()) {
+//                int value = valueIterator.next();
+//                max = max > value ? max : value;
+//                min = min < value ? min : value;
+//                dataSeries2.add((double)value);
+//            }
+//            chartData.clear();
+//            chartData.add(lineData2);
+//
+//            //数据轴最大值
+//            chart.getDataAxis().setAxisMax(max + 10);
+//            //数据轴最小值
+//            chart.getDataAxis().setAxisMin(min - 10 > 0 ? (min - 10) : 0);
+//            //数据轴刻度间隔
+//            chart.getDataAxis().setAxisSteps(10);
+//            labels.clear();
+//            while (keyIterator.hasNext()) {
+//                labels.add(keyIterator.next() + "");
+//            }
+//        }
+//    }
+        public void reset(Map<String, Integer> map) {
         if (map != null) {
             Iterator<Integer> valueIterator = map.values().iterator();
-            Iterator<Integer> keyIterator = map.keySet().iterator();
+            Iterator<String> keyIterator = map.keySet().iterator();
             int  max = Integer.MIN_VALUE, min = Integer.MAX_VALUE;
             LinkedList<Double> dataSeries2 = new LinkedList<Double>();
             LineData lineData2 = new LineData("", dataSeries2, Color.rgb(93,205,191));

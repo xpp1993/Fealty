@@ -46,6 +46,7 @@ import com.lxkj.administrator.fealty.bean.SportData;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
+import com.lxkj.administrator.fealty.manager.SPManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
@@ -68,7 +69,6 @@ import com.yc.peddemo.utils.CalendarUtils;
 import com.yc.peddemo.utils.GlobalVariable;
 import com.yc.pedometer.info.SleepTimeInfo;
 import com.yc.pedometer.info.StepInfo;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
@@ -90,13 +90,15 @@ import de.hdodenhof.circleimageview.CircleImageView;
 @ContentView(R.layout.fragement_me)
 public class MeFragment extends BaseFragment implements View.OnClickListener, NetWorkAccessTools.RequestTaskListener, DeviceScanInterfacer, IListDialogListener, ICallback {
     @ViewInject(R.id.fragment_me_details)
-    private RelativeLayout fragment_me_details;
+    private RelativeLayout fragment_me_details;//个人资料
     @ViewInject(R.id.relative_shezhi)
-    private RelativeLayout me_shezhi;
+    private RelativeLayout me_shezhi;//设置
     @ViewInject(R.id.relative_about)
     private RelativeLayout relative_about;//关于我们
     @ViewInject(R.id.relative_binded)
-    private RelativeLayout binded_action;
+    private RelativeLayout binded_action;//绑定用户
+    @ViewInject(R.id.relative_location)
+    private RelativeLayout relative_location;//我的路线查看
     @ViewInject(R.id.me_headpic)
     private CircleImageView circleImageView;
     @ViewInject(R.id.me_username)
@@ -138,6 +140,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public static final int REQUEST_CODE_UPLOAD_CONTACTS = 0X20;//上传通讯录
     public static final int REQUEST_CODE_SPORTDATA_SLEEPDATA = 0x10;//把运动数据睡眠数据上传到服务器
     public static final int REQUEST_CODE_CURRENTRATE = 0x22;//把测试的心率数据上传到服务器
+    public static final int REQUEST_CODE_RATE = 0x26;//把测试的心率数据上传到服务器
     private String phone;
     public static final int GPS_UPLOAD_CODE = 0x11;
     @ViewInject(R.id.relative_location)
@@ -162,6 +165,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private SlideSwitch jiancebaojing;//监测报警信息
     XinLvSqliteHelper xinlvhelper;
     SQLiteDatabase xinlvdb;
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor1;
 
     @Override
     protected void init() {
@@ -169,6 +174,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         bar_view_left_line.setVisibility(View.VISIBLE);
         bar_biaoti.setVisibility(View.VISIBLE);
         bar_biaoti.setText("我");
+        //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
+        preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
+        //2. 获得编辑器:当将数据存储到SharedPrefences对象中时，需要获得编辑器。如果取出则不需要。
+        editor1 = preferences.edit();
         mCallback = new MyLocationListener.CallBack() {
             @Override
             public void callYou(double lat, double lon, String loctiondescrible, String address, MySqliteHelper helper, long currentTime) {
@@ -234,6 +243,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         see_myGPSINFO.setOnClickListener(this);
         me_shezhi.setOnClickListener(this);
         relative_about.setOnClickListener(this);
+        relative_location.setOnClickListener(this);
         bluee_iv_left.setSlideListener(new SlideSwitch.SlideListener() {
             @Override
             public void open() {
@@ -334,10 +344,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.me_iv_left:
+            case R.id.fragment_me_details:
                 EventBus.getDefault().post(new NavFragmentEvent(new MeSettingFragment()));//跳转到个人信息详情页
                 break;
-            case R.id.binded_action://绑定用户
+            case R.id.relative_binded://绑定用户
                 //1.获取手机联系人
                 ArrayList<Contacts> contacts = (ArrayList<Contacts>) getContacts(AppUtils.getBaseContext());
                 //2.上传通讯录,返回通讯录中,注册过  的 用户列表
@@ -346,7 +356,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, MeFragment.this);
                 ToastUtils.showToastInUIThread("正在获取联系人列表....");
                 break;
-            case R.id.see_mygps_iv:
+            case R.id.relative_location:
                 //跳转到百度地图
                 Melucheng_fragment melucheng_fragment = new Melucheng_fragment();
                 melucheng_fragment.setHelper(helper);
@@ -357,7 +367,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 melucheng_fragment.setArguments(bundle);
                 EventBus.getDefault().post(new NavFragmentEvent(melucheng_fragment, bundle));
                 break;
-            case R.id.me_iv_left2:
+            case R.id.relative_shezhi:
                 //跳入设置界面
                 EventBus.getDefault().post(new NavFragmentEvent(new Fragment_Shezhi()));
                 break;
@@ -446,15 +456,39 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     DecodeManager.decodeFriendMessage(jsonObject, REQUEST_CODE_UPLOAD_CONTACTS, myHandler);
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    ToastUtils.showToastInUIThread("服务器异常！");
                 }
                 break;
             case REQUEST_CODE_SPORTDATA_SLEEPDATA:
+                try {
+                    DecodeManager.decodeCommon(jsonObject, requestCode, myHandler);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    ToastUtils.showToastInUIThread("服务器异常！");
+                }
+                break;
             case REQUEST_CODE_CURRENTRATE://上传实时心率
+                try {
+                    DecodeManager.decodeCommon(jsonObject, requestCode, myHandler);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    ToastUtils.showToastInUIThread("服务器异常！");
+                }
+                break;
             case GPS_UPLOAD_CODE:
                 try {
                     DecodeManager.decodeCommon(jsonObject, requestCode, myHandler);
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    ToastUtils.showToastInUIThread("服务器异常！");
+                }
+                break;
+            case REQUEST_CODE_RATE:
+                try {
+                    DecodeManager.decodeCommon(jsonObject, requestCode, myHandler);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    ToastUtils.showToastInUIThread("服务器异常！");
                 }
                 break;
             default:
@@ -464,7 +498,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
-        ToastUtils.showToastInUIThread("网络连接错误，请检查重试！");
+      //  ToastUtils.showToastInUIThread("网络连接错误，请检查重试！");
     }
 
     @Override
@@ -604,11 +638,26 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     querySleepInfo();
                     break;
                 case REQUEST_CODE_SPORTDATA_SLEEPDATA:
+                    if (msg.getData().getInt("code") == 1) {
+                        Log.e("upLoad:", msg.getData().getString("desc"));
+                    }
+                    break;
+                case REQUEST_CODE_RATE:
+                    if (msg.getData().getInt("code") == 1) {
+                        Log.e("upLoad:", msg.getData().getString("desc"));
+                        ToastUtils.showToastInUIThread("心率数据已上传到服务器！");
+                    }
+                    break;
                 case REQUEST_CODE_CURRENTRATE://上传实时心率
+                    if (msg.getData().getInt("code") == 1) {
+                        Log.e("upLoad:", msg.getData().getString("desc"));
+                        Log.e("currentRate", " 实时心率数据已上传到服务器!");
+                    }
+                    break;
                 case GPS_UPLOAD_CODE:
                     if (msg.getData().getInt("code") == 1) {
                         Log.e("upLoad:", msg.getData().getString("desc"));
-                        ToastUtils.showToastInUIThread("数据已更新到服务器！");
+                        ToastUtils.showToastInUIThread("GPS数据已上传到服务器！");
                     }
                     break;
                 default:
@@ -651,10 +700,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             jsonObject.put("rate", rate);
             jsonArray.add(jsonObject);
             rateList.add(rateListData);
+            if (rateList.size() == 7)
+                break;
         }
         cursor.close();
         map.put(SessionHolder.user.getMobile(), rateList);
-        object.put("rate_list", jsonArray);
+        object.put("heartRate", jsonArray);
         object.put("mobile", SessionHolder.user.getMobile());
         String jsonString = object.toJSONString();
         if (rateList.size() == 0) {
@@ -664,10 +715,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         EventBus.getDefault().post(map);
         //  myHandler.postDelayed(d)
         //把心率json数据上传到服务器,上传到服务器之后，清空数据库
-//        Map<String, String> params = CommonTools.getParameterMap(new String[]{"rate_list", "mobile"}, jsonString, SessionHolder.user.getMobile());
-//        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, MeFragment.this);
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"heartRate", "mobile"}, jsonString, SessionHolder.user.getMobile());
+        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_ZHEXIAN, params, null, REQUEST_CODE_RATE, MeFragment.this);
         myHandler.postDelayed(delatesqlite, 2000);//清空数据库
     }
+
     /**
      * 电量和蓝牙版本接收
      */
@@ -826,7 +878,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         @Override
         public void onSleepChange() {
             //表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
-            myHandler.postDelayed(runnable_updataGPS2, 1000 * 60 * 60 * 2);
+            myHandler.postDelayed(runnable_updataGPS2, 1000 * 60 * 60 * sleep_gpsin);
             //心率不正常，实时实时上传GPS信息。然后每隔三分钟上传一次。
             myHandler.sendEmptyMessage(UPDATE_SLEEP_UI_MSG);
         }
@@ -849,7 +901,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             EventBus.getDefault().post(sportData);
             //  myHandler.sendEmptyMessage(UPDATE_STEP_UI_MSG);
             //运动时每隔15分钟上传一次GPS
-            myHandler.postDelayed(runnable_updataGPS, 1000 * 60 * 15);
+            myHandler.postDelayed(runnable_updataGPS, 1000 * 60 * sport_gpsint);
             //心率不正常，实时实时上传GPS信息。然后每隔三分钟上传一次。
         }
     };
@@ -956,7 +1008,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.sendEmptyMessage(OFFLINE_SLEEP_SYNC_OK);
         } else if (status == ICallbackStatus.OFFLINE_STEP_SYNC_OK) {//离线运动同步完成，发送请求电量指令,开始测试心率指令
             myHandler.sendEmptyMessage(OFFLINE_STEP_SYNC_OK);//把离线同步的运动数据发送给首页
-            myHandler.postDelayed(runnable3, 1000 * 30);//发送心率测试开始
+            myHandler.postDelayed(runnable3, 1000 * 60*rate_int);//发送心率测试开始
             myHandler.postDelayed(runnable4, 1000 * 15);//请求手环电量
             // myHandler.postDelayed(runnable5, 1000);//把数据上传到服务器
         } else if (status == ICallbackStatus.GET_BLE_BATTERY_OK) {
@@ -999,6 +1051,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     /**
      * 发送心率测试开启
      */
+    int rate_int = 3;
     private Runnable runnable3 = new Runnable() {
         @Override
         public void run() {
@@ -1009,8 +1062,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 public void run() {
                     functionRateFinished();
                 }
-            }, 1000 * 10);
-            myHandler.postDelayed(this, 1000 * 30);
+            }, 1000 * 20);
+            String rate_ji = preferences.getString(ParameterManager.SHEZHI_JIANCEXINLV, "3");
+            int rate_int = Integer.parseInt(rate_ji);
+            myHandler.postDelayed(this, 1000 * 60 * rate_int);
         }
     };
     /**
@@ -1036,22 +1091,29 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.postDelayed(this, 1000 * 15);
         }
     };
+    int sport_gpsint = 15;
     //运动时每15分钟上传一次GPS
     private Runnable runnable_updataGPS = new Runnable() {
         @Override
         public void run() {
             Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, SessionHolder.user.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GPS_UPLOAD_URL, params, null, GPS_UPLOAD_CODE, MeFragment.this);
-            myHandler.postDelayed(this, 1000 * 60 * 15);
+            String sport_gps = preferences.getString(ParameterManager.SHEZHI_SPORT_GPS, "15");
+            sport_gpsint = Integer.parseInt(sport_gps);
+            myHandler.postDelayed(this, 1000 * 60 * sport_gpsint);
         }
     };
+
+    int sleep_gpsin = 2;
     //睡眠时每两个小时上传一次GPS
     private Runnable runnable_updataGPS2 = new Runnable() {
         @Override
         public void run() {
             Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, SessionHolder.user.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GPS_UPLOAD_URL, params, null, GPS_UPLOAD_CODE, MeFragment.this);
-            myHandler.postDelayed(this, 1000 * 60 * 60 * 2);
+            String sleep_gps = preferences.getString(ParameterManager.SHEZHI_SLEEP_GPS, "2");
+            sleep_gpsin = Integer.parseInt(sleep_gps);
+            myHandler.postDelayed(this, 1000 * 60 * 60 * sleep_gpsin);
         }
     };
 
@@ -1078,7 +1140,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             //停止定位
             locService.stop();
             //三分钟后开始定位
-            myHandler.postDelayed(runable_startGps, 1000 * 60 * 3);
+            String ce_gps = preferences.getString(ParameterManager.SHEZHI_JIANCEGPS, "3");
+            int ce_int = Integer.parseInt(ce_gps);
+            myHandler.postDelayed(runable_startGps, 1000 * 60 * ce_int);
         }
     };
     private Runnable runable_startGps = new Runnable() {

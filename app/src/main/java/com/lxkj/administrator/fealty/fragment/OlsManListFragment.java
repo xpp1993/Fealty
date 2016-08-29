@@ -65,9 +65,12 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
         final String oldmobile = userInfo.getMobile();
 
         //点击弹出身份选择框
-       CustomHeaderAndFooterPicker picker = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
+//       CustomHeaderAndFooterPicker picker = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
+//                "爸爸", "妈妈", "爷爷", "奶奶", "姥爷", "姥姥", "叔叔", "阿姨", "姑姑", "大伯", "婶婶", "姐姐", "哥哥"
+//        });
+        CustomHeaderAndFooterPicker picker = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
                 "爸爸", "妈妈", "爷爷", "奶奶", "姥爷", "姥姥", "叔叔", "阿姨", "姑姑", "大伯", "婶婶", "姐姐", "哥哥"
-        });
+        },"您要绑定的用户是你的：");
         picker.setSelectedIndex(1);
         picker.setTopBackgroundColor(0xFFEEEEEE);
         picker.setTopLineColor(0xFF33B5E5);

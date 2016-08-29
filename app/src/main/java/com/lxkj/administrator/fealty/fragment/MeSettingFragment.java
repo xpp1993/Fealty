@@ -385,7 +385,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
      */
     private void alterSelfData(Map<String, String> parameters) {
        // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), SessionHolder.user.getUserpic(), SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
-        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"},SessionHolder.user.getMobile()," "," "," ", " ");
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"},SessionHolder.user.getMobile(),"","","", "");
         params.putAll(parameters);
         try {
 //            if (headImageFile != null && headImageFile.exists()) {

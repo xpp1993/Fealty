@@ -26,9 +26,9 @@ public final class SessionHolder {
      *
      */
 
-//    public static void initHolder(String mobile, UserInfo userMySelf) {
-//        SessionHolder.mobile=mobile;
-//        SessionHolder.user = userMySelf;
-//    }
+    public static void initHolder(String mobile, UserInfo userMySelf) {
+        SessionHolder.mobile=mobile;
+        SessionHolder.user = userMySelf;
+    }
 
 }
