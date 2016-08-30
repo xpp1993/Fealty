@@ -45,14 +45,15 @@ public class PPView extends View {
 
     private Paint mPaint;
 
-    private String firstText = "我的";
-    private String secondText = "健康";
+    private String firstText = "我";
+   // private String secondText = "健康";
+   private String secondText = "80";
     private String thirdText = "实时心率";
-    private String fountText = "80";
+  //  private String fountText = "80";
 
-    public void setFountText(String fountText) {
-        this.fountText = fountText;
-    }
+//    public void setFountText(String fountText) {
+//        this.fountText = fountText;
+//    }
 
     public void setSecondText(String secondText) {
         this.secondText = secondText;
@@ -207,16 +208,16 @@ public class PPView extends View {
          */
         canvas.drawBitmap(bitmap, (getWidth() - textWidth - bitmap.getWidth() - 2) / 2, (getHeight() + secondTextSize+3*maxHeight - bitmap.getHeight()) / 2, mPaint);
 
-        /**
-         * 画第四行文本
-         */
-        mPaint.setStrokeWidth(0);
-        mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(fourthTextColor);
-        mPaint.setTextSize(fourthTextSize);
-        mPaint.setTypeface(Typeface.DEFAULT_BOLD); //设置字体
-        textWidth = mPaint.measureText(fountText);   //测量字体宽度，我们需要根据字体的宽度设置在圆环中间
-        canvas.drawText(fountText, (getWidth() - textWidth) / 2,  (getHeight() + secondTextSize+3*maxHeight + 3*fourthTextSize) / 2, mPaint); //
+//        /**
+//         * 画第四行文本
+//         */
+//        mPaint.setStrokeWidth(0);
+//        mPaint.setStyle(Paint.Style.FILL);
+//        mPaint.setColor(fourthTextColor);
+//        mPaint.setTextSize(fourthTextSize);
+//        mPaint.setTypeface(Typeface.DEFAULT_BOLD); //设置字体
+//        textWidth = mPaint.measureText(fountText);   //测量字体宽度，我们需要根据字体的宽度设置在圆环中间
+//        canvas.drawText(fountText, (getWidth() - textWidth) / 2,  (getHeight() + secondTextSize+3*maxHeight + 3*fourthTextSize) / 2, mPaint); //
 
 
     }

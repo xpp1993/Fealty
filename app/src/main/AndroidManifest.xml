@@ -44,7 +44,8 @@
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.BATTERY_STATS"/>
+    <uses-permission android:name="android.permission.BATTERY_STATS" />
+
     <application
         android:name=".base.BaseApplication"
         android:allowBackup="true"
@@ -162,6 +163,9 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".activity.DialogActivity"
+            android:theme="@style/activity_popup" />
 
         <service
             android:name="com.yc.peddemo.sdk.BluetoothLeService"

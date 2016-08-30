@@ -6,7 +6,9 @@
     <!-- button ui -->
     <dimen name="corner_radius">2dp</dimen>
     <dimen name="layer_padding">3dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 
+    <dimen name="text_size">30dp</dimen>
     <!-- card item space -->
     <dimen name="card_item_space">8dp</dimen>
 </resources>

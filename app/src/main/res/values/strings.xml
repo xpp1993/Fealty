@@ -14,6 +14,12 @@
         <item>RotateDown</item>
         <item>Accordion</item>
     </string-array>
-    <string name="head_item">您要绑定的用户是你的：</string>
-    <string name="head_gps">多长时间定位一次？</string>
+    <!-- Font -->
+    <string name="roboto_regular">sans-serif</string>
+    <string name="roboto_light">sans-serif-light</string>
+    <string name="roboto_condensed">sans-serif-condensed</string>
+    <string name="roboto_thin">sans-serif-thin</string>
+    <string name="roboto_medium">sans-serif-medium</string>
+
+    <string name="number_picker_formatter">%02d</string>
 </resources>

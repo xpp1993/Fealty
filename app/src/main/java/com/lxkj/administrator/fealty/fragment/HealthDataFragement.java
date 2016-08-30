@@ -201,7 +201,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                 case REQURST_HANDLER_CURRENT_RATE://处理当前心率
                     int currentRate = msg.arg1;
                     RATE_STATUS = currentRate;
-                    mPpView.setFountText(currentRate + "");
+                 //   mPpView.setFountText(currentRate + "");
+                    mPpView.setSecondText(currentRate+"");
                     mPpView.invalidate();
                     //把实时心率传到定位页面
                     Intent intent = new Intent();

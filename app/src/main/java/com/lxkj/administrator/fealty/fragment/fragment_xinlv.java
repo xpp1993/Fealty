@@ -1,6 +1,5 @@
 package com.lxkj.administrator.fealty.fragment;
-
-import android.app.Dialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -10,10 +9,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lxkj.administrator.fealty.R;
+import com.lxkj.administrator.fealty.activity.DialogActivity;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SPManager;
-import com.lxkj.administrator.fealty.ui.picker.CustomHeaderAndFooterPicker;
 import com.lxkj.administrator.fealty.ui.picker.HeaderAndFooterPicker;
 import com.lxkj.administrator.fealty.ui.picker.OptionPicker;
 import com.lxkj.administrator.fealty.utils.AppUtils;
@@ -44,8 +43,15 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
     private RelativeLayout sport_xinlvfanwei;//设置运动时心率范围
     @ViewInject(R.id.sleep_xinlv)
     private RelativeLayout sleep_xinlv_fanwei;//设置睡眠时心率范围
+    @ViewInject(R.id.sleepxinlv_show)
+    private TextView sleepxinlv_show;
+    @ViewInject(R.id.sport_show)
+    private TextView sport_show;
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
+    @ViewInject(R.id.fanwei_show)
+    private TextView fanwei_show;
+
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
@@ -59,9 +65,11 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
         editor = preferences.edit();
 
     }
+
     // 用EventBus 来导航,订阅者
     public void onEventMainThread(Bundle event) {
     }
+
     @Override
     protected void initListener() {
         //设置监听
@@ -85,16 +93,16 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.jiancetime://弹出dialog
 //                CustomHeaderAndFooterPicker picker2 = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
 //                        "3", "5", "7", "9", "15", "25", "30", "35", "40", "45", "50", "55"
 //                }, "请选择心率间测时间：");
                 ArrayList list2 = new ArrayList();
                 for (int i = 1; i <= 59; i++) {
-                    list2.add(i);
+                    list2.add(i + "");
                 }
-                HeaderAndFooterPicker picker2 = new HeaderAndFooterPicker(getActivity(), list2,"请选择心率间测时间：");
+                HeaderAndFooterPicker picker2 = new HeaderAndFooterPicker(getActivity(), list2, "请选择心率间测时间：");
                 showhourNumber(picker2, "分钟/次", new OptionPicker.OnOptionPickListener() {
                     @Override
                     public void onOptionPicked(int position, String option) {
@@ -105,10 +113,22 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
                 });
                 break;
             case R.id.sleep_xinlv:
+                Intent intent_sleep = new Intent(getActivity(), DialogActivity.class);
+                Bundle bundle_sleep=getValue(sleepxinlv_show);
+                intent_sleep.putExtra("bundle_sleep", bundle_sleep);
+                startActivityForResult(intent_sleep, 0);
                 break;
-            case  R.id.sport_xinlv:
+            case R.id.sport_xinlv:
+                Intent intent_sport = new Intent(getActivity(), DialogActivity.class);
+                Bundle bundle_sport=getValue(sport_show);
+                intent_sport.putExtra("bundle_sport",bundle_sport);
+                startActivityForResult(intent_sport, 1);
                 break;
             case R.id.baojinfanwei:
+                Intent intent_normal = new Intent(getActivity(), DialogActivity.class);
+                Bundle bundle_fanwei=getValue(fanwei_show);
+                intent_normal.putExtra("bundle_fanwei",bundle_fanwei);
+                startActivityForResult(intent_normal, 2);
                 break;
             case R.id.bar_iv_left:
                 getActivity().onBackPressed();
@@ -117,9 +137,11 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
                 break;
         }
     }
+
     /**
      * 显示dialog
-     *  @param picker
+     *
+     * @param picker
      * @param str
      * @param listener
      */
@@ -137,4 +159,21 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
         picker.show();
     }
 
+    /**
+     * 获得控件上的心率范围边界
+     */
+    private Bundle getValue(TextView textView){
+        String sleepxinlvfanwei = (String) sleepxinlv_show.getText();
+        String sleepfanwei[] = sleepxinlvfanwei.split("-");
+        int max = Integer.parseInt(sleepfanwei[1]);
+        int min = Integer.parseInt(sleepfanwei[0]);
+        Bundle bundle = new Bundle();
+        bundle.putInt("max", max);
+        bundle.putInt("min",min);
+        return  bundle;
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }

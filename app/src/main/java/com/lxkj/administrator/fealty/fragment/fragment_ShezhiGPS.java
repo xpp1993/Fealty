@@ -99,7 +99,7 @@ public class fragment_ShezhiGPS extends BaseFragment implements View.OnClickList
             case R.id.relative_sleep_gps://点击设置睡眠时多少小时上传一次GPS定位信息，弹出时间数字选择框
                 ArrayList list = new ArrayList();
                 for (int i = 1; i <= 24; i++) {
-                    list.add(i);
+                    list.add(i+"");
                 }
 //                CustomHeaderAndFooterPicker picker = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
 //                        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"
@@ -121,7 +121,7 @@ public class fragment_ShezhiGPS extends BaseFragment implements View.OnClickList
 //                }, "请选择运动时定位时间：");
                 ArrayList list1 = new ArrayList();
                 for (int i = 1; i <= 59; i++) {
-                    list1.add(i);
+                    list1.add(i+"");
                 }
                 HeaderAndFooterPicker picker1 = new HeaderAndFooterPicker(getActivity(), list1,"请选择运动时定位时间：");
                 showhourNumber(picker1, "分钟/次", new OptionPicker.OnOptionPickListener() {
@@ -140,7 +140,7 @@ public class fragment_ShezhiGPS extends BaseFragment implements View.OnClickList
 //                }, "请选择间测定位时间：");
                 ArrayList list2 = new ArrayList();
                 for (int i = 1; i <= 59; i++) {
-                    list2.add(i);
+                    list2.add(i+"");
                 }
                 HeaderAndFooterPicker picker2 = new HeaderAndFooterPicker(getActivity(), list2,"请选择间测定位时间：");
                 showhourNumber(picker2, "分钟/次", new OptionPicker.OnOptionPickListener() {
