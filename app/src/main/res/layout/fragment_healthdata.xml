@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             ppview:bitmap="@mipmap/xinlv"
             ppview:firstTextColor="#5dcbdf"
-            ppview:firstTextSize="18sp"
+            ppview:firstTextSize="22sp"
             ppview:fourthTextColor="#5dcbdf"
             ppview:fourthTextSize="19sp"
             ppview:innerCircleColor="#5dcbdf"
@@ -58,7 +58,7 @@
             ppview:outerCircleRadius="85.5dp"
             ppview:outerCircleWidth="5dp"
             ppview:secondTextColor="#5dcbdf"
-            ppview:secondTextSize="35sp"
+            ppview:secondTextSize="42sp"
             ppview:thirdTextColor="#5dcbdf"
             ppview:thirdTextSize="12sp" />
         <FrameLayout

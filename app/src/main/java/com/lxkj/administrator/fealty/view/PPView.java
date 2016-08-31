@@ -178,7 +178,8 @@ public class PPView extends View {
         mPaint.setTextSize(firstTextSize);
         mPaint.setTypeface(Typeface.DEFAULT_BOLD); //设置字体
         float textWidth = mPaint.measureText(firstText);   //测量字体宽度，我们需要根据字体的宽度设置在圆环中间
-        canvas.drawText(firstText, (getWidth() - textWidth) / 2, (getHeight() - secondTextSize - firstTextSize/2) / 2, mPaint); //
+//        canvas.drawText(firstText, (getWidth() - textWidth) / 2, (getHeight() - secondTextSize - firstTextSize / 2) / 2, mPaint); //
+        canvas.drawText(firstText, (getWidth() - textWidth) / 2, (getHeight() - secondTextSize - firstTextSize) / 2, mPaint); //
 
         /**
          * 画第二行文本
@@ -189,7 +190,7 @@ public class PPView extends View {
         mPaint.setTextSize(secondTextSize);
         mPaint.setTypeface(Typeface.DEFAULT_BOLD); //设置字体
         textWidth = mPaint.measureText(secondText);   //测量字体宽度，我们需要根据字体的宽度设置在圆环中间
-        canvas.drawText(secondText, (getWidth() - textWidth) / 2, (getHeight() + secondTextSize) / 2, mPaint); //
+        canvas.drawText(secondText, (getWidth() - textWidth) / 2, (getHeight() + secondTextSize) / 2, mPaint);
 
         /**
          * 画第三行文本
@@ -223,4 +224,7 @@ public class PPView extends View {
     }
 
 
+    public void setSecondTextColor(int secondTextColor) {
+        this.secondTextColor = secondTextColor;
+    }
 }
