@@ -1,7 +1,9 @@
 package com.lxkj.administrator.fealty.fragment;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -63,7 +65,6 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
         preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
         //2. 获得编辑器:当将数据存储到SharedPrefences对象中时，需要获得编辑器。如果取出则不需要。
         editor = preferences.edit();
-
     }
 
     // 用EventBus 来导航,订阅者
@@ -93,6 +94,7 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
+        Bundle bundle;
         switch (v.getId()) {
             case R.id.jiancetime://弹出dialog
 //                CustomHeaderAndFooterPicker picker2 = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
@@ -114,21 +116,27 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
                 break;
             case R.id.sleep_xinlv:
                 Intent intent_sleep = new Intent(getActivity(), DialogActivity.class);
-                Bundle bundle_sleep=getValue(sleepxinlv_show);
-                intent_sleep.putExtra("bundle_sleep", bundle_sleep);
-                startActivityForResult(intent_sleep, 0);
+                bundle = getValue(sleepxinlv_show);
+                bundle.putString("title", getResources().getString(R.string.sleep_title));
+                intent_sleep.putExtra("bundle", bundle);
+                // startActivity(intent_sleep);
+                startActivityForResult(intent_sleep, ParameterManager.REQURST_CODE_SLEEP);
                 break;
             case R.id.sport_xinlv:
                 Intent intent_sport = new Intent(getActivity(), DialogActivity.class);
-                Bundle bundle_sport=getValue(sport_show);
-                intent_sport.putExtra("bundle_sport",bundle_sport);
-                startActivityForResult(intent_sport, 1);
+                bundle = getValue(sport_show);
+                bundle.putString("title", getResources().getString(R.string.sport_title));
+                intent_sport.putExtra("bundle", bundle);
+                // startActivity(intent_sport);
+                startActivityForResult(intent_sport, ParameterManager.REQURST_CODE_SPORT);
                 break;
             case R.id.baojinfanwei:
                 Intent intent_normal = new Intent(getActivity(), DialogActivity.class);
-                Bundle bundle_fanwei=getValue(fanwei_show);
-                intent_normal.putExtra("bundle_fanwei",bundle_fanwei);
-                startActivityForResult(intent_normal, 2);
+                bundle = getValue(fanwei_show);
+                bundle.putString("title", getResources().getString(R.string.normal_title));
+                intent_normal.putExtra("bundle", bundle);
+                // startActivity(intent_normal);
+                startActivityForResult(intent_normal, ParameterManager.REQURST_CODE_NORMAL);
                 break;
             case R.id.bar_iv_left:
                 getActivity().onBackPressed();
@@ -162,18 +170,39 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
     /**
      * 获得控件上的心率范围边界
      */
-    private Bundle getValue(TextView textView){
-        String sleepxinlvfanwei = (String) sleepxinlv_show.getText();
-        String sleepfanwei[] = sleepxinlvfanwei.split("-");
-        int max = Integer.parseInt(sleepfanwei[1]);
-        int min = Integer.parseInt(sleepfanwei[0]);
+    private Bundle getValue(TextView textView) {
+        String xinlvfanwei = (String) textView.getText();
+        String fanwei[] = xinlvfanwei.split("-");
+        int max = Integer.parseInt(fanwei[1]);
+        int min = Integer.parseInt(fanwei[0]);
+        Log.e("fanwei", min + "-" + max);
         Bundle bundle = new Bundle();
         bundle.putInt("max", max);
-        bundle.putInt("min",min);
-        return  bundle;
+        bundle.putInt("min", min);
+        return bundle;
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (data==null){
+            return;
+        }
+        String str = data.getBundleExtra("data").getString("minmax");
+        if (str==null||str.equals(""))
+            return;
+        if (requestCode == ParameterManager.REQURST_CODE_NORMAL) {
+            if (resultCode == ParameterManager.REQURST_CODE_NORMAL) {
+                fanwei_show.setText(str);
+            }
+        } else if (requestCode == ParameterManager.REQURST_CODE_SPORT) {
+            if (resultCode == ParameterManager.REQURST_CODE_SPORT) {
+                sport_show.setText(str);
+            }
+        } else if (requestCode == ParameterManager.REQURST_CODE_SLEEP) {
+            if (resultCode == ParameterManager.REQURST_CODE_SLEEP) {
+                sleepxinlv_show.setText(str);
+            }
+        }
     }
 }

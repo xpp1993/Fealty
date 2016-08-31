@@ -22,4 +22,7 @@
     <string name="roboto_medium">sans-serif-medium</string>
 
     <string name="number_picker_formatter">%02d</string>
+    <string name="sleep_title">请设置睡眠时心率的范围：</string>
+    <string name="sport_title">请设置运动时心率的范围：</string>
+    <string name="normal_title">请设置正常心率的范围：</string>
 </resources>
