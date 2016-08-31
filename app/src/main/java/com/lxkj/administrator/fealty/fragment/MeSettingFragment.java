@@ -178,10 +178,10 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                     }
                     // alterSelfData(null);
                 } catch (Exception e) {
-                    Log.e("RegistActivity", "onActivityResult:" + e.getMessage());
+                    Log.e("MeSettingFragment", "onActivityResult:" + e.getMessage());
                 }
             } else {
-                Log.v("RegistActivity", "onActivityResult:请求图片从剪切器没有返回");
+                Log.v("MeSettingFragment", "onActivityResult:请求图片从剪切器没有返回");
             }
             if (tempImageFile != null && tempImageFile.exists()) {
                 tempImageFile.delete();
@@ -265,7 +265,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                 showSetBirthDayDialog();
                 break;
             case R.id.fragment_mine_iv_reset:
-                EventBus.getDefault().post(new NavFragmentEvent(new RegistFragment()));
+                EventBus.getDefault().post(new NavFragmentEvent(new ResetPasswordFragment()));
                 break;
             case R.id.bar_iv_left:
                 EventBus.getDefault().post(new String("刷新界面"));

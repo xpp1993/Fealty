@@ -109,6 +109,10 @@ public class DialogActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    /**
+     * 把数据发给Fragment
+     * @param resultcode
+     */
     private void showText(int resultcode) {
         Intent intent = new Intent();
         Bundle data = new Bundle();

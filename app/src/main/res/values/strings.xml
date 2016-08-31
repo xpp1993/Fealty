@@ -25,4 +25,9 @@
     <string name="sleep_title">请设置睡眠时心率的范围：</string>
     <string name="sport_title">请设置运动时心率的范围：</string>
     <string name="normal_title">请设置正常心率的范围：</string>
+    <string name="sleeptime">睡眠时</string>
+    <string name="sporttime">运动时</string>
+    <string name="hight_side">心率偏高！</string>
+    <string name="low_side">心率偏低！</string>
+    <string name="abnormal">心率异常！</string>
 </resources>

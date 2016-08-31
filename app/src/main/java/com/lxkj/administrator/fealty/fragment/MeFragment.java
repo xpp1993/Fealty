@@ -28,6 +28,7 @@ import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONArray;
 import com.avast.android.dialogs.fragment.ListDialogFragment;
@@ -69,6 +70,7 @@ import com.yc.peddemo.utils.CalendarUtils;
 import com.yc.peddemo.utils.GlobalVariable;
 import com.yc.pedometer.info.SleepTimeInfo;
 import com.yc.pedometer.info.StepInfo;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
@@ -128,11 +130,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private final int CONNECTED = 1;
     private final int DISCONNECTED = 3;
     private int CURRENT_STATUS = DISCONNECTED;
+    private int RATE_STATUS = 95;
     private WriteCommandToBLE mWriteCommand;
     private String TAG = "xpp";
     private Handler mHandler;
-    //    private int tempRate = 75;
-//    private int tempStatus;
     private DataProcessing mDataProcessing;
     private final int UPDATA_REAL_RATE_MSG = 20;//处理心率监测数据
     private final int UPDATE_STEP_UI_MSG = 0;//同步计步数据
@@ -167,6 +168,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     SQLiteDatabase xinlvdb;
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor1;
+    int sportMinRate;
+    int sportMaxRate;
+    int norMin;
+    int norMax;
+    int sleepMaxRate;
+    int sleepMinRate;
+    private boolean message_shark;//是否震动
+    private boolean message_sound;//是否声音提醒
+    private boolean message_dialog;//是否弹窗提醒
+    private boolean message_yuyin;//是否语音提醒
 
     @Override
     protected void init() {
@@ -282,7 +293,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     protected void initData() {
         //判断是否是新的一天
         // JudgeNewDayWhenResume();
+        readSP();//读取文件中的值
         startGps();//开始定位
+
     }
 
     // 用EventBus 来导航,订阅者
@@ -498,7 +511,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
-      //  ToastUtils.showToastInUIThread("网络连接错误，请检查重试！");
+        //  ToastUtils.showToastInUIThread("网络连接错误，请检查重试！");
     }
 
     @Override
@@ -845,13 +858,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private RateChangeListener mOnRateListener = new RateChangeListener() {
         @Override
         public void onRateChange(int rate, int status) {
-//           int  tempRate = rate;
-//           int tempStatus = status;
             Intent intent = new Intent();
             intent.putExtra("tempRate", rate);
             intent.setAction(HealthDataFragement.RATE_CHANGED);
             getActivity().sendBroadcast(intent);
-//            RATE_STATUS = tempRate;
+            RATE_STATUS = rate;
             Log.e("wyj", "onRateChange =" + rate);
             //把心率测试数据写入数据库
             //获取系统当前时间
@@ -880,7 +891,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             //表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
             myHandler.postDelayed(runnable_updataGPS2, 1000 * 60 * 60 * sleep_gpsin);
             //心率不正常，实时实时上传GPS信息。然后每隔三分钟上传一次。
-            myHandler.sendEmptyMessage(UPDATE_SLEEP_UI_MSG);
+            //  myHandler.sendEmptyMessage(UPDATE_SLEEP_UI_MSG);
+            judgeRate(getResources().getString(R.string.sleeptime));
         }
     };
     /**
@@ -902,9 +914,83 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             //  myHandler.sendEmptyMessage(UPDATE_STEP_UI_MSG);
             //运动时每隔15分钟上传一次GPS
             myHandler.postDelayed(runnable_updataGPS, 1000 * 60 * sport_gpsint);
-            //心率不正常，实时实时上传GPS信息。然后每隔三分钟上传一次。
+            //判断心率是否偏低偏高
+             judgeRate(getResources().getString(R.string.sporttime));
         }
     };
+
+    private void judgeRate(String str) {
+        if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常，app响铃报警，上传服务器，他人接收到报警
+            if (message_shark == true) {//如果打开震动
+//                mVibrator.vibrate(5000);//振动五秒
+//                Toast.makeText(getActivity(), getResources().getString(R.string.abnormal), Toast.LENGTH_SHORT).show();
+            } else if (message_sound == true) {//如果打开声音
+
+            } else if (message_dialog == true) {//如果打开弹窗提醒
+
+            } else if (message_yuyin == true) {//如果打开语音提醒
+
+            }
+        } else {
+            if (RATE_STATUS < sportMinRate) {//运动时心率偏低，消息通知
+                if (message_shark == true) {//如果打开震动
+//                    mVibrator.vibrate(5000);//振动五秒
+//                    Toast.makeText(getActivity(), str + getResources().getString(R.string.low_side), Toast.LENGTH_SHORT).show();
+                } else if (message_sound == true) {//如果打开声音
+
+                } else if (message_dialog == true) {//如果打开弹窗提醒
+
+                } else if (message_yuyin == true) {//如果打开语音提醒
+
+                }
+            } else if (RATE_STATUS > sportMaxRate) {//运动时心率偏高，消息通知
+                if (message_shark == true) {//如果打开震动
+//                    mVibrator.vibrate(5000);//振动五秒
+//                    Toast.makeText(getActivity(), str + getResources().getString(R.string.hight_side), Toast.LENGTH_SHORT).show();
+                } else if (message_sound == true) {//如果打开声音
+
+                } else if (message_dialog == true) {//如果打开弹窗提醒
+
+                } else if (message_yuyin == true) {//如果打开语音提醒
+
+                }
+            }
+        }
+    }
+
+    /**
+     * 读取sp文件中的内容
+     */
+    private void readSP() {
+        sportMinRate = preferences.getInt(ParameterManager.SPORT_RATE_MIN_MINUTE, 90);//运动时最低的心率
+        sportMaxRate = preferences.getInt(ParameterManager.SPORT_RATE_MAX_MINUTE, 120);//运动时最高的心率
+        norMin = preferences.getInt(ParameterManager.NORMAL_RATE_MIN_MINUTE, 60);//正常最低心率
+        norMax = preferences.getInt(ParameterManager.NORMAL_RATE_MAX_MINUTE, 120);//正常最高心率
+        sleepMinRate = preferences.getInt(ParameterManager.SLEEP_RATE_MIN_MINUTE, 60);//睡眠时最低心率
+        sleepMaxRate = preferences.getInt(ParameterManager.SLEEP_RATE_MAX_MINUTE, 100);//睡眠时最高心率
+        message_shark = preferences.getBoolean(ParameterManager.MESSAGE_zhend, true);//默认震动提醒
+        message_sound = preferences.getBoolean(ParameterManager.MESSAGE_SOUND, false);
+        message_dialog = preferences.getBoolean(ParameterManager.MESSAGE_dialog, false);
+        message_yuyin = preferences.getBoolean(ParameterManager.MESSAGE_yuyin, false);
+    }
+
+    /**
+     * 消息提醒
+     */
+    private void messageWarn() {
+        if (message_shark == true) {//如果打开震动
+
+        }
+        if (message_sound == true) {//如果打开声音
+
+        }
+        if (message_dialog == true) {//如果打开弹窗提醒
+
+        }
+        if (message_yuyin == true) {//如果打开语音提醒
+
+        }
+    }
 
     /**
      * 返回今天的步数、距离、卡路里的集合
@@ -1008,7 +1094,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.sendEmptyMessage(OFFLINE_SLEEP_SYNC_OK);
         } else if (status == ICallbackStatus.OFFLINE_STEP_SYNC_OK) {//离线运动同步完成，发送请求电量指令,开始测试心率指令
             myHandler.sendEmptyMessage(OFFLINE_STEP_SYNC_OK);//把离线同步的运动数据发送给首页
-            myHandler.postDelayed(runnable3, 1000 * 60*rate_int);//发送心率测试开始
+            myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);//发送心率测试开始
             myHandler.postDelayed(runnable4, 1000 * 15);//请求手环电量
             // myHandler.postDelayed(runnable5, 1000);//把数据上传到服务器
         } else if (status == ICallbackStatus.GET_BLE_BATTERY_OK) {
@@ -1170,7 +1256,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }
         object.put("contact_list", jsonArray);
         String jsonString = object.toJSONString();
-        //  System.out.println(jsonString);
+        System.out.println(jsonString);
         return jsonString;
     }
 
