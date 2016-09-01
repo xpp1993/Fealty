@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.provider.Contacts;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -201,8 +203,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                 case REQURST_HANDLER_CURRENT_RATE://处理当前心率
                     int currentRate = msg.arg1;
                     RATE_STATUS = currentRate;
-                 //   mPpView.setFountText(currentRate + "");
-                    mPpView.setSecondText(currentRate+"");
+                    //   mPpView.setFountText(currentRate + "");
+                    mPpView.setSecondText(currentRate + "");
                     mPpView.invalidate();
                     //把实时心率传到定位页面
                     Intent intent = new Intent();
@@ -211,15 +213,15 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     getActivity().sendBroadcast(intent);
                     break;
                 case REQURST_HANDLER_LIST_RATE://画心率折线图
-                  //  TreeMap<Integer, Integer> map = new TreeMap<>();
-                    Map<String,Integer>map=new HashMap<>();
+                    //  TreeMap<Integer, Integer> map = new TreeMap<>();
+                    Map<String, Integer> map = new HashMap<>();
                     List<RateListData> list = (List<RateListData>) msg.obj;
                     for (int i = 0; i < list.size(); i++) {
                         RateListData listData = list.get(i);
                         try {
 //                            int rate_time = Integer.parseInt(listData.getTime());
 //                            map.put(rate_time, listData.getRate());
-                            map.put(listData.getTime(),listData.getRate());
+                            map.put(listData.getTime(), listData.getRate());
                         } catch (NumberFormatException e) {
                         }
                     }
@@ -339,11 +341,19 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     //提供给外界设置折线图中心率的方法,currentHeart
     public void setRateListData(List<RateListData> listData) {
         Message message = Message.obtain();
-        if (listData.size()==0)
+        if (listData.size() == 0)
             return;
         message.what = REQURST_HANDLER_LIST_RATE;
         message.obj = listData;
         handler.sendMessage(message);
+    }
+
+    /**
+     * 设置第二行文本的颜色
+     */
+    private void functionTest() {
+        mPpView.setSecondTextColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
+        mPpView.postInvalidate();
     }
 
 }
