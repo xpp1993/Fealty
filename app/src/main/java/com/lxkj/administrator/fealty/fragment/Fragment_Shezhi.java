@@ -64,6 +64,7 @@ public class Fragment_Shezhi extends BaseFragment implements View.OnClickListene
         int id = v.getId();
         switch (id) {
             case R.id.bar_iv_left:
+                EventBus.getDefault().post(new String("刷新界面"));
                 getActivity().onBackPressed();
                 break;
             case R.id.shezhi_GPS://跳转到GPS设置界面
@@ -80,5 +81,10 @@ public class Fragment_Shezhi extends BaseFragment implements View.OnClickListene
             default:
                 break;
         }
+    }
+    @Override
+    public boolean onBack() {
+        EventBus.getDefault().post(new String("刷新界面"));
+        return super.onBack();
     }
 }

@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.lxkj.administrator.fealty.MainActivity;
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
@@ -96,6 +97,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
     public static final int REQUEST_CODE_SELF_DATA_ALTER = 0X310;
     public static final int REQUEST_USER_BYMIBILE = 0x01;
     private Handler handler = new MyHandler();
+    @ViewInject(R.id.fragment_mine_tv_exit)
+    private TextView fragment_mine_tv_exit;
 
     @Override
     protected void init() {
@@ -116,6 +119,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
         tv_birth.setOnClickListener(this);
         iv_reset.setOnClickListener(this);
         bar_iv_left.setOnClickListener(this);
+        fragment_mine_tv_exit.setOnClickListener(this);
     }
 
     @Override
@@ -131,7 +135,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
             circleImageView.setImageResource(R.mipmap.unknow_head);
         } else {
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
-          //  NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+            //  NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
         }
         tv_nickName.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
         tv_phone.setText(SessionHolder.user.getMobile());
@@ -165,8 +169,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                 Log.v("RegistActivity", "onActivityResult:请求图片从从剪切器返回成功");
                 try {
                     circleImageView.setImageURI(Uri.fromFile(headImageFile));
-                   // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), "", SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
-                   // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile()," "," "," "," ");
+                    // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), "", SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
+                    // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile()," "," "," "," ");
                     if (headImageFile != null && headImageFile.exists()) {
                         Map<String, String> map = new HashMap<>();
                         byte[] buffer = changeFileToByte(headImageFile);
@@ -272,7 +276,16 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                 EventBus.getDefault().post(new String("刷新界面"));
                 getActivity().onBackPressed();//返回
                 break;
+            case R.id.fragment_mine_tv_exit:
+                getActivity().finish();
+                break;
         }
+    }
+
+    @Override
+    public boolean onBack() {
+        EventBus.getDefault().post(new String("刷新界面"));
+        return super.onBack();
     }
 
     private void showSetBirthDayDialog() {
@@ -385,8 +398,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
      * 修改个人资料
      */
     private void alterSelfData(Map<String, String> parameters) {
-       // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), SessionHolder.user.getUserpic(), SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
-        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"},SessionHolder.user.getMobile(),"","","", "");
+        // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), SessionHolder.user.getUserpic(), SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), "", "", "", "");
         params.putAll(parameters);
         try {
 //            if (headImageFile != null && headImageFile.exists()) {

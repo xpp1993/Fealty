@@ -28,7 +28,6 @@ import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONArray;
 import com.avast.android.dialogs.fragment.ListDialogFragment;
@@ -68,6 +67,7 @@ import com.yc.peddemo.sdk.UTESQLOperate;
 import com.yc.peddemo.sdk.WriteCommandToBLE;
 import com.yc.peddemo.utils.CalendarUtils;
 import com.yc.peddemo.utils.GlobalVariable;
+import com.yc.pedometer.info.RateOneDayInfo;
 import com.yc.pedometer.info.SleepTimeInfo;
 import com.yc.pedometer.info.StepInfo;
 
@@ -78,7 +78,6 @@ import org.xutils.view.annotation.ViewInject;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,8 +135,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private Handler mHandler;
     private DataProcessing mDataProcessing;
     private final int UPDATA_REAL_RATE_MSG = 20;//处理心率监测数据
-    private final int UPDATE_STEP_UI_MSG = 0;//同步计步数据
-    private final int UPDATE_SLEEP_UI_MSG = 23;//同步睡眠数据
+    //    private final int UPDATE_STEP_UI_MSG = 0;//同步计步数据
+//    private final int UPDATE_SLEEP_UI_MSG = 23;//同步睡眠数据
+    private final int OFFLINE_RATE_SYNC_OK = 0x123;
     public static final int REQUEST_CODE_UPLOAD_CONTACTS = 0X20;//上传通讯录
     public static final int REQUEST_CODE_SPORTDATA_SLEEPDATA = 0x10;//把运动数据睡眠数据上传到服务器
     public static final int REQUEST_CODE_CURRENTRATE = 0x22;//把测试的心率数据上传到服务器
@@ -180,6 +180,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private boolean message_yuyin;//是否语音提醒
     private Vibrator mVibrator;
     private NotificationManager notificationManager;//1.获取状态栏通知管理器
+
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
@@ -213,7 +214,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             }
         };
         //初始化个人资料显示
-        initPersonalDataShow();
+       initPersonalDataShow();
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_USER_BYMOBILE, params, null, MeFragment.REQUEST_USER_BYMIBILE, this);
         sp = getActivity().getSharedPreferences(GlobalVariable.SettingSP, 0);
@@ -228,6 +229,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         mVibrator = ((BaseApplication) AppUtils.getBaseContext()).mVibrator;
         notificationManager = ((BaseApplication) AppUtils.getBaseContext()).notificationManager;
     }
+
 
     /**
      * 初始化个人资料显示
@@ -305,15 +307,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     // 用EventBus 来导航,订阅者
     public void onEventMainThread(String event) {
         String str = event.getBytes().toString();
-        Log.d("Tag", str);
+        Log.d("Tag", str+"-------------");
         initPersonalDataShow();
+        readSP();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        readSP();//读取文件中的值
-    }
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        initPersonalDataShow();
+//        readSP();//读取文件中的值
+//    }
 
     //2016-8-21 xpp add
     @Override
@@ -349,15 +353,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.removeCallbacks(runnable6);
         if (runable_startGps != null)
             myHandler.removeCallbacks(runable_startGps);
+        if (runnable_rate != null)
+            myHandler.removeCallbacks(runnable_rate);
         if (helper != null) {
             helper.close();
         }
         if (xinlvhelper != null) {
             xinlvhelper.close();
         }
-        if (xinlvdb != null) {
-            xinlvdb.close();
-        }
+//        if (xinlvdb != null) {
+//            xinlvdb.close();
+//        }
         if (delatesqlite != null) {
             myHandler.removeCallbacks(delatesqlite);
         }
@@ -605,7 +611,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     break;
                 case DISCONNECT_MSG://报警并尝试连接
                     CURRENT_STATUS = DISCONNECTED;
-                    bluee_iv_left.setSlideable(true);
+                    // bluee_iv_left.setSlideable(true);
                     String lastConnectAddr0 = sp.getString(
                             GlobalVariable.LAST_CONNECT_DEVICE_ADDRESS_SP, "");
                     boolean connectResute0 = mBLEServiceOperate
@@ -615,7 +621,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 case CONNECTED_MSG:
                     mBluetoothLeService.setRssiHandler(myHandler);
                     CURRENT_STATUS = CONNECTED;
-                    bluee_iv_left.setSlideable(false);
+                    // bluee_iv_left.setSlideable(false);
                     ToastUtils.showToastInUIThread("已连接");
                     break;
                 case UPDATA_REAL_RATE_MSG://处理接收到的心率数据.把心率数据写入数据库
@@ -628,9 +634,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "currentHeart"}, SessionHolder.user.getMobile(), rate_time, rate + "");
                     NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.INSERT_CURRENTRATE, params, null, REQUEST_CODE_CURRENTRATE, MeFragment.this);
                     break;
-//                case UPDATE_SLEEP_UI_MSG://睡眠数据
-//                    querySleepInfo();
-//                    break;
+                case OFFLINE_RATE_SYNC_OK://同步心率数据
+                    RateOneDayInfo rateOneDayInfo = mySQLOperate.queryRateOneDayMainInfo(CalendarUtils.getCalendar(0));
+                    if (rateOneDayInfo != null) {
+                        int rateToday = rateOneDayInfo.getCurrentRate();//获得今天最后一次测得的心率值
+                        //发给界面显示
+                        Intent intent = new Intent();
+                        intent.putExtra("tempRate", rateToday);
+                        intent.setAction(HealthDataFragement.RATE_CHANGED);
+                        getActivity().sendBroadcast(intent);
+                    }
+                    break;
 //                case UPDATE_STEP_UI_MSG://返回今天的步数、距离、卡路里的集合
 //                    queryStepInfo();
                 //   break;
@@ -1025,6 +1039,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 .setTicker("通知来了")
                 .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.mipmap.baojing)
+                .setAutoCancel(true)
                 .setDefaults(defaults)
                 .setContentIntent(getDefalutIntent(Notification.FLAG_INSISTENT)) //让声音、振动无限循环，直到用户响应 （取消或者打开）
                 .setContentIntent(getDefalutIntent(Notification.FLAG_AUTO_CANCEL))//设置通知栏点击意图, 用户单击通知后自动消失;
@@ -1125,6 +1140,37 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         alterSelfData(parameters);
     }
 
+//    /**
+//     * mBluetoothLeService.setICallback(this)检测返回的数据
+//     *
+//     * @param result
+//     * @param status
+//     */
+//    @Override
+//    public void OnResult(boolean result, int status) {
+//        Log.i(TAG, "result=" + result + ",status=" + status);
+//        if (status == ICallbackStatus.CONNECTED_STATUS) {
+//            myHandler.sendEmptyMessage(CONNECTED_MSG);
+////            if (result == true) {//表示计步状态,在老人清醒时，每隔15分钟上传一次手机坐标
+////            } else if (result == false) {//表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
+////            }
+//        } else if (status == ICallbackStatus.DISCONNECT_STATUS) {
+//            myHandler.sendEmptyMessage(DISCONNECT_MSG);
+//        } else if (status == ICallbackStatus.SYNC_TIME_OK) {// 设置时间操作完成，发送同步睡眠数据数据指令
+//            myHandler.postDelayed(runnable2, 1000);
+//        } else if (status == ICallbackStatus.OFFLINE_SLEEP_SYNC_OK) {//离线睡眠同步完成,发送同步运动数据指令
+//            myHandler.postDelayed(runnable1, 1000);
+//            //把睡眠数据发给健康监测页，且上传到服务器
+//            myHandler.sendEmptyMessage(OFFLINE_SLEEP_SYNC_OK);
+//        } else if (status == ICallbackStatus.OFFLINE_STEP_SYNC_OK) {//离线运动同步完成，发送请求电量指令,开始测试心率指令
+//            myHandler.sendEmptyMessage(OFFLINE_STEP_SYNC_OK);//把离线同步的运动数据发送给首页
+//            myHandler.postDelayed(runnable4, 1000 * 60 * rate_int);//请求手环电量
+//            myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);//发送心率测试开始
+//            // myHandler.postDelayed(runnable5, 1000);//把数据上传到服务器
+//        } else if (status == ICallbackStatus.GET_BLE_BATTERY_OK) {
+//        }
+//    }
+
     /**
      * mBluetoothLeService.setICallback(this)检测返回的数据
      *
@@ -1136,17 +1182,24 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         Log.i(TAG, "result=" + result + ",status=" + status);
         if (status == ICallbackStatus.CONNECTED_STATUS) {
             myHandler.sendEmptyMessage(CONNECTED_MSG);
+            //发送同步时间指令
+            myHandler.postDelayed(runnable, 1000);
 //            if (result == true) {//表示计步状态,在老人清醒时，每隔15分钟上传一次手机坐标
 //            } else if (result == false) {//表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
 //            }
         } else if (status == ICallbackStatus.DISCONNECT_STATUS) {
             myHandler.sendEmptyMessage(DISCONNECT_MSG);
         } else if (status == ICallbackStatus.SYNC_TIME_OK) {// 设置时间操作完成，发送同步睡眠数据数据指令
-            myHandler.postDelayed(runnable2, 1000);
-        } else if (status == ICallbackStatus.OFFLINE_SLEEP_SYNC_OK) {//离线睡眠同步完成,发送同步运动数据指令
-            myHandler.postDelayed(runnable1, 1000);
+             myHandler.postDelayed(runnable2, 1000);
+          //  myHandler.postDelayed(runnable2, 500);
+        } else if (status == ICallbackStatus.OFFLINE_SLEEP_SYNC_OK) {//离线睡眠同步完成,发送同步心率数据指令
             //把睡眠数据发给健康监测页，且上传到服务器
             myHandler.sendEmptyMessage(OFFLINE_SLEEP_SYNC_OK);
+            myHandler.postDelayed(runnable_rate, 1000);//同步心率数据
+        } else if (status == ICallbackStatus.OFFLINE_RATE_SYNC_OK) {//如果同步心率完成，发送同步运动数据指令
+             myHandler.postDelayed(runnable1, 1000);
+           // myHandler.postDelayed(runnable1, 500);
+            myHandler.sendEmptyMessage(OFFLINE_RATE_SYNC_OK);
         } else if (status == ICallbackStatus.OFFLINE_STEP_SYNC_OK) {//离线运动同步完成，发送请求电量指令,开始测试心率指令
             myHandler.sendEmptyMessage(OFFLINE_STEP_SYNC_OK);//把离线同步的运动数据发送给首页
             myHandler.postDelayed(runnable4, 1000 * 60 * rate_int);//请求手环电量
@@ -1190,6 +1243,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }
     };
     /**
+     * 同步心率数据指令
+     */
+    private Runnable runnable_rate = new Runnable() {
+        @Override
+        public void run() {
+            if (mBluetoothLeService != null) {
+                mWriteCommand.syncAllRateData();
+            }
+        }
+    };
+    /**
      * 发送心率测试开启
      */
     int rate_int = 3;
@@ -1205,7 +1269,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 }
             }, 1000 * 20);
             String rate_ji = preferences.getString(ParameterManager.SHEZHI_JIANCEXINLV, "3");
-            int rate_int = Integer.parseInt(rate_ji);
+            rate_int = Integer.parseInt(rate_ji);
             myHandler.postDelayed(this, 1000 * 60 * rate_int);
         }
     };
