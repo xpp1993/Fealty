@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSON;
+import com.lxkj.administrator.fealty.bean.RateListData;
 import com.lxkj.administrator.fealty.bean.UserInfo;
 
 import org.json.JSONArray;
@@ -13,6 +15,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class DecodeManager {
@@ -133,6 +136,46 @@ public final class DecodeManager {
     }
 
     /**
+     * 解析折线心率信息
+     *
+     * @param jsonObject
+     * @param handler
+     * @throws JSONException
+     */
+    public static void decodeHeartMessage(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
+        Log.v("decodeIssueMessage", jsonObject.toString());
+        Message msg = new Message();
+        Bundle data = new Bundle();
+        msg.what = messageWhat;
+        insertRecInformation(data, jsonObject);
+        if (isRequestOK(jsonObject)) {
+            HashMap<String, List<RateListData>> result = new HashMap<>();
+            JSONArray array = jsonObject.optJSONObject("json").optJSONArray("heartMsg");
+            for (int i = 0; i < array.length(); i++) {
+                List<RateListData> list = new ArrayList<>();
+                JSONObject object1 = array.getJSONObject(i);
+                String jsonString = object1.optString("heartRate");
+                com.alibaba.fastjson.JSONObject ob1 = (com.alibaba.fastjson.JSONObject) JSON.parse(jsonString);
+                com.alibaba.fastjson.JSONArray jsonArray = ob1.getJSONArray("heartRate");
+                String mobile = ob1.getString("mobile");
+                for (int j = 0; j < jsonArray.size(); j++) {
+                    com.alibaba.fastjson.JSONObject object = jsonArray.getJSONObject(j);
+                    //    com.alibaba.fastjson.JSONObject object = (com.alibaba.fastjson.JSONObject) jsonArray.get(i);
+                    String rate_time = object.getString("rate_time");
+                    int rate = object.getInteger("rate");
+                    RateListData rateListData = new RateListData(rate, rate_time);
+                    list.add(rateListData);
+                    Log.e("rateListData", rateListData.toString());
+                }
+                result.put(mobile, list);
+            }
+            data.putSerializable("result", result);
+        }
+        msg.setData(data);
+        handler.sendMessage(msg);
+    }
+
+    /**
      * 解析 通用jsonObject
      *
      * @param jsonObject
@@ -145,7 +188,7 @@ public final class DecodeManager {
         Message msg = new Message();
         Bundle data = new Bundle();
         msg.what = messageWhat;
-       // insertRecInformation(data, jsonObject);
+        // insertRecInformation(data, jsonObject);
         if (isRequestOK(jsonObject)) {
             int code = jsonObject.optInt("code");
             String desc = jsonObject.optString("desc");
@@ -168,7 +211,7 @@ public final class DecodeManager {
         Message msg = new Message();
         Bundle data = new Bundle();
         msg.what = messageWhat;
-      //  insertRecInformation(data, jsonObject);
+        //  insertRecInformation(data, jsonObject);
         if (isRequestOK(jsonObject)) {
             int code = jsonObject.optInt("code");
             String desc = jsonObject.optString("desc");
@@ -179,56 +222,56 @@ public final class DecodeManager {
             String nickName = jsonObject1.getString("nickName");
             String headFile = jsonObject1.optString("headFile", "");
             String sex = String.valueOf(jsonObject1.optInt("sex", 0) == 0 ? "" : jsonObject1.getInt("sex"));
-          //  String sex = String.valueOf(jsonObject1.optInt("sex", 0));
+            //  String sex = String.valueOf(jsonObject1.optInt("sex", 0));
             String birthday = jsonObject1.optString("birthday", "");
             data.putString("mobile", mobile);
             data.putString("nickName", nickName);
             data.putString("sex", sex);
             data.putString("birthday", birthday);
             data.putString("headFile", headFile);
-            Log.e("healFile",headFile);
+            Log.e("healFile", headFile);
         }
         msg.setData(data);
         handler.sendMessage(msg);
     }
 
-    /**
-     * 解析 用户信息查询 ,查询别人的
-     *
-     * @param jsonObject
-     * @param messageWhat
-     * @param handler
-     * @throws JSONException
-     */
-    public static void decodeUserInfoQuery(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
-        Log.v("decodeUserInfoQuery", jsonObject.toString());
-        Message msg = new Message();
-        Bundle data = new Bundle();
-        msg.what = messageWhat;
-        insertRecInformation(data, jsonObject);
-
-        if (isRequestOK(jsonObject)) {
-            int relation = jsonObject.getInt("relation");
-            String friend = jsonObject.optString("friend", "");
-            String nickname = jsonObject.getString("nickname");
-            String userpic = jsonObject.optString("userpic", "");
-            String gender = String.valueOf(jsonObject.optInt("gender", 0) == 0 ? "" : jsonObject.getInt("gender"));
-
-            HashMap<String, String> params = (HashMap<String, String>) jsonObject.get("params");
-            String q_userid = params.get("q_userid");
-
-//            User user = new User();
-//            user.setUserid(q_userid);
-//            user.setNickName(nickname);
-//            user.setUserpic(userpic);
-//            user.setRelation(relation);
-//            user.setFriend(friend);
-//            user.setGender(gender);
-//            data.putSerializable("user", user);
-        }
-        msg.setData(data);
-        handler.sendMessage(msg);
-    }
+//    /**
+//     * 解析 用户信息查询 ,查询别人的
+//     *
+//     * @param jsonObject
+//     * @param messageWhat
+//     * @param handler
+//     * @throws JSONException
+//     */
+//    public static void decodeUserInfoQuery(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
+//        Log.v("decodeUserInfoQuery", jsonObject.toString());
+//        Message msg = new Message();
+//        Bundle data = new Bundle();
+//        msg.what = messageWhat;
+//        insertRecInformation(data, jsonObject);
+//
+//        if (isRequestOK(jsonObject)) {
+//            int relation = jsonObject.getInt("relation");
+//            String friend = jsonObject.optString("friend", "");
+//            String nickname = jsonObject.getString("nickname");
+//            String userpic = jsonObject.optString("userpic", "");
+//            String gender = String.valueOf(jsonObject.optInt("gender", 0) == 0 ? "" : jsonObject.getInt("gender"));
+//
+//            HashMap<String, String> params = (HashMap<String, String>) jsonObject.get("params");
+//            String q_userid = params.get("q_userid");
+//
+////            User user = new User();
+////            user.setUserid(q_userid);
+////            user.setNickName(nickname);
+////            user.setUserpic(userpic);
+////            user.setRelation(relation);
+////            user.setFriend(friend);
+////            user.setGender(gender);
+////            data.putSerializable("user", user);
+//        }
+//        msg.setData(data);
+//        handler.sendMessage(msg);
+//    }
 
     /**
      * 解析 修改用户信息
@@ -245,8 +288,8 @@ public final class DecodeManager {
         msg.what = messageWhat;
         insertRecInformation(data, jsonObject);
         if (isRequestOK(jsonObject)) {
-            int code = jsonObject.optInt("code",1);
-            String desc = jsonObject.optString("desc","");
+            int code = jsonObject.optInt("code", 1);
+            String desc = jsonObject.optString("desc", "");
             data.putInt("code", code);
             data.putString("desc", desc);
             JSONObject jsonObject1 = jsonObject.getJSONObject("params");
@@ -281,8 +324,8 @@ public final class DecodeManager {
         msg.what = messageWhat;
         insertRecInformation(data, jsonObject);
         if (isRequestOK(jsonObject)) {
-            int code = jsonObject.optInt("code",1);
-            String desc = jsonObject.optString("desc","");
+            int code = jsonObject.optInt("code", 1);
+            String desc = jsonObject.optString("desc", "");
             data.putInt("code", code);
             data.putString("desc", desc);
             JSONArray old_people_list = jsonObject.optJSONObject("json").optJSONArray("old_people_list");
@@ -330,7 +373,7 @@ public final class DecodeManager {
                 String parentPhone = object.optString("parentPhone");
                 String light_hour = object.optString("light_hour");
                 String total_hour_str = object.optString("total_hour_str");
-                Log.e("total_hour_str",total_hour_str);
+                Log.e("total_hour_str", total_hour_str);
                 String light_minute = object.optString("light_minute");
                 String deep_hour = object.optString("deep_hour");
                 String deep_minute = object.optString("deep_minute");
@@ -377,6 +420,6 @@ public final class DecodeManager {
         String desc = jsonObject.getString("desc");
         bundle.putInt("code", code);
         bundle.putString("desc", desc);
-       // bundle.putSerializable("params", (HashMap<String, String>) (jsonObject.opt("params")));
+        // bundle.putSerializable("params", (HashMap<String, String>) (jsonObject.opt("params")));
     }
 }

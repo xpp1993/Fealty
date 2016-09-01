@@ -19,6 +19,11 @@ public class RateListData {
         this.time = time;
     }
 
+    public RateListData(int rate, String time) {
+        this.rate = rate;
+        this.time = time;
+    }
+
     public String getMobile() {
         return mobile;
     }
@@ -51,4 +56,5 @@ public class RateListData {
                 ", time='" + time + '\'' +
                 '}';
     }
+
 }

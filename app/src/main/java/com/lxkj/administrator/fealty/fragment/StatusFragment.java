@@ -46,6 +46,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     private List<HealthDataFragement> fragments = new ArrayList<HealthDataFragement>();
     private final int REQUEST_CODE_UPDATA_USERIFO_INTERNET = 0x23;
     private final int REQUEST_CODE_UPDATA_GPS_INTERNET = 0x26;
+    private final int REQUEST_CODE_UPDATA_ZHEXIAN_HEART = 0x25;
     private MyHandler myHandler;
     // private HealthDataFragement healthDataFragement;
 
@@ -73,6 +74,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null, REQUEST_CODE_UPDATA_USERIFO_INTERNET, this);
         //2.
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_GPS_FROM_URL, params, null, REQUEST_CODE_UPDATA_GPS_INTERNET, this);
+        //3.折线心率
+        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_HEART, params, null, REQUEST_CODE_UPDATA_ZHEXIAN_HEART, this);
         //写个循环每一段时间刷新一次页面
         myHandler.postDelayed(LoadData, 1000 * 60 * 3);
     }
@@ -96,6 +99,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null, REQUEST_CODE_UPDATA_USERIFO_INTERNET, StatusFragment.this);
             //2.
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_GPS_FROM_URL, params, null, REQUEST_CODE_UPDATA_GPS_INTERNET, StatusFragment.this);
+            //3
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_HEART, params, null, REQUEST_CODE_UPDATA_ZHEXIAN_HEART, StatusFragment.this);
             myHandler.postDelayed(this, 1000 * 60 * 3);
         }
     };
@@ -165,10 +170,12 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
             }
         }
     }
+
     @Override
     protected void initData() {
 
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -177,6 +184,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
             myHandler.removeCallbacks(LoadData);
         }
     }
+
     @Override
     public void onRequestStart(int requestCode) {
 
@@ -196,6 +204,9 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                     break;
                 case REQUEST_CODE_UPDATA_USERIFO_INTERNET://更新首页用户信息
                     DecodeManager.decodeSportSleep(jsonObject, requestCode, myHandler);
+                    break;
+                case REQUEST_CODE_UPDATA_ZHEXIAN_HEART:
+                    DecodeManager.decodeHeartMessage(jsonObject, requestCode, myHandler);
                     break;
                 default:
                     break;
@@ -271,6 +282,30 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                             fragement.setSportData(calories, step, distance);
                             fragement.setIdentity(identity);
                             fragement.setCurentRate(currentHeart);
+                        }
+
+                    } else {
+                        ToastUtils.showToastInUIThread("服务器数据有异常！");
+                    }
+                    break;
+                case REQUEST_CODE_UPDATA_ZHEXIAN_HEART:
+                    if (data.getInt("code") == 1) {
+                        HashMap<String, List<RateListData>> result = (HashMap<String, List<RateListData>>) data.getSerializable("result");
+                        if (result == null)
+                            return;
+                        Iterator keyIterator = result.entrySet().iterator();
+                        while (keyIterator.hasNext()) {
+                            Map.Entry entry = (Map.Entry) keyIterator.next();
+                            String parentPhone = (String) entry.getKey();
+                           // List<RateListData> listDatas = (List<RateListData>) entry.getValue();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("parentPhone", parentPhone);
+                            //  HealthDataFragement healthDataFragement = new HealthDataFragement();
+                            HealthDataFragement healthDataFragement = new HealthDataFragement();
+                            healthDataFragement.setArguments(bundle);
+                            HealthDataFragement fragement = adapter.addFragment(healthDataFragement);
+                            adapter.notifyDataSetChanged();
+                            fragement.setRateListData(result.get(entry.getKey()));
                         }
 
                     } else {

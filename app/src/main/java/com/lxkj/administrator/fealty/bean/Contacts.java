@@ -9,10 +9,8 @@ public class Contacts {
     private String name;
     private String phone;
 
-    public Contacts() {
-    }
-
     public Contacts(String id, String name, String phone) {
+        super();
         this.id = id;
         this.name = name;
         this.phone = phone;

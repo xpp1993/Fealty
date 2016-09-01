@@ -25,9 +25,16 @@
     <string name="sleep_title">请设置睡眠时心率的范围：</string>
     <string name="sport_title">请设置运动时心率的范围：</string>
     <string name="normal_title">请设置正常心率的范围：</string>
-    <string name="sleeptime">睡眠时</string>
-    <string name="sporttime">运动时</string>
-    <string name="hight_side">心率偏高！</string>
-    <string name="low_side">心率偏低！</string>
-    <string name="abnormal">心率异常！</string>
+    <!--<string name="sleeptime">睡眠时</string>-->
+    <!--<string name="sporttime">运动时</string>-->
+    <!--<string name="hight_side">心率偏高！</string>-->
+    <!--<string name="low_side">心率偏低！</string>-->
+    <!--<string name="abnormal">心率异常！</string>-->
+    <string name="xinlvabnormal">"尊敬的用户！您的心率数据异常，请注意！"</string>
+    <string name="sportlow">尊敬的用户！您运动时的心率数据偏低，请注意！</string>
+    <string name="sporthight">尊敬的用户！您运动时的心率数据偏高，请注意！</string>
+    <string name="sleeplow">尊敬的用户！您睡眠时的心率数据偏低，请注意！</string>
+    <string name="sleephight">尊敬的用户！您睡眠时的心率数据偏高，请注意！</string>
+    <string name="betty">尊敬的用户！您的手环电量不足，请及时充电！</string>
+    <string name="phonebetty">尊敬的用户！您的手机量不足，请及时充电！</string>
 </resources>
