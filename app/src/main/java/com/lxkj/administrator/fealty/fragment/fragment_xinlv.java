@@ -53,6 +53,8 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
     private SharedPreferences.Editor editor;
     @ViewInject(R.id.fanwei_show)
     private TextView fanwei_show;
+    @ViewInject(R.id.jaincetime_show)
+    private TextView jaincetime_show;
 
     @Override
     protected void init() {
@@ -81,9 +83,22 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
         jiancetime.setOnClickListener(this);
     }
 
+    /**
+     * 初始化数据
+     */
     @Override
     protected void initData() {
-
+        String jaince = preferences.getString(ParameterManager.SHEZHI_JIANCEXINLV, 3 + "");
+        jaincetime_show.setText(jaince);
+        int sleepmax = preferences.getInt(ParameterManager.SLEEP_RATE_MAX_MINUTE, 100);
+        int sleepmin = preferences.getInt(ParameterManager.SLEEP_RATE_MIN_MINUTE, 60);
+        int sportmax = preferences.getInt(ParameterManager.SPORT_RATE_MAX_MINUTE, 120);
+        int sportmin = preferences.getInt(ParameterManager.SPORT_RATE_MIN_MINUTE, 90);
+        int normalmax = preferences.getInt(ParameterManager.NORMAL_RATE_MAX_MINUTE, 120);
+        int normalmin = preferences.getInt(ParameterManager.NORMAL_RATE_MIN_MINUTE, 60);
+        sport_show.setText(sportmin + "-" + sportmax);
+        fanwei_show.setText(normalmin + "-" + normalmax);
+        sleepxinlv_show.setText(sleepmin + "-" + sleepmax);
     }
 
     @Override
@@ -110,6 +125,7 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
                     public void onOptionPicked(int position, String option) {
                         editor.putString(ParameterManager.SHEZHI_JIANCEXINLV, option);
                         editor.commit();
+                        jaincetime_show.setText(option);
                         Toast.makeText(getActivity(), "设置成功", Toast.LENGTH_LONG).show();
                     }
                 });
@@ -185,11 +201,11 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (data==null){
+        if (data == null) {
             return;
         }
         String str = data.getBundleExtra("data").getString("minmax");
-        if (str==null||str.equals(""))
+        if (str == null || str.equals(""))
             return;
         if (requestCode == ParameterManager.REQURST_CODE_NORMAL) {
             if (resultCode == ParameterManager.REQURST_CODE_NORMAL) {

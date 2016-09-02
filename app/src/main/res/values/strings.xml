@@ -30,11 +30,11 @@
     <!--<string name="hight_side">心率偏高！</string>-->
     <!--<string name="low_side">心率偏低！</string>-->
     <!--<string name="abnormal">心率异常！</string>-->
-    <string name="xinlvabnormal">"尊敬的用户！您的心率数据异常，请注意！"</string>
-    <string name="sportlow">尊敬的用户！您运动时的心率数据偏低，请注意！</string>
-    <string name="sporthight">尊敬的用户！您运动时的心率数据偏高，请注意！</string>
-    <string name="sleeplow">尊敬的用户！您睡眠时的心率数据偏低，请注意！</string>
-    <string name="sleephight">尊敬的用户！您睡眠时的心率数据偏高，请注意！</string>
-    <string name="betty">尊敬的用户！您的手环电量不足，请及时充电！</string>
-    <string name="phonebetty">尊敬的用户！您的手机量不足，请及时充电！</string>
+    <string name="xinlvabnormal">您的心率数据异常，请注意！</string>
+    <string name="sportlow">您运动时的心率数据偏低，请注意！</string>
+    <string name="sporthight">您运动时的心率数据偏高，请注意！</string>
+    <string name="sleeplow">您睡眠时的心率数据偏低，请注意！</string>
+    <string name="sleephight">您睡眠时的心率数据偏高，请注意！</string>
+    <string name="betty">您的手环电量不足，请及时充电！</string>
+    <string name="phonebetty">您的手机量不足，请及时充电！</string>
 </resources>

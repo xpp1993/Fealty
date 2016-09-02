@@ -40,6 +40,7 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
     private SlideSwitch dialog;//设置弹窗提醒
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
+
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
@@ -52,9 +53,11 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
         //2. 获得编辑器:当将数据存储到SharedPrefences对象中时，需要获得编辑器。如果取出则不需要。
         editor = preferences.edit();
     }
+
     // 用EventBus 来导航,订阅者
     public void onEventMainThread(Bundle event) {
     }
+
     @Override
     protected void initListener() {
         bar_back.setOnClickListener(this);
@@ -65,9 +68,10 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
                 editor.commit();
                 Toast.makeText(getActivity(), "设置成功", Toast.LENGTH_LONG).show();
             }
+
             @Override
             public void close() {
-                editor.putBoolean(ParameterManager.BAOJIN_SOUND,false);
+                editor.putBoolean(ParameterManager.BAOJIN_SOUND, false);
                 editor.commit();
                 Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
             }
@@ -75,14 +79,14 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
         shark.setSlideListener(new SlideSwitch.SlideListener() {
             @Override
             public void open() {
-                editor.putBoolean(ParameterManager.BAOJIN_zhend,true);
+                editor.putBoolean(ParameterManager.BAOJIN_zhend, true);
                 editor.commit();
-                Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "设置成功", Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void close() {
-                editor.putBoolean(ParameterManager.BAOJIN_zhend,false);
+                editor.putBoolean(ParameterManager.BAOJIN_zhend, false);
                 editor.commit();
                 Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
             }
@@ -97,7 +101,7 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
 
             @Override
             public void close() {
-                editor.putBoolean(ParameterManager.BAOJIN_dialog,false);
+                editor.putBoolean(ParameterManager.BAOJIN_dialog, false);
                 editor.commit();
                 Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
             }
@@ -111,16 +115,26 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
 
             @Override
             public void close() {
-                editor.putBoolean(ParameterManager.BAOJIN_yuyin,false);
+                editor.putBoolean(ParameterManager.BAOJIN_yuyin, false);
                 editor.commit();
                 Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    /**
+     * 初始化数据
+     */
     @Override
     protected void initData() {
-
+        boolean message_shark = preferences.getBoolean(ParameterManager.BAOJIN_zhend, true);//默认震动提醒
+        boolean message_sound = preferences.getBoolean(ParameterManager.BAOJIN_SOUND, false);
+        boolean message_dialog = preferences.getBoolean(ParameterManager.BAOJIN_dialog, false);
+        boolean message_yuyin = preferences.getBoolean(ParameterManager.BAOJIN_yuyin, false);
+        voice.setState(message_sound);
+        shark.setState(message_shark);
+        yuyin.setState(message_yuyin);
+        dialog.setState(message_dialog);
     }
 
     @Override
@@ -131,8 +145,8 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
-        if (v.getId()==R.id.bar_iv_left){
-                getActivity().onBackPressed();
+        if (v.getId() == R.id.bar_iv_left) {
+            getActivity().onBackPressed();
         }
     }
 }

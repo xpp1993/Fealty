@@ -134,7 +134,14 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
 
     @Override
     protected void initData() {
-
+        boolean message_shark = preferences.getBoolean(ParameterManager.MESSAGE_zhend, true);//默认震动提醒
+        boolean message_sound = preferences.getBoolean(ParameterManager.MESSAGE_SOUND, false);
+        boolean message_dialog = preferences.getBoolean(ParameterManager.MESSAGE_dialog, false);
+        boolean message_yuyin = preferences.getBoolean(ParameterManager.MESSAGE_yuyin, false);
+        voice.setState(message_sound);
+        shark.setState(message_shark);
+        yuyin.setState(message_yuyin);
+        dialog.setState(message_dialog);
     }
 
     @Override
