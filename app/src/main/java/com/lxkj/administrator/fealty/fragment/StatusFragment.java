@@ -271,6 +271,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                             String distance = result.get(parentPhone)[7];
                             String identity = result.get(parentPhone)[8];
                             String currentHeart = result.get(parentPhone)[9];
+                            Log.e("currrent",currentHeart);
                             Bundle bundle = new Bundle();
                             bundle.putString("parentPhone", parentPhone);
                             //  HealthDataFragement healthDataFragement = new HealthDataFragement();

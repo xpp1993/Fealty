@@ -141,11 +141,13 @@ public class LineChart03View extends GraphicalView {
     public void render(Canvas canvas) {
         try {
             // chart.setChartRange(60,0, //设置x位置为60
-            chart.setChartRange(0, 0,
+//            chart.setChartRange(0, 0,
+//                    this.getLayoutParams().width - 10, this.getLayoutParams().height - 10);
+                        chart.setChartRange(0, 0,
                     this.getLayoutParams().width - 10, this.getLayoutParams().height - 10);
             //设置绘图区内边距
-            chart.setPadding(70, 30, 30, 60);
-
+          //  chart.setPadding(70, 30, 30, 30);
+            chart.setPadding(70, 28, 30,90);
             chart.render(canvas);
         } catch (Exception e) {
             Log.e(TAG, e.toString());

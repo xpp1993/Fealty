@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -29,6 +30,7 @@ import com.lxkj.administrator.fealty.bean.SportData;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
+import com.lxkj.administrator.fealty.manager.SPManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
@@ -92,6 +94,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     public static final String RATE_CHANGED = "com.lxkj.administrator.fealty.fragment.HealthDataFragment";
     private HealthRateReceiver mReceiver = null;
     private int RATE_STATUS = 80;//保存心率
+    private SharedPreferences preferences;
+    private int sportMinRate, sportMaxRate, norMax, norMin, sleepMinRate, sleepMaxRate;
 
     @Override
     protected void init() {
@@ -99,6 +103,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         // map = new TreeMap<>();
         //设置horizontalScrollvView拉到头和尾的时候没有阴影颜色
         horiView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
+        preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
     }
 
     @Override
@@ -204,8 +210,12 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     int currentRate = msg.arg1;
                     RATE_STATUS = currentRate;
                     //   mPpView.setFountText(currentRate + "");
-                    mPpView.setSecondText(currentRate + "");
-                    mPpView.invalidate();
+                    readSP();
+                    if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常
+                        functionTest(currentRate,R.color.warning);
+                    }else{
+                       functionTest(currentRate,R.color.normal);
+                    }
                     //把实时心率传到定位页面
                     Intent intent = new Intent();
                     intent.putExtra("tempRate", currentRate);
@@ -238,6 +248,19 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         mLineChart03View_left.reset(map);
         mLineChart03View.postInvalidate();
         mLineChart03View_left.postInvalidate();
+    }
+
+
+    /**
+     * 读取sp文件中的内容
+     */
+    private void readSP() {
+        sportMinRate = preferences.getInt(ParameterManager.SPORT_RATE_MIN_MINUTE, 90);//运动时最低的心率
+        sportMaxRate = preferences.getInt(ParameterManager.SPORT_RATE_MAX_MINUTE, 120);//运动时最高的心率
+        norMin = preferences.getInt(ParameterManager.NORMAL_RATE_MIN_MINUTE, 60);//正常最低心率
+        norMax = preferences.getInt(ParameterManager.NORMAL_RATE_MAX_MINUTE, 120);//正常最高心率
+        sleepMinRate = preferences.getInt(ParameterManager.SLEEP_RATE_MIN_MINUTE, 60);//睡眠时最低心率
+        sleepMaxRate = preferences.getInt(ParameterManager.SLEEP_RATE_MAX_MINUTE, 100);//睡眠时最高心率
     }
 
     //广播接受者
@@ -329,8 +352,9 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
 
     //提供给外界设置当前心率的方法,currentHeart
     public void setCurentRate(String currentHeart) {
+        int tempRate=Integer.parseInt(currentHeart);
         Message message = Message.obtain();
-        message.obj = currentHeart;
+        message.arg1 = tempRate;
         if (TextUtils.isEmpty(currentHeart)) {
             return;
         }
@@ -351,8 +375,9 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     /**
      * 设置第二行文本的颜色
      */
-    private void functionTest() {
-        mPpView.setSecondTextColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
+    private void functionTest(int currentRate,int color) {
+        mPpView.setSecondTextColor(ContextCompat.getColor(getContext(),color));
+        mPpView.setSecondText(currentRate + "");
         mPpView.postInvalidate();
     }
 

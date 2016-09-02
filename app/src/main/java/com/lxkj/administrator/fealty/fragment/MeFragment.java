@@ -604,6 +604,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     break;
                 case DISCONNECT_MSG://报警并尝试连接
                     CURRENT_STATUS = DISCONNECTED;
+                    readSP();
+                    if (message_shark == true) {//如果打开震动
+                        setNotification(1, Notification.DEFAULT_VIBRATE, getResources().getString(R.string.disconnected));
+                    } else if (message_sound == true) {//如果打开声音
+                        setNotification(1, Notification.DEFAULT_SOUND, getResources().getString(R.string.disconnected));
+
+                    } else if (message_dialog == true) {//如果打开弹窗提醒
+
+                    } else if (message_yuyin == true) {//如果打开语音提醒
+
+                    }
                     // bluee_iv_left.setSlideable(true);
                     String lastConnectAddr0 = sp.getString(
                             GlobalVariable.LAST_CONNECT_DEVICE_ADDRESS_SP, "");
@@ -833,9 +844,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     //通过setContentIntent(PendingIntent intent)方法中的意图设置对应的flags
     public PendingIntent getDefalutIntent(int flags) {
-        //  Intent intent = new Intent(getActivity(), MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(AppUtils.getBaseContext(), 1, new Intent(), flags);
-        //    PendingIntent pendingIntent = PendingIntent.getActivity(AppUtils.getBaseContext(), 1, intent, flags);
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        // PendingIntent pendingIntent = PendingIntent.getActivity(AppUtils.getBaseContext(), 1, new Intent(), flags);
+        PendingIntent pendingIntent = PendingIntent.getActivity(AppUtils.getBaseContext(), 1, intent, flags);
         return pendingIntent;
     }
 
@@ -917,6 +928,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             int minute = time.getMinutes();//分
             int second = time.getSeconds();//秒
             String rate_time = hour + ":" + minute + ":" + second;//测到此刻心率的时间
+           // String rate_time =minute + ":" + second;//测到此刻心率的时间
             Bundle rate_bundle = new Bundle();
             rate_bundle.putString("time", rate_time);
             rate_bundle.putInt("rate", rate);
@@ -948,7 +960,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private void judgeSleepRate() {
         readSP();
         if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常，app响铃报警，他人接收到报警
-          //  rateAbnormalNotify();
+            //  rateAbnormalNotify();
         } else {
             if (RATE_STATUS < sleepMinRate) {//睡眠时心率偏低，消息通知
                 if (message_shark == true) {//如果打开震动
@@ -1002,7 +1014,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private void judgeStepRate() {
         readSP();
         if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常，app响铃报警，上传服务器，他人接收到报警
-          //  rateAbnormalNotify();
+            //  rateAbnormalNotify();
         } else {
             if (RATE_STATUS < sportMinRate) {//运动时心率偏低，消息通知
                 if (message_shark == true) {//如果打开震动

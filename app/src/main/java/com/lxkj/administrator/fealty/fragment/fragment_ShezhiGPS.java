@@ -90,8 +90,8 @@ public class fragment_ShezhiGPS extends BaseFragment implements View.OnClickList
         String sleepgps = preferences.getString(ParameterManager.SHEZHI_SLEEP_GPS, 2 + "");
         String sportGps = preferences.getString(ParameterManager.SHEZHI_SPORT_GPS, 15 + "");
         String jiance = preferences.getString(ParameterManager.SHEZHI_JIANCEGPS, 3 + "");
-        sport_show.setText(sleepgps);
-        sleep_show.setText(sportGps);
+        sport_show.setText(sportGps);
+        sleep_show.setText(sleepgps);
         jiance_show.setText(jiance);
     }
 

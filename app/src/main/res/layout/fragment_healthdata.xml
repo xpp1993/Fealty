@@ -37,7 +37,7 @@
         android:layout_below="@id/old_gps"
         android:background="@color/MainTheme" />
     <RelativeLayout
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="5dp"
         android:layout_below="@id/shouview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -58,7 +58,7 @@
             ppview:outerCircleRadius="85.5dp"
             ppview:outerCircleWidth="5dp"
             ppview:secondTextColor="#5dcbdf"
-            ppview:secondTextSize="42sp"
+            ppview:secondTextSize="44sp"
             ppview:thirdTextColor="#5dcbdf"
             ppview:thirdTextSize="12sp" />
         <FrameLayout
@@ -79,7 +79,7 @@
                     <com.lxkj.administrator.fealty.view.LineChart03View
                         android:id="@+id/lineChartView_right"
                         android:layout_width="360dp"
-                        android:layout_height="140dp" />
+                        android:layout_height="145dp" />
 
                 </LinearLayout>
             </HorizontalScrollView>
@@ -87,7 +87,7 @@
             <com.lxkj.administrator.fealty.view.LineChart03View_left
                 android:id="@+id/circle_view"
                 android:layout_width="360dp"
-                android:layout_height="140dp"
+                android:layout_height="145dp"
                 android:layout_gravity="left" />
         </FrameLayout>
     </RelativeLayout>

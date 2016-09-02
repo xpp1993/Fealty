@@ -29,7 +29,7 @@ public class ParameterManager {
     public static final int REQURST_CODE_NORMAL = 0X29A;
     public static final String SESSION_CACHE_SP_NAME = "dexin_session_cache";//sp文件名称
     public static final int TOTAL_ROCK_TIME = 60;//计时器总时长
-   // public static final long SPLACH_DELAY_TIME = 1500;
+    public static final String DEVICE_ADDRESS="diveceAddress";//设备地址存储在sp文件中的key
     public static final String GET_CHECK_CODE = "http://192.168.8.133:8080/cuffapi/user/get_check_code?phone=";
     public static final String SIGN_IN_SUBMIT = "http://192.168.8.133:8080/cuffapi/user/sign_in_submit";
     public static final String RESET_PASSWORD = "http://192.168.8.133:8080/cuffapi/user/password_submit";

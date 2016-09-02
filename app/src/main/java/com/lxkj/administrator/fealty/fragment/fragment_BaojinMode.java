@@ -73,7 +73,7 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
             public void close() {
                 editor.putBoolean(ParameterManager.BAOJIN_SOUND, false);
                 editor.commit();
-                Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
             }
         });
         shark.setSlideListener(new SlideSwitch.SlideListener() {
@@ -88,7 +88,7 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
             public void close() {
                 editor.putBoolean(ParameterManager.BAOJIN_zhend, false);
                 editor.commit();
-                Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
             }
         });
         dialog.setSlideListener(new SlideSwitch.SlideListener() {
@@ -103,7 +103,7 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
             public void close() {
                 editor.putBoolean(ParameterManager.BAOJIN_dialog, false);
                 editor.commit();
-                Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
             }
         });
         yuyin.setSlideListener(new SlideSwitch.SlideListener() {
@@ -117,7 +117,7 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
             public void close() {
                 editor.putBoolean(ParameterManager.BAOJIN_yuyin, false);
                 editor.commit();
-                Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), "取消设置", Toast.LENGTH_SHORT).show();
             }
         });
     }
