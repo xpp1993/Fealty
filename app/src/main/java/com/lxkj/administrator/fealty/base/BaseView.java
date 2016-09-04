@@ -1,6 +1,7 @@
 package com.lxkj.administrator.fealty.base;
 
 import android.content.Context;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import org.xutils.x;
@@ -9,6 +10,7 @@ import org.xutils.x;
  * Created by Administrator on 2016/8/2/0002.
  */
 public abstract class BaseView extends RelativeLayout {
+
     public BaseView(Context context) {
         super(context);
         initView();
@@ -28,4 +30,6 @@ public abstract class BaseView extends RelativeLayout {
     }
 
     protected abstract void initView();
+
+    public abstract Button getButton() ;
 }
