@@ -18,6 +18,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
@@ -57,6 +58,7 @@ import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
 import com.lxkj.administrator.fealty.utils.MySqliteHelper;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
+import com.lxkj.administrator.fealty.utils.ThreadPoolUtils;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
 import com.lxkj.administrator.fealty.utils.XinLvSqliteHelper;
 import com.lxkj.administrator.fealty.view.DialogView;
@@ -364,6 +366,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         if (helper != null) {
             helper.close();
         }
+        if (warn_runnable != null) {
+            myHandler.removeCallbacks(warn_runnable);
+        }
         if (xinlvhelper != null) {
             xinlvhelper.close();
         }
@@ -664,6 +669,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     int rate = rate_bundle.getInt("rate");
                     String rate_time = rate_bundle.getString("time");
                     xinlvdb.insert("xinlv", null, toContentValues(rate_time, rate, SessionHolder.user.getMobile()));
+                    readSP();
+                    if (rate < norMin || rate > norMax) {//心率不正常，app响铃报警
+                        rateAbnormalNotify();
+                        myHandler.postDelayed(runnable_updataGPS3, 1000 * 60 * ce_int);
+                    }
                     //上传到服务器
                     Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "currentHeart"}, SessionHolder.user.getMobile(), rate_time, rate + "");
                     NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.INSERT_CURRENTRATE, params, null, REQUEST_CODE_CURRENTRATE, MeFragment.this);
@@ -680,10 +690,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         //判断心率是否异常
                         readSP();
                         if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常，app响铃报警，他人接收到报警
-                            rateAbnormalNotify();
+                            myHandler.postDelayed(warn_runnable, 1000);
                             //心率不正常，实时实时上传GPS信息。然后每隔三分钟上传一次。
-                            myHandler.postDelayed(runnable_updataGPS3, 1000 * 60 * 60 * ce_int);
-
+                            myHandler.postDelayed(runnable_updataGPS3, 1000 * 60 * ce_int);
                         }
                     }
                     break;
@@ -722,7 +731,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 case GPS_UPLOAD_CODE:
                     if (msg.getData().getInt("code") == 1) {
                         Log.e("upLoad:", msg.getData().getString("desc"));
-                        ToastUtils.showToastInUIThread("GPS数据已上传到服务器！");
+//                        ToastUtils.showToastInUIThread("GPS数据已上传到服务器！");
                     }
                     break;
                 default:
@@ -730,6 +739,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             }
         }
     }
+
+    private Runnable warn_runnable = new Runnable() {
+        @Override
+        public void run() {
+            rateAbnormalNotify();
+        }
+    };
 
     // 将数据封装为ContentValues,心率数据局放入数据库
     public ContentValues toContentValues(String time, int rate, String phone) {
@@ -782,7 +798,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         //把心率json数据上传到服务器,上传到服务器之后，清空数据库
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"heartRate", "mobile"}, jsonString, SessionHolder.user.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_ZHEXIAN, params, null, REQUEST_CODE_RATE, MeFragment.this);
-        myHandler.postDelayed(delatesqlite, 2000);//清空数据库
+        myHandler.postDelayed(delatesqlite, 1000);//清空数据库
     }
 
     /**
@@ -847,13 +863,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     private void showDialogWarn(BaseView dialogView, Button button) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+     //   Looper.prepare();
         final AlertDialog dialog = builder.setView(dialogView).create();
+        dialog.show();
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
             }
         });
+    //    Looper.loop();
         dialog.show();
     }
 
@@ -890,11 +909,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             getActivity().sendBroadcast(intent);
             RATE_STATUS = rate;
             Log.e("wyj", "onRateChange =" + RATE_STATUS);
-            readSP();
-            if (rate < norMin || rate > norMax) {//心率不正常，app响铃报警
-                rateAbnormalNotify();
-                myHandler.postDelayed(runnable_updataGPS3, 1000 * 60 * 60 * ce_int);
-            }
             //把心率测试数据写入数据库
             //获取系统当前时间
             java.sql.Timestamp time = new java.sql.Timestamp(new java.util.Date().getTime());
@@ -1009,16 +1023,27 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
      * @param context
      * @param dialogView
      */
-    private void diffNotifyShow(int noId, String context, BaseView dialogView) {
+    private void diffNotifyShow(int noId, String context, final BaseView dialogView) {
         if (message_shark == true) {//如果打开震动
             setNotification(noId, Notification.DEFAULT_VIBRATE, context);
         } else if (message_sound == true) {//如果打开声音
             setNotification(noId, Notification.DEFAULT_SOUND, context);
         } else if (message_dialog == true) {//如果打开弹窗提醒
-            Button button = dialogView.getButton();
-            showDialogWarn(dialogView, button);
+            final Button button = dialogView.getButton();
+            ThreadPoolUtils.runTaskOnUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    showDialogWarn(dialogView, button);
+                }
+            });
+
         } else if (message_yuyin == true) {//如果打开语音提醒
             speakOut(context);
+            try {
+                Thread.sleep(1800);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1226,7 +1251,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     /**
      * 发送心率测试开启
      */
-    int rate_int = 3;
+    int rate_int;
     private Runnable runnable3 = new Runnable() {
         @Override
         public void run() {

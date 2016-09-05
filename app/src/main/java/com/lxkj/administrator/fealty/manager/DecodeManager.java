@@ -235,43 +235,45 @@ public final class DecodeManager {
         handler.sendMessage(msg);
     }
 
-//    /**
-//     * 解析 用户信息查询 ,查询别人的
-//     *
-//     * @param jsonObject
-//     * @param messageWhat
-//     * @param handler
-//     * @throws JSONException
-//     */
-//    public static void decodeUserInfoQuery(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
-//        Log.v("decodeUserInfoQuery", jsonObject.toString());
-//        Message msg = new Message();
-//        Bundle data = new Bundle();
-//        msg.what = messageWhat;
-//        insertRecInformation(data, jsonObject);
-//
-//        if (isRequestOK(jsonObject)) {
-//            int relation = jsonObject.getInt("relation");
-//            String friend = jsonObject.optString("friend", "");
-//            String nickname = jsonObject.getString("nickname");
-//            String userpic = jsonObject.optString("userpic", "");
-//            String gender = String.valueOf(jsonObject.optInt("gender", 0) == 0 ? "" : jsonObject.getInt("gender"));
-//
-//            HashMap<String, String> params = (HashMap<String, String>) jsonObject.get("params");
-//            String q_userid = params.get("q_userid");
-//
-////            User user = new User();
-////            user.setUserid(q_userid);
-////            user.setNickName(nickname);
-////            user.setUserpic(userpic);
-////            user.setRelation(relation);
-////            user.setFriend(friend);
-////            user.setGender(gender);
-////            data.putSerializable("user", user);
-//        }
-//        msg.setData(data);
-//        handler.sendMessage(msg);
-//    }
+    /**
+     * 解析 用户信息查询 ,查询别人的
+     *
+     * @param jsonObject
+     * @param messageWhat
+     * @param handler
+     * @throws JSONException
+     */
+    public static void decodeUserInfoQuery(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
+        Log.v("decodeUserInfoQuery", jsonObject.toString());
+        Message msg = new Message();
+        Bundle data = new Bundle();
+        msg.what = messageWhat;
+        insertRecInformation(data, jsonObject);
+        if (isRequestOK(jsonObject)) {
+            int code = jsonObject.optInt("code", 1);
+            String desc = jsonObject.optString("desc", "");
+            data.putInt("code", code);
+            data.putString("desc", desc);
+            JSONArray userMsg_list = jsonObject.optJSONObject("json").optJSONArray("userMsg_list");
+            if (userMsg_list != null && userMsg_list.length() > 0) {
+                ArrayList<UserInfo> friends = new ArrayList<UserInfo>();
+                for (int i = 0; i < userMsg_list.length(); i++) {
+                    JSONObject friendJsonObject = userMsg_list.getJSONObject(i);
+                    String parentPhone = friendJsonObject.optString("parentPhone");
+                    int currentHeart = friendJsonObject.optInt("currentHeart");
+                    String identity = friendJsonObject.optString("identity");
+                    String cuffElectricity = friendJsonObject.optString("cuffElectricity");
+                    String mobileElectricity = friendJsonObject.optString("mobileElectricity");
+                    String address = friendJsonObject.optString("address");
+                    UserInfo userInfo = new UserInfo(identity, parentPhone, currentHeart, address, cuffElectricity, mobileElectricity);
+                    friends.add(userInfo);
+                }
+                data.putSerializable("userMsg_list", friends);
+            }
+        }
+        msg.setData(data);
+        handler.sendMessage(msg);
+    }
 
     /**
      * 解析 修改用户信息

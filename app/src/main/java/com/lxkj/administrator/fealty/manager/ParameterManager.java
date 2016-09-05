@@ -48,6 +48,7 @@ public class ParameterManager {
     public static final String GET_GPS_FROM_URL = "http://192.168.8.133:8080/cuffapi/gps/select_user_gps";
     public static final String UPLOAD_ZHEXIAN = "http://192.168.8.133:8080/cuffapi/heart/insert_user_heart";
     public static final String SELECT_USER_HEART="http://192.168.8.133:8080/cuffapi/heart/select_user_heart";
+    public static final String SELECT_USER_BINDED="http://192.168.8.133:8080/cuffapi/current_heart/select_binded_user_msg";
 //    public static final String GET_CHECK_CODE = "http://120.76.27.233:8080/cuffapi/user/get_check_code?phone=";
 //    public static final String SIGN_IN_SUBMIT = "http://120.76.27.233:8080/cuffapi/user/sign_in_submit";
 //    public static final String RESET_PASSWORD = "http://120.76.27.233:8080/cuffapi/user/password_submit";
@@ -65,4 +66,5 @@ public class ParameterManager {
 //    public static final String GPS_UPLOAD_URL = "http://120.76.27.2333:8080/cuffapi/gps/operation_user_gps";
 //    public static final String GET_GPS_FROM_URL = "http://120.76.27.233:8080/cuffapi/gps/select_user_gps";
 //    public static final String UPLOAD_ZHEXIAN = "http://120.76.27.233:8080/cuffapi/heart/insert_user_heart";
+//public static final String SELECT_USER_BINDED="http://120.76.27.233:8080/cuffapi/current_heart/select_binded_user_msg";
 }

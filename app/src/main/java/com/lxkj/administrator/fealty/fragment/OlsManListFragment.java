@@ -5,7 +5,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lxkj.administrator.fealty.R;
@@ -34,7 +36,13 @@ import java.util.Map;
  * Created by Administrator on 2016/7/26.
  */
 @ContentView(R.layout.fragement_oldmanlist)
-public class OlsManListFragment extends BaseFragment implements AdapterView.OnItemClickListener, NetWorkAccessTools.RequestTaskListener {
+public class OlsManListFragment extends BaseFragment implements AdapterView.OnItemClickListener, NetWorkAccessTools.RequestTaskListener, View.OnClickListener {
+    @ViewInject(R.id.bar_iv_left)
+    private ImageView bar_back;
+    @ViewInject(R.id.bar_tv_title_left)
+    private TextView bar_biaoti;
+    @ViewInject(R.id.bar_view_left_line)
+    private ImageView bar_view_left_line;
     @ViewInject(R.id.oldmanlistview)
     private ListView oldmanlistview;
     ArrayList<UserInfo> list_user;
@@ -45,13 +53,17 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
 
     @Override
     protected void init() {
-
+        bar_back.setVisibility(View.VISIBLE);
+        bar_view_left_line.setVisibility(View.VISIBLE);
+        bar_biaoti.setVisibility(View.VISIBLE);
+        bar_biaoti.setText("可以绑定的用户");
 
     }
 
     @Override
     protected void initListener() {
         oldmanlistview.setOnItemClickListener(this);
+        bar_back.setOnClickListener(this);
     }
 
     @Override
@@ -65,7 +77,7 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
         final String oldmobile = userInfo.getMobile();
 
         //点击弹出身份选择框
-       CustomHeaderAndFooterPicker picker = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
+        CustomHeaderAndFooterPicker picker = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
                 "爸爸", "妈妈", "爷爷", "奶奶", "姥爷", "姥姥", "叔叔", "阿姨", "姑姑", "大伯", "婶婶", "姐姐", "哥哥"
         });
 
@@ -81,12 +93,13 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
             @Override
             public void onOptionPicked(int position, String option) {
                 Toast.makeText(getActivity(), option, Toast.LENGTH_LONG).show();
-                Map<String, String> params = CommonTools.getParameterMap(new String[]{"old_people_mobile", "mobile", "identity"}, oldmobile, SessionHolder.user.getMobile(),option);
+                Map<String, String> params = CommonTools.getParameterMap(new String[]{"old_people_mobile", "mobile", "identity"}, oldmobile, SessionHolder.user.getMobile(), option);
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_BIND_OLD, params, null, REQUEST_CODE_BIND_OTHERS, OlsManListFragment.this);
             }
         });
         picker.show();
     }
+
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
@@ -94,6 +107,7 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
         adpter = new OldmanListviewAdpter(list_user);
         oldmanlistview.setAdapter(adpter);
     }
+
     @Override
     public void onRequestStart(int requestCode) {
 
@@ -121,6 +135,18 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.bar_iv_left:
+                getActivity().onBackPressed();
+                break;
+            default:
+                break;
+
+        }
     }
 
     class MyHandler extends Handler {

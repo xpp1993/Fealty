@@ -2,6 +2,7 @@ package com.lxkj.administrator.fealty.ui;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.lxkj.administrator.fealty.R;
@@ -24,5 +25,10 @@ public class DevicelistitemView extends BaseView {
     @Override
     protected void initView() {
         View.inflate(getContext(), R.layout.listitem_device, this);
+    }
+
+    @Override
+    public Button getButton() {
+        return null;
     }
 }

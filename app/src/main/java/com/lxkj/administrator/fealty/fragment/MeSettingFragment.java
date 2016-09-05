@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.lxkj.administrator.fealty.MainActivity;
@@ -99,6 +100,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
     private Handler handler = new MyHandler();
     @ViewInject(R.id.fragment_mine_tv_exit)
     private TextView fragment_mine_tv_exit;
+    @ViewInject(R.id.fragment_mine_rl_about)
+    private RelativeLayout see_user;
 
     @Override
     protected void init() {
@@ -120,6 +123,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
         iv_reset.setOnClickListener(this);
         bar_iv_left.setOnClickListener(this);
         fragment_mine_tv_exit.setOnClickListener(this);
+        see_user.setOnClickListener(this);
     }
 
     @Override
@@ -278,6 +282,10 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                 break;
             case R.id.fragment_mine_tv_exit:
                 getActivity().finish();
+                break;
+            case R.id.fragment_mine_rl_about:
+                //查看绑定的用户信息
+                EventBus.getDefault().post(new NavFragmentEvent(new UserDetailInfo()));
                 break;
         }
     }

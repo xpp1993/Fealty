@@ -17,6 +17,10 @@ public class UserInfo implements Serializable{
     private String userpic;//头像
     private String identity;//身份标识
     private String password;
+    private String address;//Gps定位的地址
+    private int currentHeart;
+    private String cuffElectricity;
+    private String mobileElectricity;
     public UserInfo(String mobile, String gender, String nickName, String username, String birthday, String userpic,String password) {
         this.mobile = mobile;
         this.gender = gender;
@@ -26,6 +30,47 @@ public class UserInfo implements Serializable{
         this.userpic = userpic;
         this.identity=identity;
         this.password=password;
+    }
+
+    public UserInfo(String identity, String mobile, int currentHeart, String address, String cuffElectricity, String mobileElectricity) {
+        this.identity = identity;
+        this.mobile = mobile;
+        this.currentHeart = currentHeart;
+        this.address = address;
+        this.cuffElectricity = cuffElectricity;
+        this.mobileElectricity = mobileElectricity;
+    }
+
+    public int getCurrentHeart() {
+        return currentHeart;
+    }
+
+    public void setCurrentHeart(int currentHeart) {
+        this.currentHeart = currentHeart;
+    }
+
+    public String getCuffElectricity() {
+        return cuffElectricity;
+    }
+
+    public void setCuffElectricity(String cuffElectricity) {
+        this.cuffElectricity = cuffElectricity;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getMobileElectricity() {
+        return mobileElectricity;
+    }
+
+    public void setMobileElectricity(String mobileElectricity) {
+        this.mobileElectricity = mobileElectricity;
     }
 
     public UserInfo() {
@@ -106,6 +151,10 @@ public class UserInfo implements Serializable{
                 ", userpic='" + userpic + '\'' +
                 ", identity='" + identity + '\'' +
                 ", password='" + password + '\'' +
+                ", address='" + address + '\'' +
+                ", currentHeart=" + currentHeart +
+                ", cuffElectricity='" + cuffElectricity + '\'' +
+                ", mobileElectricity='" + mobileElectricity + '\'' +
                 '}';
     }
 }
