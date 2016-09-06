@@ -66,7 +66,10 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
             public void open() {//如果声音提醒是打开的。把状态写入sp 文件(写一个静态类表示各个开关状态)
                 editor.putBoolean(ParameterManager.BAOJIN_SOUND, true);
                 editor.commit();
-                Toast.makeText(getActivity(), "设置成功", Toast.LENGTH_LONG).show();
+           //     Toast.makeText(getActivity(), "设置成功", Toast.LENGTH_LONG).show();
+                shark.setState(false);
+                dialog.setState(false);
+                yuyin.setState(false);
             }
 
             @Override
@@ -81,7 +84,10 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
             public void open() {
                 editor.putBoolean(ParameterManager.BAOJIN_zhend, true);
                 editor.commit();
-                Toast.makeText(getActivity(), "设置成功", Toast.LENGTH_LONG).show();
+             //   Toast.makeText(getActivity(), "设置成功", Toast.LENGTH_LONG).show();
+                voice.setState(false);
+                dialog.setState(false);
+                yuyin.setState(false);
             }
 
             @Override
@@ -95,8 +101,11 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
             @Override
             public void open() {
                 editor.putBoolean(ParameterManager.BAOJIN_dialog, true);
-                Toast.makeText(getActivity(), "设置成功", Toast.LENGTH_LONG).show();
+          //      Toast.makeText(getActivity(), "设置成功", Toast.LENGTH_LONG).show();
                 editor.commit();
+                voice.setState(false);
+                yuyin.setState(false);
+                shark.setState(false);
             }
 
             @Override
@@ -111,6 +120,9 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
             public void open() {
                 editor.putBoolean(ParameterManager.BAOJIN_yuyin, true);
                 editor.commit();
+                voice.setState(false);
+                dialog.setState(false);
+                shark.setState(false);
             }
 
             @Override

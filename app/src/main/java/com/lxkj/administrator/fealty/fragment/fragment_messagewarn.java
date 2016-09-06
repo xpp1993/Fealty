@@ -117,7 +117,7 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
            public void open() {
                editor.putBoolean(ParameterManager.MESSAGE_yuyin, true);
                editor.commit();
-               Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
+              // Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
                voice.setState(false);
                dialog.setState(false);
                shark.setState(false);
@@ -131,7 +131,6 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
            }
        });
     }
-
     @Override
     protected void initData() {
         boolean message_shark = preferences.getBoolean(ParameterManager.MESSAGE_zhend, true);//默认震动提醒
@@ -143,13 +142,11 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
         yuyin.setState(message_yuyin);
         dialog.setState(message_dialog);
     }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
-
     @Override
     public void onClick(View v) {
         if (v.getId()==R.id.bar_iv_left){

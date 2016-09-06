@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:clickable="true"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="68dp"
         android:background="#ffffff">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -54,7 +54,7 @@
     <View
         android:id="@+id/view1"
         android:layout_width="match_parent"
-        android:layout_height="15dp"
+        android:layout_height="20dp"
         android:layout_below="@id/fragment_me_details"
         android:background="#EFEFF3" />
     <LinearLayout
@@ -123,7 +123,7 @@
         <View
             android:id="@+id/view4"
             android:layout_width="match_parent"
-            android:layout_height="15dp"
+            android:layout_height="20dp"
             android:background="#EFEFF3" />
         <RelativeLayout
             android:id="@+id/relative_binded"
@@ -180,7 +180,7 @@
     <View
         android:id="@+id/view5"
         android:layout_width="match_parent"
-        android:layout_height="15dp"
+        android:layout_height="20dp"
         android:layout_below="@id/linearlayout1"
         android:background="#EFEFF3" />
     <LinearLayout
@@ -228,7 +228,8 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="5dp"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:visibility="gone">
             <TextView
                 android:id="@+id/info"
                 style="@style/self_info_layout_tv_title"

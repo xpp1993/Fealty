@@ -122,8 +122,8 @@ public class MyLocationListener implements BDLocationListener, NetWorkAccessTool
          *删除数据
          * 删除数据库中条件为time<当前时间-x（假如x=30分钟) 的数据
          */
-        //currentTime = System.currentTimeMillis();
-        currentTime= SystemClock.uptimeMillis();
+        currentTime = System.currentTimeMillis();
+        //currentTime= SystemClock.uptimeMillis();
         ContentValues values = toContentValues(currentTime, String.valueOf(lat), String.valueOf(lon));
         long _id = db.insert("gps", null, values);
         Log.e("_id", _id + "  "+currentTime);

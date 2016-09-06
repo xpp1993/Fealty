@@ -123,7 +123,7 @@ public class UserDetailInfo extends BaseFragment implements View.OnClickListener
 
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
-
+        ToastUtils.showToastInUIThread("服务器返回错误");
     }
     private class MyHandler extends Handler {
         @Override

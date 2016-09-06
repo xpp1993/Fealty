@@ -4,31 +4,13 @@
     android:layout_height="wrap_content"
     android:background="#50FFFFFF"
     android:orientation="vertical" >
-
-    <!--
-         <RelativeLayout
-        android:id="@+id/bindlayout"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
-
-        <TextView
-            android:id="@+id/head_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:text="@string/YC_unbinddevice"
-            android:textColor="@color/white"
-            android:textSize="22dp" />
-    </RelativeLayout>
-    -->
-
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
+        android:layout_marginTop="5dp"
         android:baselineAligned="false"
         android:orientation="horizontal" >
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

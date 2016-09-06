@@ -38,6 +38,7 @@
     <string name="betty">您的手环电量不足，请及时充电！</string>
     <string name="phonebetty">您的手机量不足，请及时充电！</string>
     <string name="disconnected">连接错误，请重新连接手环！</string>
+    <string name="reflush">刷新界面</string>
     <!--<string name="xinlvabnormaly">尊敬的的用户 您的心率数据异常</string>-->
     <!--<string name="sportlowy">尊敬的的用户 您运动时的心率数据偏低</string>-->
     <!--<string name="sporthighty">尊敬的的用户 您运动时的心率数据偏高</string>-->

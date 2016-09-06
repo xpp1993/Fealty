@@ -123,22 +123,21 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SIGN_UP_COMMIT, params, null, REQUEST_CODE_LOGIN_COMMIT, this);
         }
     }
-
     /**
      * 跳转到重置密码页面
      */
     private void goToResetPassword() {
         ResetPasswordFragment resetPasswordFragment = new ResetPasswordFragment();
         EventBus.getDefault().post(new NavFragmentEvent(resetPasswordFragment));
-        // this.isHidden();
+        finish();
     }
-
     /**
      * 跳转到注册页面
      */
     private void gotoRegist() {
         RegistFragment registFragment = new RegistFragment();
         EventBus.getDefault().post(new NavFragmentEvent(registFragment));
+        finish();
     }
 
     @Override
@@ -304,4 +303,8 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
 
     }
 
+    @Override
+    public boolean finish() {
+        return true;
+    }
 }

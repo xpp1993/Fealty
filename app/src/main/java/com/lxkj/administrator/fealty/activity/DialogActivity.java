@@ -127,9 +127,7 @@ public class DialogActivity extends Activity implements View.OnClickListener {
             handler.removeCallbacks(finishRunnable);
         }
     }
-
     private class finishRunnable implements Runnable {
-
         @Override
         public void run() {
             finish();

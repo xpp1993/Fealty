@@ -1,5 +1,4 @@
 package com.lxkj.administrator.fealty.adapter;
-
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,44 +6,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-
 import com.lxkj.administrator.fealty.R;
-import com.lxkj.administrator.fealty.base.MyBaseAdapter;
-import com.lxkj.administrator.fealty.ui.DevicelistitemView;
-import com.lxkj.administrator.fealty.utils.AppUtils;
-
 import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by Administrator on 2016/8/3.
  */
 public class LeDeviceListAdapter extends BaseAdapter {
-//    public LeDeviceListAdapter(List list) {
-//        super(list);
-//    }
-//    @Override
-//    public View getView(int position, View convertView, ViewGroup parent) {
-//        if (convertView==null){
-//            convertView=new DevicelistitemView(AppUtils.getBaseContext());
-//        }
-//        DevicelistitemView devicelistitemView= (DevicelistitemView) convertView;
-//        //获得蓝牙设备
-//        BluetoothDevice bluetoothDevice=list.get(position);
-//        //获得蓝牙设备地址
-//        devicelistitemView.device_address.setText(bluetoothDevice.getAddress());
-//        //获得蓝牙设备名称
-//        devicelistitemView.device_name.setText(bluetoothDevice.getName());
-//        return convertView;
-//    }
-private ArrayList<BluetoothDevice> mLeDevices;
-    private LayoutInflater mInflator;
+    private ArrayList<BluetoothDevice> mLeDevices;
+    private Context context;
 
-    public LeDeviceListAdapter() {
-        super();
+    public LeDeviceListAdapter(Context context) {
+        this.context = context;
         mLeDevices = new ArrayList<BluetoothDevice>();
-      //  mInflator = DeviceScanActivity.this.getLayoutInflater();
-        mInflator=LayoutInflater.from(AppUtils.getBaseContext());
     }
 
     public void addDevice(BluetoothDevice device) {
@@ -79,9 +52,9 @@ private ArrayList<BluetoothDevice> mLeDevices;
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder viewHolder;
-        // General ListView optimization code.
         if (view == null) {
-            view = mInflator.inflate(R.layout.listitem_device, null);
+            LayoutInflater mInflator = LayoutInflater.from(context);
+            view = mInflator.inflate(R.layout.listitem_device, viewGroup, false);
             viewHolder = new ViewHolder();
             viewHolder.deviceName = (TextView) view
                     .findViewById(R.id.device_name);
@@ -102,9 +75,11 @@ private ArrayList<BluetoothDevice> mLeDevices;
 
         return view;
     }
+
+    class ViewHolder {
+        TextView deviceName;
+        TextView deviceAddress;
+    }
 }
- class ViewHolder {
-    TextView deviceName;
-    TextView deviceAddress;
-}
+
 

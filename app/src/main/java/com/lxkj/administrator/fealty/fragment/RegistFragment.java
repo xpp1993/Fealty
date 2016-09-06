@@ -108,6 +108,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
     private String check_id;//获取验证码id
     String registerID;
     private static final String TAG = "JPush";
+
     protected void init() {
         //   EventBus.getDefault().register(this);
         bar_iv_left.setVisibility(View.VISIBLE);
@@ -116,11 +117,14 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
         bar_tv_title_left.setText("账号注册");
         remainRockTime = ParameterManager.TOTAL_ROCK_TIME;
         handler = new Myhandler();
-        //极光推送
-        registerID = JPushInterface.getRegistrationID(AppUtils.getBaseContext());
-        handler.sendMessage(handler.obtainMessage(MSG_SET_ALIAS, registerID));
-        Log.e("registerID", registerID);
+//        //极光推送
+//        //  registerID = JPushInterface.getRegistrationID(AppUtils.getBaseContext());
+//        String phone = phoneEditText.getText().toString().trim();
+//        //  handler.sendMessage(handler.obtainMessage(MSG_SET_ALIAS, registerID));
+//        handler.sendMessage(handler.obtainMessage(MSG_SET_ALIAS, phone));
+//        Log.e("registerID", registerID);
     }
+
     private static final int MSG_SET_ALIAS = 1001;
     private final TagAliasCallback mAliasCallback = new TagAliasCallback() {
         @Override
@@ -175,6 +179,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
         });
 
     }
+
     /**
      * 设置头像
      */
@@ -202,7 +207,8 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
         final Handler handler = new Handler();
         handler.post(runable);
     }
-   private  Runnable runable = new Runnable() {
+
+    private Runnable runable = new Runnable() {
         @Override
         public void run() {
             remainRockTime--;
@@ -217,6 +223,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
             }
         }
     };
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_PICK_IMAGE) {
@@ -318,7 +325,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                         System.out.print(ParameterManager.GET_CHECK_CODE + phone);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        ToastUtils.showToastInUIThread("程序错误!");
+                        ToastUtils.showToastInUIThread("服务器错误!");
                     }
                 } else {
                     ToastUtils.showToastInUIThread("手机号码格式错误,重写填写!");
@@ -351,7 +358,10 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
 //                        } else if ("子女".equals(radiobuttonString)) {
 //                            indentity = "0";
 //                        }
-                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "password", "check_code", "nickName", "identity", "headFile", "id", "registerID"}, phone, password, checkCode, nickName, indentity, "", check_id, registerID);
+                        //极光推送
+                       handler.sendMessage(handler.obtainMessage(MSG_SET_ALIAS, phone));
+                        Log.e("registerID",phone);
+                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "password", "check_code", "nickName", "identity", "headFile", "id", "registerID"}, phone, password, checkCode, nickName, indentity, "", check_id, phone);
                         if (headImageFile != null && headImageFile.exists()) {
                             HashMap<String, String> map = new HashMap<String, String>();
                             byte[] buffer = changeFileToByte(headImageFile);
@@ -365,12 +375,13 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        ToastUtils.showToastInUIThread("程序错误!");
+                        ToastUtils.showToastInUIThread("服务器错误!");
                     }
                 }
                 break;
         }
     }
+
     /**
      * 将file转为数组
      *

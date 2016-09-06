@@ -111,7 +111,6 @@
                 <category android:name="com.lxkj.administrator.fealty" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.TestActivity" />
         <!-- Required SDK核心功能-->
         <service
             android:name="cn.jpush.android.service.DownloadService"
@@ -155,10 +154,11 @@
             android:name="JPUSH_APPKEY"
             android:value="a80329b7ceab92d42c5eb9bb" />
 
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:launchMode="singleTask">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"  />
+                <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -167,6 +167,7 @@
         <activity
             android:name=".activity.DialogActivity"
             android:theme="@style/activity_popup" />
+        <activity android:name=".activity.ScanDeviceActivity" />
 
         <service
             android:name="com.yc.peddemo.sdk.BluetoothLeService"

@@ -64,9 +64,9 @@ public class UserInfoAdapter extends BaseAdapter {
         UserInfo userInfo = list.get(position);
         viewHolder.text_subject.setText(userInfo.getIdentity());
         viewHolder.text_address.setText(userInfo.getAddress());
-        viewHolder.text_xin.setText(userInfo.getCurrentHeart() + "");
-        viewHolder.text_bettry.setText(userInfo.getCuffElectricity());
-        viewHolder.text_bettrym.setText(userInfo.getMobileElectricity());
+        viewHolder.text_xin.setText("实时心率："+userInfo.getCurrentHeart() );
+        viewHolder.text_bettry.setText("手环电量："+userInfo.getCuffElectricity());
+        viewHolder.text_bettrym.setText("手机电量:"+userInfo.getMobileElectricity());
         return convertView;
     }
     class ViewHolder {
