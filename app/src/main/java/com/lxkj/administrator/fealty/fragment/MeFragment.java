@@ -713,7 +713,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         //   Looper.prepare();
         final AlertDialog dialog = builder.setView(dialogView).create();
-        dialog.show();
+        dialog.setContentView(null);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
