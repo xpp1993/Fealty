@@ -116,7 +116,7 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
 //                        "3", "5", "7", "9", "15", "25", "30", "35", "40", "45", "50", "55"
 //                }, "请选择心率间测时间：");
                 ArrayList list2 = new ArrayList();
-                for (int i = 3; i <= 59; i++) {
+                for (int i = 3; i <= 30; i++) {
                     list2.add(i + "");
                 }
                 HeaderAndFooterPicker picker2 = new HeaderAndFooterPicker(getActivity(), list2, "请选择心率间测时间：");

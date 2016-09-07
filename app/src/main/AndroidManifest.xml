@@ -168,7 +168,7 @@
             android:name=".activity.DialogActivity"
             android:theme="@style/activity_popup" />
         <activity android:name=".activity.ScanDeviceActivity" />
-
+        <activity android:name=".activity.XinlvNorActivity" />
         <service
             android:name="com.yc.peddemo.sdk.BluetoothLeService"
             android:enabled="true" />

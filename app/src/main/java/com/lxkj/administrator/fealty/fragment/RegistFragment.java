@@ -302,7 +302,8 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                 changeHeadIcon();
                 break;
             case R.id.bar_iv_left:
-                getActivity().onBackPressed();//返回
+               // getActivity().onBackPressed();//返回
+                EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));//跳转到登录页面
                 break;
             case R.id.regist_iv_password_see_or_hidden:
                 if (showPassword) {

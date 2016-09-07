@@ -179,7 +179,8 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bar_iv_left:
-                getActivity().onBackPressed();//返回
+             //   getActivity().onBackPressed();//返回
+                EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));//跳转到登录页面
                 break;
             case R.id.activity_reset_tv_getcheckcode:
                 phone = phoneEditText.getText().toString().trim();

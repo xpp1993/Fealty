@@ -60,33 +60,19 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
     public static final int REQUEST_CODE_LOGIN_COMMIT = 0X12;//登录提交
     public static final int REQUEST_CODE_UPLOAD_CONTACTS = 0X20;//上传通讯录
     private long beforeTime;
-    private long delayTime;//最短睡眠时间
-    private long afterTime;
     public static final int MESSAGE_WHAT_LOGIN_LOGINING = 1;
     public static final int MESSAGE_WHAT_LOGIN_LOGINFAIL = 3;
-    private static long DEFAULTTIME = 500;//登录过程最少持续时间
 
     private Handler handler;
 
 
     @Override
     protected void init() {
-        //  EventBus.getDefault().register(this);
         showPassword = false;
         handler = new MyHandler();
 
     }
 
-//    // 用EventBus 来导航,订阅者
-//    public void onEventMainThread(NavFragmentEvent event) {
-//
-//    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        //  EventBus.getDefault().unregister(this);
-    }
 
     @Override
     protected void initListener() {
@@ -123,21 +109,21 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SIGN_UP_COMMIT, params, null, REQUEST_CODE_LOGIN_COMMIT, this);
         }
     }
+
     /**
      * 跳转到重置密码页面
      */
     private void goToResetPassword() {
         ResetPasswordFragment resetPasswordFragment = new ResetPasswordFragment();
         EventBus.getDefault().post(new NavFragmentEvent(resetPasswordFragment));
-        finish();
     }
+
     /**
      * 跳转到注册页面
      */
     private void gotoRegist() {
         RegistFragment registFragment = new RegistFragment();
         EventBus.getDefault().post(new NavFragmentEvent(registFragment));
-        finish();
     }
 
     @Override
@@ -249,36 +235,27 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                     ToastUtils.showToastInUIThread(msg.getData().getString("message"));
                     break;
                 case REQUEST_CODE_LOGIN_COMMIT:
-                    int identity = bundle.getInt("identity");
-                    int binded = bundle.getInt("binded");
                     int code = bundle.getInt("code");
                     String mobile = bundle.getString("mobile");
+                    String password = bundle.getString("password");
+                    String nickName = bundle.getString("nickName");
+                    String headFile = bundle.getString("headFile");
+                    String birthday = bundle.getString("birthday");
+                    int sex = bundle.getInt("sex");
                     UserInfo userInfo = new UserInfo();
                     userInfo.setMobile(phone);
+                    userInfo.setGender(sex + "");
+                    userInfo.setPassword(password);
+                    userInfo.setNickName(nickName);
+                    userInfo.setBirthday(birthday);
+                    userInfo.setUserpic(headFile);
                     SessionHolder.initHolder(mobile, userInfo);
-                    //  SPManager.getSPManager(AppUtils.getBaseContext()).persistenceSession();
                     if (code == 1) {
-                        //  if (identity == 1) {//老人,进入主页面
                         login_password_edittext.setText("");
                         login_phone_edittext.setText("");
                         loginButton.setProgress(0);
                         tv_login.setClickable(true);
                         EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
-                        finish();
-                        //   }
-//                        else if (identity == 0) {//子女
-//                            if (binded == 1) {//已绑定老人
-//                                EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
-//                            } else if (binded == 0) {//没有绑定老人
-//                                //1.获取手机联系人
-//                                ArrayList<Contacts> contacts = (ArrayList<Contacts>) getContacts(AppUtils.getBaseContext());
-//                                //2.上传通讯录,返回通讯录中,注册过 ,且是老人 的 用户列表（老人头像，老人手机号）
-//                                Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list"}, uploadContacts(contacts));
-//                                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, LoginFragment.this);
-//                                ToastUtils.showToastInUIThread("正在获取联系人列表....");
-//                                //3.选择绑定的老人
-//                            }
-//                        }
                     } else {
                         Message msg1 = new Message();
                         msg1.what = MESSAGE_WHAT_LOGIN_LOGINFAIL;
@@ -289,20 +266,16 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                         Log.w("retinfo error", msg.getData().getString("desc"));
                     }
                     break;
-                case REQUEST_CODE_UPLOAD_CONTACTS:
-                    if (msg.getData().getInt("code") == 1) {//请求成功
-                        ArrayList<UserInfo> list_user = (ArrayList<UserInfo>) msg.getData().getSerializable("old_people_list");
-                        //跳转到注册过此APP的联系人列表
-                        Bundle data = new Bundle();
-                        data.putSerializable("list_user", list_user);
-                        EventBus.getDefault().post(new NavFragmentEvent(new OlsManListFragment(), bundle));
-                    }
-                    break;
             }
         }
-
     }
 
+    @Override
+    public boolean onBack() {
+        return false;
+    }
+
+    //防止登录页面重叠
     @Override
     public boolean finish() {
         return true;

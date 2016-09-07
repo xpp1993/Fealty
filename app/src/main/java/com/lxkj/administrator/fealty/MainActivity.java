@@ -1,5 +1,6 @@
 package com.lxkj.administrator.fealty;
 
+import android.os.Build;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -8,6 +9,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Window;
+import android.view.WindowManager;
 
 import org.xutils.view.annotation.ContentView;
 import org.xutils.x;
@@ -16,6 +19,7 @@ import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.fragment.LoginFragment;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
+import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.LinkedList;
 
@@ -33,24 +37,49 @@ public class MainActivity extends FragmentActivity {
     public static final int LAST_CLICK_GAP = 600;
     public static final int EXIT_GAP = 2000;
     public long lastClickTime = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //  setContentView(R.layout.activity_main);
         // 注入xutils3 的view
+//        //透明状态栏
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//        //透明导航栏
+//         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        //只对api19以上版本有效
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            setTranslucentStatus(true);
+        }
+        //为状态栏着色
+        SystemBarTintManager tintManager = new SystemBarTintManager(this);
+        tintManager.setStatusBarTintEnabled(true);
+        tintManager.setStatusBarTintResource(R.color.MainTheme);
         x.view().inject(this);
         // EventBus 注册
         fm = getSupportFragmentManager();
         EventBus.getDefault().register(this);
-      LoginFragment baseFragment;
-    //  MainTabsFragemnt baseFragment;
+        LoginFragment baseFragment;
+        //  MainTabsFragemnt baseFragment;
         String tag;
-       baseFragment = new LoginFragment();
-       // baseFragment=new MainTabsFragemnt();
-       tag = baseFragment.getMTag();
+        baseFragment = new LoginFragment();
+        // baseFragment=new MainTabsFragemnt();
+        tag = baseFragment.getMTag();
         mFragments.add(tag);
 
         fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();
+    }
+
+    private void setTranslucentStatus(boolean on) {
+        Window win = getWindow();
+        WindowManager.LayoutParams winParams = win.getAttributes();
+        final int bits = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+        if (on) {
+            winParams.flags |= bits;
+        } else {
+            winParams.flags &= ~bits;
+        }
+        win.setAttributes(winParams);
     }
     //监听返回键
     //按返回键，Fragment要不要禁用返回键
@@ -86,7 +115,6 @@ public class MainActivity extends FragmentActivity {
             fm.popBackStack();
         }
     }
-
 
     //Fragment控制返回键
     public boolean backCurrentFragment() {

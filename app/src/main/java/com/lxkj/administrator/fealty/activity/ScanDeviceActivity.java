@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -16,6 +19,7 @@ import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.adapter.LeDeviceListAdapter;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
+import com.readystatesoftware.systembartint.SystemBarTintManager;
 import com.yc.peddemo.sdk.BLEServiceOperate;
 import com.yc.peddemo.sdk.DeviceScanInterfacer;
 
@@ -40,6 +44,14 @@ public class ScanDeviceActivity extends Activity implements View.OnClickListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragement_devicelist);
+        //只对api19以上版本有效
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            setTranslucentStatus(true);
+        }
+        //为状态栏着色
+        SystemBarTintManager tintManager = new SystemBarTintManager(this);
+        tintManager.setStatusBarTintEnabled(true);
+        tintManager.setStatusBarTintResource(R.color.MainTheme);
         initializes();
         // Checks if Bluetooth is supported on the device.
         if (!mBLEServiceOperate.isSupportBle4_0()) {
@@ -50,6 +62,18 @@ public class ScanDeviceActivity extends Activity implements View.OnClickListener
         bar_back.setOnClickListener(this);
         mBLEServiceOperate.setDeviceScanListener(this);//for DeviceScanInterfacer
         devicelistview.setOnItemClickListener(this);
+    }
+
+    private void setTranslucentStatus(boolean on) {
+        Window win = getWindow();
+        WindowManager.LayoutParams winParams = win.getAttributes();
+        final int bits = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+        if (on) {
+            winParams.flags |= bits;
+        } else {
+            winParams.flags &= ~bits;
+        }
+        win.setAttributes(winParams);
     }
 
     /**
@@ -147,7 +171,7 @@ public class ScanDeviceActivity extends Activity implements View.OnClickListener
         final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
         if (device == null)
             return;
-        if (device.getAddress()==null||device.getAddress().equals(""))
+        if (device.getAddress() == null || device.getAddress().equals(""))
             return;
         //把数据传出去
         EventBus.getDefault().post(device.getAddress());

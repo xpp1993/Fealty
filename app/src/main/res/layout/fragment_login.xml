@@ -1,8 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:fitsSystemWindows="true"
+    android:layout_height="match_parent"
     android:clipToPadding="true"
-    android:layout_height="match_parent">
+    android:fitsSystemWindows="true">
 
     <ImageView
         android:id="@+id/activity_login_iv_banner"
@@ -10,8 +10,7 @@
         android:layout_height="236dp"
         android:layout_centerHorizontal="true"
         android:scaleType="fitXY"
-      android:src="@color/navigation_text_default"
-     />
+        android:src="@drawable/img_login_banneree" />
 
     <LinearLayout
         android:id="@+id/activity_login_ll_phone"
@@ -35,6 +34,7 @@
 
             <EditText
                 android:id="@+id/login_et_phone"
+                style="@style/CommonStyle.input_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -42,7 +42,6 @@
                 android:layout_marginRight="40dp"
                 android:layout_toRightOf="@id/login_iv_phone"
                 android:hint="你的手机号码"
-                style="@style/CommonStyle.input_edittext"
                 android:inputType="phone" />
         </RelativeLayout>
 
@@ -75,7 +74,6 @@
                 android:src="@mipmap/icon_login_password" />
 
 
-
             <ImageView
                 android:id="@+id/login_iv_password_see_or_hidden"
                 android:layout_width="25dp"
@@ -84,15 +82,16 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="40dp"
                 android:src="@mipmap/icon_login_show_password_normal" />
+
             <EditText
                 android:id="@+id/login_et_password"
+                style="@style/CommonStyle.input_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="20dp"
                 android:layout_toLeftOf="@id/login_iv_password_see_or_hidden"
                 android:layout_toRightOf="@id/activity_login_iv_password"
-                style="@style/CommonStyle.input_edittext"
                 android:hint="填写密码"
                 android:inputType="textPassword" />
         </RelativeLayout>

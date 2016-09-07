@@ -64,7 +64,7 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
             public void open() {//如果声音提醒是打开的。把状态写入sp 文件(写一个静态类表示各个开关状态)
                 editor.putBoolean(ParameterManager.MESSAGE_SOUND, true);
                 editor.commit();
-                Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
+             //   Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
                 shark.setState(false);
                 dialog.setState(false);
                 yuyin.setState(false);
@@ -81,7 +81,7 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
             public void open() {
                 editor.putBoolean(ParameterManager.MESSAGE_zhend,true);
                 editor.commit();
-                Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
+            //    Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
                 voice.setState(false);
                 dialog.setState(false);
                 yuyin.setState(false);
@@ -98,7 +98,7 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
             @Override
             public void open() {
                 editor.putBoolean(ParameterManager.MESSAGE_dialog,true);
-                Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
+           //     Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
                 editor.commit();
                 voice.setState(false);
                 yuyin.setState(false);
