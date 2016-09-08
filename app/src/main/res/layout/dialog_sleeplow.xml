@@ -3,15 +3,15 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
-    android:background="#55000000"
     android:fitsSystemWindows="true"
+    android:background="@android:color/transparent"
    >
     <RelativeLayout
         android:id="@+id/dialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="38dp"
-        android:background="#ffffffff">
+       >
 
         <LinearLayout
             android:layout_width="wrap_content"

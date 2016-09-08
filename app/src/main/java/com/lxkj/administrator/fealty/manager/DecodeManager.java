@@ -121,14 +121,14 @@ public final class DecodeManager {
             String password = object.optString("password");
             String nickName = object.optString("nickName");
             String headFile = object.optString("headFile");
-            String birthday=object.optString("birthday");
+            String birthday = object.optString("birthday");
             data.putInt("sex", sex);
             data.putInt("binded", binded);
             data.putString("mobile", mobile);
             data.putString("password", password);
             data.putString("nickName", nickName);
             data.putString("headFile", headFile);
-            data.putString("birthday",birthday);
+            data.putString("birthday", birthday);
         }
         msg.setData(data);
         handler.sendMessage(msg);

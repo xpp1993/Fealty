@@ -115,5 +115,11 @@
     <style name="activity_popup" parent="android:Theme.Translucent.NoTitleBar">
         <item name="android:windowAnimationStyle">@style/AnimBottom</item>
     </style>
+    <!--<style name="NobackDialog"-->
+        <!--parent="@android:style/Theme.Dialog">-->
 
+        <!--<item-->
+            <!--name="android:windowBackground">@color/no_back</item>-->
+
+    <!--</style>-->
 </resources>
