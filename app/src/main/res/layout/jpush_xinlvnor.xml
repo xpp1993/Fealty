@@ -12,8 +12,8 @@
         android:id="@+id/dialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         android:layout_marginTop="38dp"
         android:background="#ffffffff">
 
@@ -26,7 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
-                android:layout_marginTop="48dp"
+                android:layout_marginTop="30dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -34,11 +34,17 @@
                     android:layout_height="wrap_content"
                     android:text="实时心率"
                     android:textColor="#585858"
-                    android:textSize="16sp" />
+                    android:textSize="19sp" />
                 <TextView
+                    android:id="@+id/xinlv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:drawableLeft="@drawable/xinlvbaojin"/>
+                    android:layout_marginLeft="150dp"
+                    android:drawableLeft="@drawable/xinlvbaojin"
+                    android:text="60"
+                    android:textColor="#d90000"
+                    android:drawablePadding="10dp"
+                    android:textSize="30sp"/>
             </LinearLayout>
 
             <View
@@ -46,16 +52,44 @@
                 android:layout_height="1dp"
                 android:layout_marginTop="10dp"
                 android:background="@color/MainTheme" />
-
-            <TextView
-                android:id="@+id/bettrywarn"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="9dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="实时位置"
+                    android:textColor="#585858"
+                    android:textSize="19sp" />
+                <TextView
+                    android:id="@+id/dizhi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:drawableLeft="@mipmap/dingwei"
+                    android:text="深圳市罗湖区外贸轻工业大厦"
+                    android:textColor="#585858"
+                    android:drawablePadding="5dp"
+                    android:textSize="19sp"/>
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/MainTheme" />
+            <TextView
+                android:id="@+id/identity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="19dp"
                 android:gravity="center"
-                android:text="您睡眠时的心率偏高"
+                android:text="爷爷心率异常"
                 android:textColor="#000000"
-                android:textSize="15sp" />
+                android:textSize="19sp" />
 
             <TextView
                 android:id="@+id/handler"
@@ -63,18 +97,18 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:gravity="center"
-                android:text="请注意休息，保持身体健康"
+                android:text="请及时联系老人，以免耽误病情"
                 android:textColor="#838383"
-                android:textSize="12sp" />
+                android:textSize="17sp" />
 
             <Button
                 android:id="@+id/dialogbtn"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_marginBottom="10dp"
+                android:layout_height="45dp"
+                android:layout_marginBottom="12dp"
                 android:layout_marginLeft="35dp"
                 android:layout_marginRight="35dp"
-                android:layout_marginTop="22dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/btn"
                 android:text="确定"
                 android:textColor="#ffffff"
