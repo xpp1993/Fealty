@@ -246,6 +246,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                             healthDataFragement.setArguments(bundle);
                             HealthDataFragement fragement = adapter.addFragment(healthDataFragement);
                             adapter.notifyDataSetChanged();
+                            if (TextUtils.isEmpty(locationdescrible))
+                                return;
                             fragement.setGPSData(lat, lon, locationdescrible, address);//通过Fragment提供的方法设置数据
                         }
 
@@ -271,7 +273,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                             String distance = result.get(parentPhone)[7];
                             String identity = result.get(parentPhone)[8];
                             String currentHeart = result.get(parentPhone)[9];
-                            Log.e("currrent",currentHeart);
+                            Log.e("currrent", currentHeart);
                             Bundle bundle = new Bundle();
                             bundle.putString("parentPhone", parentPhone);
                             //  HealthDataFragement healthDataFragement = new HealthDataFragement();
@@ -279,6 +281,14 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                             healthDataFragement.setArguments(bundle);
                             HealthDataFragement fragement = adapter.addFragment(healthDataFragement);
                             adapter.notifyDataSetChanged();
+                            if ("".equals(light_hour) || light_hour == null)
+                                light_hour = 0 + "";
+                            if ("".equals(light_minute) || light_minute == null)
+                                light_minute = 0 + "";
+                            if ("".equals(deep_hour) || deep_hour == null)
+                                deep_hour = 0 + "";
+                            if ("".equals(deep_minute) || deep_minute == null)
+                                deep_minute = 0 + "";
                             fragement.setSleepData(light_hour, light_minute, deep_hour, deep_minute, total_hour_str);
                             fragement.setSportData(calories, step, distance);
                             fragement.setIdentity(identity);
@@ -298,7 +308,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                         while (keyIterator.hasNext()) {
                             Map.Entry entry = (Map.Entry) keyIterator.next();
                             String parentPhone = (String) entry.getKey();
-                           // List<RateListData> listDatas = (List<RateListData>) entry.getValue();
+                            // List<RateListData> listDatas = (List<RateListData>) entry.getValue();
                             Bundle bundle = new Bundle();
                             bundle.putString("parentPhone", parentPhone);
                             //  HealthDataFragement healthDataFragement = new HealthDataFragement();

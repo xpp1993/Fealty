@@ -188,8 +188,17 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     String deep_hour = sleepData.getString("deep_hour");
                     String deep_minute = sleepData.getString("deep_minute");
                     String total_hour_str = sleepData.getString("total_hour_str");
+                    if (shuimiantotal == null) {
+                        shuimiantotal = (TextView) getActivity().findViewById(R.id.shuimiantotal);
+                    }
                     shuimiantotal.setText("睡眠  " + total_hour_str + "小时");
+                    if (shuimiandetail2 == null) {
+                        shuimiandetail2 = (TextView) getActivity().findViewById(R.id.shuimiandetail2);
+                    }
                     shuimiandetail2.setText("浅度睡眠" + light_hour + "小时" + light_minute + "分钟");
+                    if (shuimiandetail == null) {
+                        shuimiandetail = (TextView) getActivity().findViewById(R.id.shuimiandetail);
+                    }
                     shuimiandetail.setText("深度度睡眠" + deep_hour + "小时" + deep_minute + "分钟");
                     break;
                 case REQURST_HANDLER_SPORTDATA://处理运动数据
@@ -212,9 +221,9 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     //   mPpView.setFountText(currentRate + "");
                     readSP();
                     if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常
-                        functionTest(currentRate,R.color.warning);
-                    }else{
-                       functionTest(currentRate,R.color.normal);
+                        functionTest(currentRate, R.color.warning);
+                    } else {
+                        functionTest(currentRate, R.color.normal);
                     }
                     //把实时心率传到定位页面
                     Intent intent = new Intent();
@@ -321,6 +330,9 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         Message message = Message.obtain();
         message.what = REQURST_HANDLER_SlEEPDATA;
         message.setData(sleepData);
+        if (handler == null) {
+            handler = new MyHandler();
+        }
         handler.sendMessage(message);
     }
 
@@ -352,7 +364,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
 
     //提供给外界设置当前心率的方法,currentHeart
     public void setCurentRate(String currentHeart) {
-        int tempRate=Integer.parseInt(currentHeart);
+        int tempRate = Integer.parseInt(currentHeart);
         Message message = Message.obtain();
         message.arg1 = tempRate;
         if (TextUtils.isEmpty(currentHeart)) {
@@ -375,8 +387,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     /**
      * 设置第二行文本的颜色
      */
-    private void functionTest(int currentRate,int color) {
-        mPpView.setSecondTextColor(ContextCompat.getColor(getContext(),color));
+    private void functionTest(int currentRate, int color) {
+        mPpView.setSecondTextColor(ContextCompat.getColor(getContext(), color));
         mPpView.setSecondText(currentRate + "");
         mPpView.postInvalidate();
     }
