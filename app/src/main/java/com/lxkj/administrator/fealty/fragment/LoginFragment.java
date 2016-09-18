@@ -1,5 +1,6 @@
 package com.lxkj.administrator.fealty.fragment;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,10 +19,12 @@ import com.lxkj.administrator.fealty.bean.UserInfo;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
+import com.lxkj.administrator.fealty.manager.SPManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.ui.ActionProcessButton;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
+import com.lxkj.administrator.fealty.utils.ContextUtils;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
 
@@ -62,6 +65,8 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
     private long beforeTime;
     public static final int MESSAGE_WHAT_LOGIN_LOGINING = 1;
     public static final int MESSAGE_WHAT_LOGIN_LOGINFAIL = 3;
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
 
     private Handler handler;
 
@@ -70,7 +75,10 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
     protected void init() {
         showPassword = false;
         handler = new MyHandler();
-
+        //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
+        preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
+        //2. 获得编辑器:当将数据存储到SharedPrefences对象中时，需要获得编辑器。如果取出则不需要。
+        editor = preferences.edit();
     }
 
 
@@ -115,9 +123,9 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
      */
     private void goToResetPassword() {
         ResetPasswordFragment resetPasswordFragment = new ResetPasswordFragment();
-        Bundle bundle=new Bundle();
-        bundle.putInt("status",1);
-        EventBus.getDefault().post(new NavFragmentEvent(resetPasswordFragment,bundle));
+        Bundle bundle = new Bundle();
+        bundle.putInt("status", 1);
+        EventBus.getDefault().post(new NavFragmentEvent(resetPasswordFragment, bundle));
     }
 
     /**
@@ -251,14 +259,20 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                     userInfo.setNickName(nickName);
                     userInfo.setBirthday(birthday);
                     userInfo.setUserpic(headFile);
-                    SessionHolder.initHolder(mobile, userInfo);
                     if (code == 1) {
+//                        SessionHolder.initHolder(mobile, userInfo);
                         login_password_edittext.setText("");
                         login_phone_edittext.setText("");
                         loginButton.setProgress(0);
                         tv_login.setClickable(true);
+                        Log.i("mobile", mobile);
+                        ContextUtils.saveObj2SP(AppUtils.getBaseContext(), userInfo, "userInfo");
+                        UserInfo user = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
+                        SessionHolder.initHolder(mobile, user);
+                        // editor.putString(ParameterManager.USERINFO, mobile);
                         EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
-                       // finish();//2016.9.14.xpp add
+
+                        // finish();//2016.9.14.xpp add
                     } else {
                         Message msg1 = new Message();
                         msg1.what = MESSAGE_WHAT_LOGIN_LOGINFAIL;

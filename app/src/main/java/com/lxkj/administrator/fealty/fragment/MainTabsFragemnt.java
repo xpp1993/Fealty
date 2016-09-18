@@ -1,11 +1,15 @@
 package com.lxkj.administrator.fealty.fragment;
 
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.TextView;
 
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
+import com.lxkj.administrator.fealty.manager.ParameterManager;
+import com.lxkj.administrator.fealty.manager.SPManager;
+import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.widget.QuickFragmentTabHost;
 
 import org.xutils.view.annotation.ContentView;
@@ -23,13 +27,23 @@ public class MainTabsFragemnt extends BaseFragment {
     private QuickFragmentTabHost mTabsHost;
     private final String[] TITLES = {"健康监测", "设置"};
     private final String[] TAGS = {"status", "me"};
-   // private int[] ICONS = {R.drawable.tab_status, R.drawable.tab_status};
-    private int[]ICONS={R.mipmap.shuju,R.mipmap.wo};
+    // private int[] ICONS = {R.drawable.tab_status, R.drawable.tab_status};
+    private int[] ICONS = {R.mipmap.shuju, R.mipmap.wo};
     private final Class[] fragments = {StatusFragment.class, MeFragment.class};
     private List<ViewHolder> viewHolders = new ArrayList<ViewHolder>();
+    private long beforeTime;//程序进入的时刻
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void init() {
+        beforeTime = System.currentTimeMillis();
+        //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
+        preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
+        //2. 获得编辑器:当将数据存储到SharedPrefences对象中时，需要获得编辑器。如果取出则不需要。
+        editor = preferences.edit();
+        editor.putLong(ParameterManager.LOGIN_TIME, beforeTime);
+        editor.commit();
         //在那个布局上填充的id
         mTabsHost.setup(getContext(), getChildFragmentManager(), R.id.realtabcontent);
         initTabs();
@@ -48,7 +62,8 @@ public class MainTabsFragemnt extends BaseFragment {
 //            startActivityForResult(mIntent, 1);
 //        }
     }
-//    @Override
+
+    //    @Override
 //    public void onActivityResult(int requestCode, int resultCode, Intent data) {
 //        // TODO Auto-generated method stub
 //        super.onActivityResult(requestCode, resultCode, data);

@@ -977,6 +977,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
      */
     private void queryStepInfo() {
         StepInfo stepInfo = mySQLOperate.queryStepInfo(CalendarUtils.getCalendar(0));
+
         if (stepInfo != null) {
             int step = stepInfo.getStep();//运动的步数
             int calories = stepInfo.getCalories();//卡路里
