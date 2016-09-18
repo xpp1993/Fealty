@@ -30,10 +30,10 @@ public class OldmanListviewAdpter extends MyBaseAdapter<UserInfo> {
         ContactsListItemView contactsListItemView = (ContactsListItemView) convertView;
         contactsListItemView.getTv_phone().setText(list.get(position).getMobile());
         // 加载图片
-       // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).
-              // toLoadImage("http://192.168.8.133:8080" + "/" + list.get(position).getUserpic(), contactsListItemView.getHeadimage(), R.mipmap.unknow_head, R.mipmap.unknow_head);
        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).
-               toLoadImage("http://120.76.27.233:8080" + "/" + list.get(position).getUserpic(), contactsListItemView.getHeadimage(), R.mipmap.unknow_head, R.mipmap.unknow_head);
+              toLoadImage("http://192.168.8.133:8080" + "/" + list.get(position).getUserpic(), contactsListItemView.getHeadimage(), R.mipmap.unknow_head, R.mipmap.unknow_head);
+      // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).
+       //        toLoadImage("http://120.76.27.233:8080" + "/" + list.get(position).getUserpic(), contactsListItemView.getHeadimage(), R.mipmap.unknow_head, R.mipmap.unknow_head);
         return convertView;
     }
 }

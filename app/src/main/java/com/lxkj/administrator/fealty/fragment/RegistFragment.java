@@ -456,13 +456,13 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
 
         switch (requestCode) {
             case REQUEST_CODE_REGIST_GET_CHECKCODE:
-                ToastUtils.showToastInUIThread("网络连接错误,请检查重试");
+                ToastUtils.showToastInUIThread("访问服务器失败，请联系管理员");
                 getCheckCodeTextView.setClickable(true);
                 getCheckCodeTextView.setText("获取验证码");
                 remainRockTime = ParameterManager.TOTAL_ROCK_TIME;
                 break;
             case REQUEST_CODE_REGIST_COMMIT:
-                ToastUtils.showToastInUIThread("网络连接错误,请检查重试");
+                ToastUtils.showToastInUIThread("访问服务器失败，请联系管理员");
 //                if (headImageFile != null || headImageFile.exists()) {
 //                    headImageFile.delete();
 //                }

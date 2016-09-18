@@ -1,5 +1,6 @@
 package com.lxkj.administrator.fealty.fragment;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
@@ -65,7 +66,7 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
     private String phone;
 
     protected void init() {
-      //  EventBus.getDefault().register(this);
+        //  EventBus.getDefault().register(this);
         handler = new MyHandler();
         remainRockTime = ParameterManager.TOTAL_ROCK_TIME;
         barBackImageView.setVisibility(View.VISIBLE);
@@ -82,7 +83,7 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
     @Override
     public void onDestroy() {
         super.onDestroy();
-       // EventBus.getDefault().unregister(this);
+        // EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -137,6 +138,16 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
 
     }
 
+    int status = 0;
+
+    @Override
+    public void onGetBunndle(Bundle arguments) {
+        super.onGetBunndle(arguments);
+        if (arguments==null)
+            return;
+        status = arguments.getInt("status");
+    }
+
     @Override
     public void onRequestSuccess(JSONObject jsonObject, int requestCode) {
         switch (requestCode) {
@@ -179,8 +190,10 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bar_iv_left:
-             //   getActivity().onBackPressed();//返回
-                EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));//跳转到登录页面
+                if (status == 0)
+                    getActivity().onBackPressed();//返回
+                if (status==1)
+                    EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));//跳转到登录页面
                 break;
             case R.id.activity_reset_tv_getcheckcode:
                 phone = phoneEditText.getText().toString().trim();
@@ -226,7 +239,7 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
                     newPasswordEditText.requestFocus();
                 } else {
                     try {
-                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "new_password", "check_code","id"}, phone, newPassword1, checkCode,check_id);
+                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "new_password", "check_code", "id"}, phone, newPassword1, checkCode, check_id);
                         // RequireServiceManager.getRequireServiceManager().requireToResetPassword(this, CommonTools.encodeByMD5(phoneEditText.getText().toString().trim()), checkCode, send_id, newPassword1, REQUEST_CODE_SELF_GET_RESET_PASSWORD_CONFIRM, this);
                         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.RESET_PASSWORD, params, null, REQUEST_CODE_SELF_GET_RESET_PASSWORD_CONFIRM, this);
                     } catch (Exception e) {
@@ -237,6 +250,7 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
                 break;
         }
     }
+
     private class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -245,7 +259,7 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
                     if (msg.getData().getInt("code") == 1) {//请求成功
                         startRock();//开启倒计时
                         String check_code = msg.getData().getString("check_code");
-                        check_id=msg.getData().getString("id");
+                        check_id = msg.getData().getString("id");
                         if (TextUtils.isEmpty(check_code)) {
                             checkCodeEditText.requestFocus();
                         } else {
@@ -267,10 +281,11 @@ public class ResetPasswordFragment extends BaseFragment implements NetWorkAccess
                         EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));//跳转到登录页面
                         // finish();
                     } else {//请求失败
-                        ToastUtils.showToastInUIThread("请求失败！"+msg.getData().getString("desc"));
+                        ToastUtils.showToastInUIThread("请求失败！" + msg.getData().getString("desc"));
                     }
                     break;
             }
         }
     }
+
 }

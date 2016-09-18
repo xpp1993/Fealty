@@ -75,7 +75,7 @@ public class UserInfoAdapter extends BaseAdapter {
 
     // 将数据添加到集合
     public void addData(List<UserInfo> data) {
-        list.addAll(data);
-        notifyDataSetChanged();
+            list.addAll(data);
+            notifyDataSetChanged();
     }
 }

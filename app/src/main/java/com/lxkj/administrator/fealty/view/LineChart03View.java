@@ -93,13 +93,13 @@ public class LineChart03View extends GraphicalView {
 
     private void chartDataSet() {
         LinkedList<Double> dataSeries2 = new LinkedList<Double>();
-        dataSeries2.add((double) 75);
-        dataSeries2.add((double) 75);
-        dataSeries2.add((double) 75);
-        dataSeries2.add((double) 75);
-        dataSeries2.add((double) 75);
-        dataSeries2.add((double) 75);
-        dataSeries2.add((double) 75);
+        dataSeries2.add((double) 80);
+        dataSeries2.add((double) 80);
+        dataSeries2.add((double) 80);
+        dataSeries2.add((double) 80);
+        dataSeries2.add((double) 80);
+        dataSeries2.add((double) 80);
+        dataSeries2.add((double) 80);
         LineData lineData2 = new LineData("", dataSeries2,Color.rgb(93,205,191));
         lineData2.setDotStyle(XEnum.DotStyle.DOT);
         lineData2.getPlotLine().getDotPaint().setColor(Color.rgb(93,205,191));

@@ -3,6 +3,7 @@ package com.lxkj.administrator.fealty.manager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
@@ -184,10 +185,12 @@ public final class DecodeManager {
             for (int i = 0; i < array.length(); i++) {
                 List<RateListData> list = new ArrayList<>();
                 JSONObject object1 = array.getJSONObject(i);
-                String jsonString = object1.optString("heartRate");
-                com.alibaba.fastjson.JSONObject ob1 = (com.alibaba.fastjson.JSONObject) JSON.parse(jsonString);
-                com.alibaba.fastjson.JSONArray jsonArray = ob1.getJSONArray("heartRate");
+                String heartRateString = object1.optString("heartRate");
+                if (TextUtils.isEmpty(heartRateString))
+                    continue;
+                com.alibaba.fastjson.JSONObject ob1 = (com.alibaba.fastjson.JSONObject) JSON.parse(heartRateString);
                 String mobile = ob1.getString("mobile");
+                com.alibaba.fastjson.JSONArray jsonArray = ob1.getJSONArray("heartRate");
                 for (int j = 0; j < jsonArray.size(); j++) {
                     com.alibaba.fastjson.JSONObject object = jsonArray.getJSONObject(j);
                     //    com.alibaba.fastjson.JSONObject object = (com.alibaba.fastjson.JSONObject) jsonArray.get(i);
@@ -285,7 +288,7 @@ public final class DecodeManager {
             data.putInt("code", code);
             data.putString("desc", desc);
             JSONArray userMsg_list = jsonObject.optJSONObject("json").optJSONArray("userMsg_list");
-            if (userMsg_list != null && userMsg_list.length() > 0) {
+            if (userMsg_list != null || userMsg_list.length() > 0) {
                 ArrayList<UserInfo> friends = new ArrayList<UserInfo>();
                 for (int i = 0; i < userMsg_list.length(); i++) {
                     JSONObject friendJsonObject = userMsg_list.getJSONObject(i);

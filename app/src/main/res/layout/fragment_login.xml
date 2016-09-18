@@ -22,7 +22,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="40dp">
 
             <ImageView
                 android:id="@+id/login_iv_phone"
@@ -36,10 +36,12 @@
                 android:id="@+id/login_et_phone"
                 style="@style/CommonStyle.input_edittext"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_centerVertical="true"
+                android:layout_marginBottom="4dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="40dp"
+                android:layout_marginTop="4dp"
                 android:layout_toRightOf="@id/login_iv_phone"
                 android:hint="你的手机号码"
                 android:inputType="phone" />
@@ -50,7 +52,6 @@
             android:layout_height="1dp"
             android:layout_marginLeft="40dp"
             android:layout_marginRight="40dp"
-            android:layout_marginTop="10dp"
             android:background="#d8d8d8" />
     </LinearLayout>
 
@@ -58,12 +59,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/activity_login_ll_phone"
-        android:layout_marginTop="10dp"
         android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="40dp">
 
             <ImageView
                 android:id="@+id/activity_login_iv_password"
@@ -77,7 +77,7 @@
             <ImageView
                 android:id="@+id/login_iv_password_see_or_hidden"
                 android:layout_width="25dp"
-                android:layout_height="12dp"
+                android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="40dp"
@@ -87,9 +87,12 @@
                 android:id="@+id/login_et_password"
                 style="@style/CommonStyle.input_edittext"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:layout_centerVertical="true"
+                android:layout_marginBottom="4dp"
                 android:layout_marginLeft="20dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="4dp"
                 android:layout_toLeftOf="@id/login_iv_password_see_or_hidden"
                 android:layout_toRightOf="@id/activity_login_iv_password"
                 android:hint="填写密码"
@@ -101,7 +104,6 @@
             android:layout_height="1dp"
             android:layout_marginLeft="40dp"
             android:layout_marginRight="40dp"
-            android:layout_marginTop="10dp"
             android:background="#d8d8d8" />
     </LinearLayout>
 

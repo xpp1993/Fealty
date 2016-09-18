@@ -246,8 +246,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                             healthDataFragement.setArguments(bundle);
                             HealthDataFragement fragement = adapter.addFragment(healthDataFragement);
                             adapter.notifyDataSetChanged();
-                            if (TextUtils.isEmpty(locationdescrible))
-                                return;
+                          //  if (TextUtils.isEmpty(locationdescrible))
+                            //    return;
                             fragement.setGPSData(lat, lon, locationdescrible, address);//通过Fragment提供的方法设置数据
                         }
 
@@ -277,9 +277,9 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                             Bundle bundle = new Bundle();
                             bundle.putString("parentPhone", parentPhone);
                             //  HealthDataFragement healthDataFragement = new HealthDataFragement();
-                            HealthDataFragement healthDataFragement = new HealthDataFragement();
-                            healthDataFragement.setArguments(bundle);
-                            HealthDataFragement fragement = adapter.addFragment(healthDataFragement);
+                            HealthDataFragement fragement = new HealthDataFragement();
+                            fragement.setArguments(bundle);
+                            fragement = adapter.addFragment(fragement);
                             adapter.notifyDataSetChanged();
                             if ("".equals(light_hour) || light_hour == null)
                                 light_hour = 0 + "";

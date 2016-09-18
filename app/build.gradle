@@ -54,4 +54,5 @@ dependencies {
     compile 'com.leaking.slideswitch:slideswitch:1.0.0'
     compile files('libs/BaiduLBS_Android.jar')
     compile files('libs/jpush-android-2.1.7.jar')
+    compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'
 }

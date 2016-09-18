@@ -102,7 +102,7 @@ public class MainActivity extends FragmentActivity {
         int count = fm.getBackStackEntryCount();//
         if (count == 1) {
             if ((SystemClock.uptimeMillis() - lastClickTime) > EXIT_GAP) {
-                ToastUtils.showToastInUIThread("再按一次退出程序！");
+                ToastUtils.showToastInUIThread("退出将无法监控数据，你真的要退出吗？");
                 lastClickTime = SystemClock.uptimeMillis();
             } else {
                 MainActivity.this.finish();

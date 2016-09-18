@@ -1145,6 +1145,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             String rate_ji = preferences.getString(ParameterManager.SHEZHI_JIANCEXINLV, "3");
             rate_int = Integer.parseInt(rate_ji);
             myHandler.postDelayed(this, 1000 * 60 * rate_int);
+
         }
     };
     /**

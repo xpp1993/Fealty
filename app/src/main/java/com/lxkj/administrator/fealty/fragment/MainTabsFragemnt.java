@@ -21,7 +21,7 @@ import java.util.List;
 public class MainTabsFragemnt extends BaseFragment {
     @ViewInject(android.R.id.tabhost)
     private QuickFragmentTabHost mTabsHost;
-    private final String[] TITLES = {"健康监测", "我的设置"};
+    private final String[] TITLES = {"健康监测", "设置"};
     private final String[] TAGS = {"status", "me"};
    // private int[] ICONS = {R.drawable.tab_status, R.drawable.tab_status};
     private int[]ICONS={R.mipmap.shuju,R.mipmap.wo};
