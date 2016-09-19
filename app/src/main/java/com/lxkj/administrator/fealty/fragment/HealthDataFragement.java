@@ -19,12 +19,14 @@ import android.widget.TextView;
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.bean.RateListData;
+import com.lxkj.administrator.fealty.bean.UserInfo;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SPManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
+import com.lxkj.administrator.fealty.utils.ContextUtils;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.view.LineChart03View;
 import com.lxkj.administrator.fealty.view.LineChart03View_left;
@@ -129,7 +131,9 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
-        if (TextUtils.equals(arguments.getString("parentPhone"), SessionHolder.user.getMobile())) {
+        UserInfo userInfo= ContextUtils.getObjFromSp(AppUtils.getBaseContext(),"userInfo");
+//        if (TextUtils.equals(arguments.getString("parentPhone"), SessionHolder.user.getMobile())) {
+        if (TextUtils.equals(arguments.getString("parentPhone"), userInfo.getMobile())) {
             //注册广播接收实时心率
             registeHealthRateChangedReceiver();
         }

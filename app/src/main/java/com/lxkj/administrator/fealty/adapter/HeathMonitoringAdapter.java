@@ -8,9 +8,11 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.lxkj.administrator.fealty.bean.UserInfo;
 import com.lxkj.administrator.fealty.fragment.HealthDataFragement;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.utils.AppUtils;
+import com.lxkj.administrator.fealty.utils.ContextUtils;
 import com.lxkj.administrator.fealty.widget.JazzyViewPager;
 
 import java.util.ArrayList;
@@ -85,7 +87,9 @@ public class HeathMonitoringAdapter extends FragmentPagerAdapter {
             if(healthDataFragement.getArguments().getString("parentPhone").equals(fragment.getArguments().getString("parentPhone")))
                 return healthDataFragement;
         }
-        if(TextUtils.equals(fragment.getArguments().getString("parentPhone"), SessionHolder.user.getMobile())){
+        UserInfo userInfo= ContextUtils.getObjFromSp(AppUtils.getBaseContext(),"userInfo");
+      //  if(TextUtils.equals(fragment.getArguments().getString("parentPhone"), SessionHolder.user.getMobile())){
+        if(TextUtils.equals(fragment.getArguments().getString("parentPhone"), userInfo.getMobile())){
             fragments.add(0,fragment);
         }else{
             fragments.add(fragment);

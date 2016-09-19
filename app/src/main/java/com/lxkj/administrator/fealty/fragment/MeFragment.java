@@ -45,6 +45,7 @@ import com.lxkj.administrator.fealty.bean.Contacts;
 import com.lxkj.administrator.fealty.bean.RateListData;
 import com.lxkj.administrator.fealty.bean.SleepData;
 import com.lxkj.administrator.fealty.bean.SportData;
+import com.lxkj.administrator.fealty.bean.UserInfo;
 import com.lxkj.administrator.fealty.event.NavFragmentEvent;
 import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
@@ -52,6 +53,7 @@ import com.lxkj.administrator.fealty.manager.SPManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
+import com.lxkj.administrator.fealty.utils.ContextUtils;
 import com.lxkj.administrator.fealty.utils.MySqliteHelper;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.utils.ThreadPoolUtils;
@@ -179,7 +181,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private Vibrator mVibrator;
     private NotificationManager notificationManager;//1.获取状态栏通知管理器
     private TextToSpeech tts;
-
+    private UserInfo userInfo;
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
@@ -188,6 +190,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         bar_biaoti.setText("我");
         //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
         preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
+        userInfo = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
         mCallback = new MyLocationListener.CallBack() {
             @Override
             public void callYou(double lat, double lon, String loctiondescrible, String address, MySqliteHelper helper, long currentTime) {
@@ -212,7 +215,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         };
         //初始化个人资料显示
         initPersonalDataShow();
-        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+//        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_USER_BYMOBILE, params, null, MeFragment.REQUEST_USER_BYMIBILE, this);
         sp = getActivity().getSharedPreferences(GlobalVariable.SettingSP, 0);
         editor = sp.edit();
@@ -230,14 +234,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
      * 初始化个人资料显示
      */
     private void initPersonalDataShow() {
-        if (TextUtils.isEmpty(SessionHolder.user.getUserpic()) || "".equals(SessionHolder.user.getUserpic())) {
+      //  if (TextUtils.isEmpty(SessionHolder.user.getUserpic()) || "".equals(SessionHolder.user.getUserpic())) {
+        if (TextUtils.isEmpty(userInfo.getUserpic()) || "".equals(userInfo.getUserpic())) {
             circleImageView.setImageResource(R.mipmap.unknow_head);
         } else {
            // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
-           NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+         //  NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
         }
-        me_username.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
-        me_phone.setText(TextUtils.isEmpty(SessionHolder.user.getMobile()) ? "未设置" : "手机号:" + SessionHolder.user.getMobile());
+//        me_username.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
+//        me_phone.setText(TextUtils.isEmpty(SessionHolder.user.getMobile()) ? "未设置" : "手机号:" + SessionHolder.user.getMobile());
+        me_username.setText(TextUtils.isEmpty(userInfo.getNickName()) ? "未设置" : userInfo.getNickName());
+        me_phone.setText(TextUtils.isEmpty(userInfo.getMobile()) ? "未设置" : "手机号:" + userInfo.getMobile());
     }
 
     private void mRegisterReceiver() {
@@ -512,6 +520,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         String userpic = msg.getData().getString("headFile");
                         String sex = msg.getData().getString("sex");
                         String birthday = msg.getData().getString("birthday");
+                        SessionHolder.initHolder(mobile, userInfo);
+                        Log.e("message",mobile+","+nickname+","+userpic+","+sex+","+birthday);
                         SessionHolder.user.setMobile(mobile);
                         SessionHolder.user.setNickName(nickname);
                         SessionHolder.user.setUserpic(userpic);
@@ -1213,8 +1223,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
      * 上传睡眠和运动数据到服务器
      */
     private void alterSelfData(Map<String, String> parameters) {
+//        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "total_hour_str", "light_hour", "light_minute", "deep_hour", "deep_minute", "calories", "distance", "step", "cuffElectricity", "mobileElectricity"},
+//                SessionHolder.user.getMobile(), "", "", "", "", "", "", "", "", "", "");
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "total_hour_str", "light_hour", "light_minute", "deep_hour", "deep_minute", "calories", "distance", "step", "cuffElectricity", "mobileElectricity"},
-                SessionHolder.user.getMobile(), "", "", "", "", "", "", "", "", "", "");
+                userInfo.getMobile(), "", "", "", "", "", "", "", "", "", "");
         params.putAll(parameters);
         try {
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_SLEEP_SPORT, params, null, REQUEST_CODE_SPORTDATA_SLEEPDATA, MeFragment.this);

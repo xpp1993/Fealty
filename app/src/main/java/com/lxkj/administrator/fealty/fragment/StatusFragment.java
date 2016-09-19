@@ -1,38 +1,33 @@
 package com.lxkj.administrator.fealty.fragment;
-
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
-
 import com.lxkj.administrator.fealty.R;
 import com.lxkj.administrator.fealty.adapter.HeathMonitoringAdapter;
 import com.lxkj.administrator.fealty.base.BaseFragment;
 import com.lxkj.administrator.fealty.bean.RateListData;
 import com.lxkj.administrator.fealty.bean.SleepData;
 import com.lxkj.administrator.fealty.bean.SportData;
+import com.lxkj.administrator.fealty.bean.UserInfo;
 import com.lxkj.administrator.fealty.manager.DecodeManager;
 import com.lxkj.administrator.fealty.manager.ParameterManager;
 import com.lxkj.administrator.fealty.manager.SessionHolder;
 import com.lxkj.administrator.fealty.utils.AppUtils;
 import com.lxkj.administrator.fealty.utils.CommonTools;
+import com.lxkj.administrator.fealty.utils.ContextUtils;
 import com.lxkj.administrator.fealty.utils.NetWorkAccessTools;
 import com.lxkj.administrator.fealty.utils.ToastUtils;
 import com.lxkj.administrator.fealty.widget.JazzyViewPager;
-
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import de.greenrobot.event.EventBus;
 
 /**
@@ -49,11 +44,12 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     private final int REQUEST_CODE_UPDATA_ZHEXIAN_HEART = 0x25;
     private MyHandler myHandler;
     // private HealthDataFragement healthDataFragement;
+    private UserInfo userInfo;
 
     @Override
     protected void init() {
         myHandler = new MyHandler();
-
+        userInfo = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
         EventBus.getDefault().register(this);
         mJazzy.setTransitionEffect(JazzyViewPager.TransitionEffect.ZoomIn);
         mJazzy.setPageMargin(30);
@@ -69,7 +65,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         //1.登录进来获得我的页面,初始化
         initFragments();
         //2.网络获取数据 1.运动睡眠数据 2.GPS
-        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+//        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"},userInfo.getMobile());
         //1.
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null, REQUEST_CODE_UPDATA_USERIFO_INTERNET, this);
         //2.
@@ -83,7 +80,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     private void initFragments() {
         HealthDataFragement healthDataFragement = new HealthDataFragement();
         Bundle bundle = new Bundle();
-        bundle.putString("parentPhone", SessionHolder.user.getMobile());
+        // bundle.putString("parentPhone", SessionHolder.user.getMobile());
+        bundle.putString("parentPhone", userInfo.getMobile());
         healthDataFragement.setArguments(bundle);
         adapter.addFragment(healthDataFragement);
         adapter.notifyDataSetChanged();
@@ -93,8 +91,9 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     private Runnable LoadData = new Runnable() {
         @Override
         public void run() {
-            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
 
+           // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
             //1.
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null, REQUEST_CODE_UPDATA_USERIFO_INTERNET, StatusFragment.this);
             //2.
@@ -246,7 +245,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                             healthDataFragement.setArguments(bundle);
                             HealthDataFragement fragement = adapter.addFragment(healthDataFragement);
                             adapter.notifyDataSetChanged();
-                          //  if (TextUtils.isEmpty(locationdescrible))
+                            //  if (TextUtils.isEmpty(locationdescrible))
                             //    return;
                             fragement.setGPSData(lat, lon, locationdescrible, address);//通过Fragment提供的方法设置数据
                         }
