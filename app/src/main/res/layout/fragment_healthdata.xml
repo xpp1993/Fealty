@@ -41,7 +41,7 @@
         android:layout_below="@id/shouview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
-        <com.lxkj.administrator.fealty.view.PPView
+        <dexin.love.band.view.PPView
             android:id="@+id/pp"
             android:layout_centerHorizontal="true"
             android:layout_width="wrap_content"
@@ -76,7 +76,7 @@
                     android:id="@+id/line"
                     android:layout_width="360dp"
                     android:layout_height="wrap_content">
-                    <com.lxkj.administrator.fealty.view.LineChart03View
+                    <dexin.love.band.view.LineChart03View
                         android:id="@+id/lineChartView_right"
                         android:layout_width="360dp"
                         android:layout_height="145dp" />
@@ -84,7 +84,7 @@
                 </LinearLayout>
             </HorizontalScrollView>
 
-            <com.lxkj.administrator.fealty.view.LineChart03View_left
+            <dexin.love.band.view.LineChart03View_left
                 android:id="@+id/circle_view"
                 android:layout_width="360dp"
                 android:layout_height="145dp"

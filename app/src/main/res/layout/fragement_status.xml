@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.lxkj.administrator.fealty.widget.JazzyViewPager
+    <dexin.love.band.widget.JazzyViewPager
         android:id="@+id/mJazzy"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

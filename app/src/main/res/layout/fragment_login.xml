@@ -116,7 +116,7 @@
         android:layout_alignParentBottom="true"
         android:orientation="vertical">
 
-        <com.lxkj.administrator.fealty.ui.ActionProcessButton
+        <dexin.love.band.ui.ActionProcessButton
             android:id="@+id/tv_login"
             android:layout_width="match_parent"
             android:layout_height="48dp"
