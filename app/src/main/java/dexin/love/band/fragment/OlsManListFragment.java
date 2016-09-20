@@ -56,8 +56,7 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
         bar_back.setVisibility(View.VISIBLE);
         bar_view_left_line.setVisibility(View.VISIBLE);
         bar_biaoti.setVisibility(View.VISIBLE);
-        bar_biaoti.setText("可以绑定的用户");
-
+        bar_biaoti.setText("该用户已入住德信孝心手环app，请点击绑定");
     }
 
     @Override
@@ -134,7 +133,7 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
 
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
-
+        ToastUtils.showToastInUIThread("网络错误");
     }
 
     @Override

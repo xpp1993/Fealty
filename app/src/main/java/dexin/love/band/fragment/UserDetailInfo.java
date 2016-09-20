@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
@@ -25,6 +26,7 @@ import dexin.love.band.manager.ParameterManager;
 import dexin.love.band.manager.SessionHolder;
 import dexin.love.band.utils.AppUtils;
 import dexin.love.band.utils.CommonTools;
+import dexin.love.band.utils.ContextUtils;
 import dexin.love.band.utils.NetWorkAccessTools;
 import dexin.love.band.utils.ToastUtils;
 
@@ -59,7 +61,9 @@ public class UserDetailInfo extends BaseFragment implements View.OnClickListener
         adapter = new UserInfoAdapter(AppUtils.getBaseContext());
         listView.setAdapter(adapter);
         //网络请求数据
-        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+        UserInfo userInfo = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
+        //   Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_BINDED, params, null, REQUEST_CODE_USERINFO_BINDED, this);
     }
 
@@ -67,9 +71,11 @@ public class UserDetailInfo extends BaseFragment implements View.OnClickListener
     protected void initListener() {
         bar_back.setOnClickListener(this);
     }
+
     // 用EventBus 来导航,订阅者
     public void onEventMainThread(Bundle event) {
     }
+
     @Override
     protected void initData() {
 
@@ -84,7 +90,6 @@ public class UserDetailInfo extends BaseFragment implements View.OnClickListener
             default:
                 break;
         }
-
     }
 
     @Override
@@ -123,6 +128,7 @@ public class UserDetailInfo extends BaseFragment implements View.OnClickListener
     public void onRequestFail(int requestCode, int errorNo) {
         ToastUtils.showToastInUIThread("服务器返回错误");
     }
+
     private class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {

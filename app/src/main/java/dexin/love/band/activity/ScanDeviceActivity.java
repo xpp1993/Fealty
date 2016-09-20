@@ -178,7 +178,7 @@ public class ScanDeviceActivity extends Activity implements View.OnClickListener
             mBLEServiceOperate.stopLeScan();
             mScanning = false;
         }
-        ToastUtils.showToastInUIThread(device.getName() + "\n" + device.getAddress());
+     //   ToastUtils.showToastInUIThread(device.getName() + "\n" + device.getAddress());
         finish();
     }
 }

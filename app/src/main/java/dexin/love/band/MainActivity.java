@@ -69,9 +69,10 @@ public class MainActivity extends FragmentActivity {
         baseFragment = new SplashFagment();
         tag = baseFragment.getMTag();
         mFragments.add(tag);
-        fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();
+        //  fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();
+       // fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();
+        fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();
     }
-
     private void setTranslucentStatus(boolean on) {
         Window win = getWindow();
         WindowManager.LayoutParams winParams = win.getAttributes();
@@ -115,7 +116,8 @@ public class MainActivity extends FragmentActivity {
                 mFragments.pollLast();
             }
             Log.d("lanxin", "mFragments.size()" + mFragments.size());
-            fm.popBackStack();
+          //  fm.popBackStack();
+            fm.popBackStackImmediate();
         }
     }
 
@@ -151,7 +153,7 @@ public class MainActivity extends FragmentActivity {
             FragmentTransaction ft = fm.beginTransaction();
             // 3 添加Fragment
             ft.add(R.id.main_container, fragment, tag);
-
+           //ft.replace(R.id.main_container, fragment, tag);
             // 4 添加传过bundle
             if (bundle != null) {
                 fragment.setArguments(bundle);
@@ -164,7 +166,8 @@ public class MainActivity extends FragmentActivity {
             if (currFragment != null) {
                 if (currFragment.finish()) {
                     mFragments.pollLast();
-                    fm.popBackStack();//finish
+                   // fm.popBackStack();//finish
+                   fm.popBackStackImmediate();
                     //由于当前的Fragment，被弹出去，当前的Fragment已经变化角色，需要重新找到并隐藏
                     currFragment = (BaseFragment) getCurrentFragment();
                     if (currFragment != null) {

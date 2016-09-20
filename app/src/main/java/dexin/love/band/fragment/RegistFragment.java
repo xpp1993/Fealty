@@ -147,7 +147,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                     Log.e(TAG, logs);
             }
 
-            ExampleUtil.showToast(logs, AppUtils.getBaseContext().getApplicationContext());
+           // ExampleUtil.showToast(logs, AppUtils.getBaseContext().getApplicationContext());
         }
 
     };
@@ -498,7 +498,7 @@ public class RegistFragment extends BaseFragment implements View.OnClickListener
                         System.out.print("注册成功！！！！！！！！！！！！！！");
                         EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));//跳转到登录页面
                         ToastUtils.showToastInUIThread("请登录!");
-                    } else if (msg.getData().getInt("code") == 2) {
+                    } else  {
                         System.out.print("注册失败！");
                     }
 

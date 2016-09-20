@@ -73,6 +73,8 @@ public class Melucheng_fragment extends BaseFragment {
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
+        if (arguments == null)
+            return;
         double lat = arguments.getDouble("lat");
         double lon = arguments.getDouble("lon");
         curentTime = arguments.getLong("currentTime");
@@ -130,7 +132,7 @@ public class Melucheng_fragment extends BaseFragment {
 
         @Override
         public void run() {
-            cursor = db.query("gps", new String[]{"_id,time,lat,lon"}, "time > " + (Melucheng_fragment.this.curentTime - 1000 * 60*30), null, null, null, null, null);
+            cursor = db.query("gps", new String[]{"_id,time,lat,lon"}, "time > " + (Melucheng_fragment.this.curentTime - 1000 * 60 * 30), null, null, null, null, null);
             //不断移动光标，遍历结果集
             while (cursor.moveToNext()) {
                 //获取，第三列和第四列的值 ，lat  and lon

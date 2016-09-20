@@ -12,6 +12,7 @@ public class NavFragmentEvent {
     public Bundle bundle;
     public NavFragmentEvent(BaseFragment fragment) {
         this.fragment = fragment;
+
     }
 
     public NavFragmentEvent(BaseFragment fragment, Bundle bundle) {

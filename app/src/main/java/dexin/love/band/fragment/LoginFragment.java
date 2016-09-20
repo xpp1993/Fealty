@@ -261,14 +261,13 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                         login_phone_edittext.setText("");
                         loginButton.setProgress(0);
                         tv_login.setClickable(true);
-                        Log.i("mobile", mobile);
                         ContextUtils.saveObj2SP(AppUtils.getBaseContext(), userInfo, "userInfo");
                         UserInfo user = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
                         SessionHolder.initHolder(mobile, user);
                         // editor.putString(ParameterManager.USERINFO, mobile);
                         EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
 
-                        // finish();//2016.9.14.xpp add
+                       finish();//2016.9.14.xpp add
                     } else {
                         Message msg1 = new Message();
                         msg1.what = MESSAGE_WHAT_LOGIN_LOGINFAIL;

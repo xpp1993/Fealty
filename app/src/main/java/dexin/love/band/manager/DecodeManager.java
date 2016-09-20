@@ -19,6 +19,7 @@ import java.util.Map;
 
 import dexin.love.band.bean.RateListData;
 import dexin.love.band.bean.UserInfo;
+import dexin.love.band.utils.ToastUtils;
 
 public final class DecodeManager {
     /**
@@ -365,6 +366,7 @@ public final class DecodeManager {
             data.putInt("code", code);
             data.putString("desc", desc);
             JSONArray old_people_list = jsonObject.optJSONObject("json").optJSONArray("old_people_list");
+
             if (old_people_list != null && old_people_list.length() > 0) {
                 ArrayList<UserInfo> friends = new ArrayList<UserInfo>();
                 for (int i = 0; i < old_people_list.length(); i++) {

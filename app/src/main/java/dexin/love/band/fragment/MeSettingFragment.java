@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +42,7 @@ import de.greenrobot.event.EventBus;
 import de.hdodenhof.circleimageview.CircleImageView;
 import dexin.love.band.R;
 import dexin.love.band.base.BaseFragment;
+import dexin.love.band.bean.UserInfo;
 import dexin.love.band.event.NavFragmentEvent;
 import dexin.love.band.manager.DecodeManager;
 import dexin.love.band.manager.ParameterManager;
@@ -49,6 +51,7 @@ import dexin.love.band.ui.wheel.ScreenInfo;
 import dexin.love.band.ui.wheel.WheelMain;
 import dexin.love.band.utils.AppUtils;
 import dexin.love.band.utils.CommonTools;
+import dexin.love.band.utils.ContextUtils;
 import dexin.love.band.utils.ImageUtil;
 import dexin.love.band.utils.NetWorkAccessTools;
 import dexin.love.band.utils.ToastUtils;
@@ -100,9 +103,11 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
     private TextView fragment_mine_tv_exit;
     @ViewInject(R.id.fragment_mine_rl_about)
     private RelativeLayout see_user;
+    private UserInfo userInfo;
 
     @Override
     protected void init() {
+        userInfo = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
         bar_iv_left.setVisibility(View.VISIBLE);
         bar_view_left_line.setVisibility(View.VISIBLE);
         bar_tv_title_left.setVisibility(View.VISIBLE);
@@ -133,17 +138,25 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
      * 初始化个人资料显示
      */
     private void initPersonalDataShow() {
-        if (TextUtils.isEmpty(SessionHolder.user.getUserpic()) || "".equals(SessionHolder.user.getUserpic())) {
+
+        //   if (TextUtils.isEmpty(SessionHolder.user.getUserpic()) || "".equals(SessionHolder.user.getUserpic())) {
+        if (TextUtils.isEmpty(userInfo.getUserpic()) || "".equals(userInfo.getUserpic())) {
             circleImageView.setImageResource(R.mipmap.unknow_head);
         } else {
-          // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
-      NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+            // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+            //   NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
         }
-        tv_nickName.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
-        tv_phone.setText(SessionHolder.user.getMobile());
-        tv_simle.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置 " : SessionHolder.user.getNickName());
-        birthDayTextView.setText(TextUtils.isEmpty(SessionHolder.user.getBirthday()) ? "未设置" : SessionHolder.user.getBirthday());
-        tv_sex.setText(TextUtils.isEmpty(SessionHolder.user.getGender()) ? "未设置" : TextUtils.equals(SessionHolder.user.getGender(), ParameterManager.USER_SEX_CODE_MAN) ? "男" : "女");
+//        tv_nickName.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
+//        tv_phone.setText(SessionHolder.user.getMobile());
+//        tv_simle.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置 " : SessionHolder.user.getNickName());
+//        birthDayTextView.setText(TextUtils.isEmpty(SessionHolder.user.getBirthday()) ? "未设置" : SessionHolder.user.getBirthday());
+//        tv_sex.setText(TextUtils.isEmpty(SessionHolder.user.getGender()) ? "未设置" : TextUtils.equals(SessionHolder.user.getGender(), ParameterManager.USER_SEX_CODE_MAN) ? "男" : "女");
+        tv_nickName.setText(TextUtils.isEmpty(userInfo.getNickName()) ? "未设置" : userInfo.getNickName());
+        tv_phone.setText(userInfo.getMobile());
+        tv_simle.setText(TextUtils.isEmpty(userInfo.getNickName()) ? "未设置 " : userInfo.getNickName());
+        birthDayTextView.setText(TextUtils.isEmpty(userInfo.getBirthday()) ? "未设置" : userInfo.getBirthday());
+        tv_sex.setText(TextUtils.isEmpty(userInfo.getGender()) ? "未设置" : TextUtils.equals(userInfo.getGender(), ParameterManager.USER_SEX_CODE_MAN) ? "男" : "女");
     }
 
     @Override
@@ -279,7 +292,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                 getActivity().onBackPressed();//返回
                 break;
             case R.id.fragment_mine_tv_exit:
-                getActivity().finish();
+             // getActivity().finish();//推出app
+                EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));
                 break;
             case R.id.fragment_mine_rl_about:
                 //查看绑定的用户信息
@@ -332,7 +346,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                         newBirthDay = split[0] + "-" + split[1] + "-" + split[2];
 
                         if (!TextUtils.equals(newBirthDay, birthDayTextView.getText().toString())) {
-                            birthDayTextView.setText(newBirthDay);
+                           // birthDayTextView.setText(newBirthDay);
                             Map<String, String> parameters = new HashMap<String, String>();
                             parameters.put("birthday", newBirthDay);
                             alterSelfData(parameters);
@@ -357,7 +371,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
             public void onClick(DialogInterface arg0, int arg1) {
                 String newGender = womanRadioButton.isChecked() ? "女生" : "男生";
                 if (!TextUtils.equals(newGender, tv_sex.getText())) {
-                    tv_sex.setText(newGender);
+                   // tv_sex.setText(newGender);
                     Map<String, String> parameters = new HashMap<String, String>();
                     parameters.put("sex", TextUtils.equals(newGender, "女生") ? ParameterManager.USER_SEX_CODE_WOMAN : ParameterManager.USER_SEX_CODE_MAN);
                     alterSelfData(parameters);
@@ -387,8 +401,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                 } else if (newNickName.length() > ParameterManager.nickNameLength) {
                     ToastUtils.showToastInUIThread("昵称长度必须小于" + ParameterManager.nickNameLength + "位");
                 } else if (!TextUtils.equals(newNickName, tv_nickName.getText())) {
-                    tv_nickName.setText(newNickName);
-                    tv_simle.setText(newNickName);
+//                    tv_nickName.setText(newNickName);
+//                    tv_simle.setText(newNickName);
                     Map<String, String> parameters = new HashMap<String, String>();
                     parameters.put("nickName", newNickName);
                     alterSelfData(parameters);
@@ -405,7 +419,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
      */
     private void alterSelfData(Map<String, String> parameters) {
         // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), SessionHolder.user.getUserpic(), SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
-        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), "", "", "", "");
+        // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), "", "", "", "");
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex","xinLvFanWei"}, userInfo.getMobile(), "", "", "", "","");
         params.putAll(parameters);
         try {
 //            if (headImageFile != null && headImageFile.exists()) {
@@ -463,7 +478,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
 
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
-
+        ToastUtils.showToastInUIThread("网络错误！修改不成功");
     }
 
     private class MyHandler extends Handler {
@@ -474,7 +489,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                     if (msg.getData().getInt("code") == 1) {//请求成功
                         ToastUtils.showToastInUIThread("修改成功！");
                         // 请求个人资料
-                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+                        //     Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+                        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
                         // if (TextUtils.isEmpty(SessionHolder.user.getUserpic()))
                         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_USER_BYMOBILE, params, null, MeFragment.REQUEST_USER_BYMIBILE, MeSettingFragment.this);
                     } else {//请求失败
@@ -490,6 +506,13 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                         Log.e("pic", pic);
                         String sex = msg.getData().getString("sex");
                         String birthday = msg.getData().getString("birthday");
+                        Log.e("message", mobile + "," + nickname + "," + pic + "," + sex + "," + birthday);
+                        userInfo.setGender(sex + "");
+                        userInfo.setNickName(nickname);
+                        userInfo.setBirthday(birthday);
+                        userInfo.setUserpic(pic);
+                        ContextUtils.saveObj2SP(AppUtils.getBaseContext(), userInfo, "userInfo");
+                        SessionHolder.initHolder(mobile, userInfo);
                         SessionHolder.user.setMobile(mobile);
                         SessionHolder.user.setNickName(nickname);
                         SessionHolder.user.setUserpic(pic);

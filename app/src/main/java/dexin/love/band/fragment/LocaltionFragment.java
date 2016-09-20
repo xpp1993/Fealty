@@ -65,10 +65,12 @@ public class LocaltionFragment extends BaseFragment {
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
+        if (arguments == null)
+            return;
         double lat = arguments.getDouble("lat");
         double lon = arguments.getDouble("lon");
-        int rate=arguments.getInt("rate");
-        showxinlv.setText(rate+"");//初始化显示心率
+        int rate = arguments.getInt("rate");
+        showxinlv.setText(rate + "");//初始化显示心率
         String desctible = arguments.getString("locationdescrible");
         LatLng latLng = new LatLng(lat, lon);
         Log.e("baidumapData", lat + "::" + lon + desctible);
@@ -192,7 +194,7 @@ public class LocaltionFragment extends BaseFragment {
         mapView.onDestroy();
         if (runnable != null)
             handler.removeCallbacks(runnable);
-        if (mReceiver!= null)
+        if (mReceiver != null)
             getActivity().unregisterReceiver(mReceiver);
     }
 

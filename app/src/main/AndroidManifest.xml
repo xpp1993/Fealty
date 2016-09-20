@@ -153,6 +153,7 @@
         <meta-data
             android:name="JPUSH_APPKEY"
             android:value="66cedd375859567acdd73684" />
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask">
@@ -169,6 +170,7 @@
         <activity
             android:name=".activity.XinlvNorActivity"
             android:theme="@style/activity_popup" />
+        <activity android:name=".activity.ContactsListActivity" />
 
         <service
             android:name="com.yc.peddemo.sdk.BluetoothLeService"

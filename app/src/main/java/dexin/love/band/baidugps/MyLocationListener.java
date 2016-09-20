@@ -4,17 +4,21 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.util.Log;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
+import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.core.SearchResult;
+import com.baidu.mapapi.search.geocode.GeoCodeResult;
+import com.baidu.mapapi.search.geocode.GeoCoder;
+import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeOption;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Map;
 
 import dexin.love.band.manager.DecodeManager;
 import dexin.love.band.utils.AppUtils;
@@ -33,7 +37,7 @@ public class MyLocationListener implements BDLocationListener, NetWorkAccessTool
     private MySqliteHelper helper=new MySqliteHelper(AppUtils.getBaseContext());
     private SQLiteDatabase db=helper.getReadableDatabase();
     public static final int GPS_UPLOAD_CODE = 0x21;
-
+   // GeoCoder geoCoder = GeoCoder.newInstance();
     public MyLocationListener(CallBack mCallBack) {
         this.mCallBack = mCallBack;
     }
@@ -79,6 +83,27 @@ public class MyLocationListener implements BDLocationListener, NetWorkAccessTool
         }
     }
 
+//    /**
+//     * 经纬度或者地址互相转换
+//     */
+//    private void latIngToAddress(LatLng latlng){
+//        //设置反地理经纬度坐标，请求位置时，需要一个经纬度
+//        geoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(latlng));
+//        geoCoder.setOnGetGeoCodeResultListener(new OnGetGeoCoderResultListener() {
+//            //经纬度转换成地址
+//            @Override
+//            public void onGetGeoCodeResult(GeoCodeResult geoCodeResult) {
+//
+//            }
+//            @Override
+//            public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
+//                if (reverseGeoCodeResult == null ||  reverseGeoCodeResult.error != SearchResult.ERRORNO.NO_ERROR) {
+//                    Toast.makeText(AppUtils.getBaseContext(), "找不到该地址!", Toast.LENGTH_SHORT).show();
+//                }
+//
+//            }
+//        });
+//    }
     @Override
     public void onRequestStart(int requestCode) {
 

@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -22,13 +23,19 @@ import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONArray;
+import com.avast.android.dialogs.fragment.ListDialogFragment;
+import com.avast.android.dialogs.iface.IListDialogListener;
 import com.baidu.location.LocationClientOption;
 import com.leaking.slideswitch.SlideSwitch;
 import com.yc.peddemo.sdk.BLEServiceOperate;
@@ -63,6 +70,7 @@ import de.greenrobot.event.EventBus;
 import de.hdodenhof.circleimageview.CircleImageView;
 import dexin.love.band.MainActivity;
 import dexin.love.band.R;
+import dexin.love.band.activity.ContactsListActivity;
 import dexin.love.band.activity.ScanDeviceActivity;
 import dexin.love.band.baidugps.LocationService;
 import dexin.love.band.baidugps.MyLocationListener;
@@ -82,6 +90,7 @@ import dexin.love.band.manager.SessionHolder;
 import dexin.love.band.utils.AppUtils;
 import dexin.love.band.utils.CommonTools;
 import dexin.love.band.utils.ContextUtils;
+import dexin.love.band.utils.FormatCheck;
 import dexin.love.band.utils.MySqliteHelper;
 import dexin.love.band.utils.NetWorkAccessTools;
 import dexin.love.band.utils.ThreadPoolUtils;
@@ -100,7 +109,7 @@ import dexin.love.band.view.DialogViewSporthigh;
  * Created by Administrator on 2016/7/26.
  */
 @ContentView(R.layout.fragement_me)
-public class MeFragment extends BaseFragment implements View.OnClickListener, NetWorkAccessTools.RequestTaskListener, ICallback, TextToSpeech.OnInitListener {
+public class MeFragment extends BaseFragment implements View.OnClickListener, NetWorkAccessTools.RequestTaskListener, IListDialogListener, ICallback, TextToSpeech.OnInitListener {
     @ViewInject(R.id.fragment_me_details)
     private RelativeLayout fragment_me_details;//个人资料
     @ViewInject(R.id.relative_shezhi)
@@ -137,7 +146,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private DataProcessing mDataProcessing;
     private final int UPDATA_REAL_RATE_MSG = 20;//处理心率监测数据
     private final int OFFLINE_RATE_SYNC_OK = 0x123;
-    public static final int REQUEST_CODE_UPLOAD_CONTACTS = 0X20;//上传通讯录
+    public static final int REQUEST_CODE_UPLOAD_CONTACTS = 0X87;//上传通讯录
     public static final int REQUEST_CODE_SPORTDATA_SLEEPDATA = 0x10;//把运动数据睡眠数据上传到服务器
     public static final int REQUEST_CODE_CURRENTRATE = 0x22;//把测试的心率数据上传到服务器
     public static final int REQUEST_CODE_RATE = 0x26;//把测试的心率数据上传到服务器
@@ -180,6 +189,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private NotificationManager notificationManager;//1.获取状态栏通知管理器
     private TextToSpeech tts;
     private UserInfo userInfo;
+
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
@@ -201,7 +211,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 Log.e("xpp", loctiondescrible);
                 if (address != null) {
                     Bundle bundle = new Bundle();
-                    bundle.putString("parentPhone", SessionHolder.user.getMobile());
+                    //   bundle.putString("parentPhone", SessionHolder.user.getMobile());
+                    bundle.putString("parentPhone", userInfo.getMobile());
                     bundle.putDouble("lon", lon);
                     bundle.putDouble("lat", lat);
                     bundle.putString("describle", locationdescrible);
@@ -232,18 +243,24 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
      * 初始化个人资料显示
      */
     private void initPersonalDataShow() {
-      //  if (TextUtils.isEmpty(SessionHolder.user.getUserpic()) || "".equals(SessionHolder.user.getUserpic())) {
+        //  if (TextUtils.isEmpty(SessionHolder.user.getUserpic()) || "".equals(SessionHolder.user.getUserpic())) {
         if (TextUtils.isEmpty(userInfo.getUserpic()) || "".equals(userInfo.getUserpic())) {
             circleImageView.setImageResource(R.mipmap.unknow_head);
         } else {
-           // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
-         //  NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
-            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+            // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+            if (SessionHolder.user == null)
+                //  NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+            else
+                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
         }
-//        me_username.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
-//        me_phone.setText(TextUtils.isEmpty(SessionHolder.user.getMobile()) ? "未设置" : "手机号:" + SessionHolder.user.getMobile());
-        me_username.setText(TextUtils.isEmpty(userInfo.getNickName()) ? "未设置" : userInfo.getNickName());
-        me_phone.setText(TextUtils.isEmpty(userInfo.getMobile()) ? "未设置" : "手机号:" + userInfo.getMobile());
+        if (SessionHolder.user != null) {
+            me_username.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
+            me_phone.setText(TextUtils.isEmpty(SessionHolder.user.getMobile()) ? "未设置" : "手机号:" + SessionHolder.user.getMobile());
+        } else {
+            me_username.setText(TextUtils.isEmpty(userInfo.getNickName()) ? "未设置" : userInfo.getNickName());
+            me_phone.setText(TextUtils.isEmpty(userInfo.getMobile()) ? "未设置" : "手机号:" + userInfo.getMobile());
+        }
     }
 
     private void mRegisterReceiver() {
@@ -361,6 +378,76 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         mBLEServiceOperate.disConnect();
     }
 
+    private void showSetPhoneNumberDialog() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("请输入电话号码");
+        View inflate = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_textview_nickname, null);
+        final EditText editText = (EditText) inflate.findViewById(R.id.dialog_textview_tv);
+        editText.setSingleLine();
+        builder.setView(inflate);
+        builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                String phoneNumber = editText.getText().toString().trim();
+                ArrayList list = new ArrayList();
+                if (TextUtils.isEmpty(phoneNumber)) {
+                    ToastUtils.showToastInUIThread("号码输入不能为空");
+                } else if (!FormatCheck.isMobile(phoneNumber)) {
+                    ToastUtils.showToastInUIThread("手机号码格式错误,重写填写!");
+                } else {
+                    list.add(phoneNumber);
+                    //上传号码
+                    Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list", "mobile"}, uploadPhoneNumber(list), userInfo.getMobile());
+                    NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, MeFragment.this);
+                }
+            }
+        });
+        builder.setNegativeButton("放弃", null);
+        builder.setCancelable(false).create().show();
+    }
+
+    private static final int REQUEST_LIST_SINGLE = 11;
+    private static final int REQUEST_LIST_SIMPLE = 9;
+
+    private void showSetBindDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("请选择");
+        final View inflate = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_radiogroup_bind, null);
+        final RadioButton readRadioButton = (RadioButton) inflate.findViewById(R.id.dialog_radiogroup_read);
+        RadioButton inRadioButton = (RadioButton) inflate.findViewById(R.id.dialog_radiogroup_in);
+        builder.setView(inflate);
+        builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                String newGender = readRadioButton.isChecked() ? "导入通讯录" : "输入手机号码";
+                if (TextUtils.equals(newGender, "输入手机号码")) {
+                    showSetPhoneNumberDialog();
+                } else if (TextUtils.equals(newGender, "导入通讯录")) {
+                    ArrayList<Contacts> contacts = (ArrayList<Contacts>) getContacts(AppUtils.getBaseContext());
+                    String[] contact = new String[contacts.size()];
+                    if (contacts.size() == 0) {
+                        ToastUtils.showToastInUIThread("通讯录导入失败");
+                        return;
+                    }
+                    for (int i = 0; i < contacts.size(); i++) {
+
+                        contact[i] = contacts.get(i).toString();
+                    }
+                    ListDialogFragment.createBuilder(getActivity(), getActivity().getSupportFragmentManager()).setTitle("通讯录列表如下").setItems(contact).setCancelButtonText("取消")
+                            .setConfirmButtonText("确定")
+                            .setRequestCode(REQUEST_LIST_SINGLE)
+                            .setChoiceMode(AbsListView.CHOICE_MODE_SINGLE)
+                            .setTargetFragment(MeFragment.this, REQUEST_LIST_SINGLE)
+                            .show();
+                }
+            }
+        });
+        builder.setNegativeButton("放弃", null);
+        builder.setCancelable(false).create().show();
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -368,12 +455,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 EventBus.getDefault().post(new NavFragmentEvent(new MeSettingFragment()));//跳转到个人信息详情页
                 break;
             case R.id.relative_binded://绑定用户
-                //1.获取手机联系人
-                ArrayList<Contacts> contacts = (ArrayList<Contacts>) getContacts(AppUtils.getBaseContext());
-                //2.上传通讯录,返回通讯录中,注册过  的 用户列表
-                Log.e("telephoe", SessionHolder.user.getMobile());
-                Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list", "mobile"}, uploadContacts(contacts), SessionHolder.user.getMobile());
-                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, MeFragment.this);
+                //弹出对话框1.选择从通讯录里导入号码 2.弹出输入号码对话框
+                showSetBindDialog();
+//                //1.获取手机联系人
+//                ArrayList<Contacts> contacts = (ArrayList<Contacts>) getContacts(AppUtils.getBaseContext());
+//                //2.上传通讯录,返回通讯录中,注册过  的 用户列表
+////                Log.e("telephoe", SessionHolder.user.getMobile());
+//
+//                //  Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list", "mobile"}, uploadContacts(contacts), SessionHolder.user.getMobile());
+//                Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list", "mobile"}, uploadContacts(contacts), userInfo.getMobile());
+//                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, MeFragment.this);
                 break;
             case R.id.relative_location:
                 //跳转到百度地图
@@ -484,7 +575,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
-        // ToastUtils.showToastInUIThread("网络连接错误，请检查重试！");
+        ToastUtils.showToastInUIThread("网络错误");
     }
 
     /**
@@ -507,6 +598,29 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }
     }
 
+    /**
+     * 绑定用户弹出的对话框
+     *
+     * @param value
+     * @param number
+     * @param requestCode
+     */
+    @Override
+    public void onListItemSelected(CharSequence value, int number, int requestCode) {
+        if (requestCode == REQUEST_LIST_SINGLE || requestCode == REQUEST_LIST_SIMPLE) {
+            Log.e("listfragment", value + "");
+            String info = (String) value;
+            String[] namePhone = info.split(":");
+            Log.e("namePhone", namePhone[1]);
+            ArrayList list = new ArrayList();
+            if (namePhone[1] != null) {
+                list.add(namePhone[1]);
+                //上传号码
+                Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list", "mobile"}, uploadPhoneNumber(list), userInfo.getMobile());
+                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, MeFragment.this);
+            }
+        }
+    }
     private class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -519,7 +633,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         String sex = msg.getData().getString("sex");
                         String birthday = msg.getData().getString("birthday");
                         SessionHolder.initHolder(mobile, userInfo);
-                        Log.e("message",mobile+","+nickname+","+userpic+","+sex+","+birthday);
+                        Log.e("message", mobile + "," + nickname + "," + userpic + "," + sex + "," + birthday);
                         SessionHolder.user.setMobile(mobile);
                         SessionHolder.user.setNickName(nickname);
                         SessionHolder.user.setUserpic(userpic);
@@ -557,14 +671,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     Bundle rate_bundle = msg.getData();
                     int rate = rate_bundle.getInt("rate");
                     String rate_time = rate_bundle.getString("time");
-                    xinlvdb.insert("xinlv", null, toContentValues(rate_time, rate, SessionHolder.user.getMobile()));
+                    // xinlvdb.insert("xinlv", null, toContentValues(rate_time, rate, SessionHolder.user.getMobile()));
+                    xinlvdb.insert("xinlv", null, toContentValues(rate_time, rate, userInfo.getMobile()));
                     readSP();
                     if (rate < norMin || rate > norMax) {//心率不正常，app响铃报警
                         rateAbnormalNotify();
                         myHandler.postDelayed(runnable_updataGPS3, 1000 * 60 * ce_int);
                     }
                     //上传到服务器
-                    Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "currentHeart"}, SessionHolder.user.getMobile(), rate_time, rate + "");
+                    // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "currentHeart"}, SessionHolder.user.getMobile(), rate_time, rate + "");
+                    Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "currentHeart"}, userInfo.getMobile(), rate_time, rate + "");
                     NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.INSERT_CURRENTRATE, params, null, REQUEST_CODE_CURRENTRATE, MeFragment.this);
                     break;
                 case OFFLINE_RATE_SYNC_OK://同步心率数据
@@ -592,6 +708,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                             bundle.putSerializable("old_people_list", msg.getData().getSerializable("old_people_list"));
                             EventBus.getDefault().post(new NavFragmentEvent(new OlsManListFragment(), bundle));
                         }
+                    } else if (msg.getData().getInt("code") == 0) {
+                        //   ToastUtils.showToastInUIThread("该用户不是德信手环app用户，不能绑定!");
                     }
                     break;
                 case OFFLINE_STEP_SYNC_OK://同步了离线运动数据，显示,且上传服务器
@@ -673,9 +791,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 break;
         }
         cursor.close();
-        map.put(SessionHolder.user.getMobile(), rateList);
+        // map.put(SessionHolder.user.getMobile(), rateList);
+        map.put(userInfo.getMobile(), rateList);
         object.put("heartRate", jsonArray);
-        object.put("mobile", SessionHolder.user.getMobile());
+        //object.put("mobile", SessionHolder.user.getMobile());
+        object.put("mobile", userInfo.getMobile());
         String jsonString = object.toJSONString();
         if (rateList.size() == 0) {
             return;
@@ -684,8 +804,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         EventBus.getDefault().post(map);
         //  myHandler.postDelayed(d)
         //把心率json数据上传到服务器,上传到服务器之后，清空数据库
-        Log.e("json",jsonString);
-        Map<String, String> params = CommonTools.getParameterMap(new String[]{"heartRate", "mobile"}, jsonString, SessionHolder.user.getMobile());
+        Log.e("json", jsonString);
+        // Map<String, String> params = CommonTools.getParameterMap(new String[]{"heartRate", "mobile"}, jsonString, SessionHolder.user.getMobile());
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"heartRate", "mobile"}, jsonString, userInfo.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_ZHEXIAN, params, null, REQUEST_CODE_RATE, MeFragment.this);
         myHandler.postDelayed(delatesqlite, 1000);//清空数据库
     }
@@ -859,7 +980,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             sportData.setCalories(calories);
             sportData.setSteps(steps);
             sportData.setDistance(distance);
-            sportData.setParentphone(SessionHolder.user.getMobile());
+            // sportData.setParentphone(SessionHolder.user.getMobile());
+            sportData.setParentphone(userInfo.getMobile());
             //把计步监听的结果上传服务器
             updataSportData(steps, calories, distance);
             EventBus.getDefault().post(sportData);
@@ -990,7 +1112,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             int step = stepInfo.getStep();//运动的步数
             int calories = stepInfo.getCalories();//卡路里
             float distance = stepInfo.getDistance();//距离
-            SportData sportData = new SportData(step, calories, distance, SessionHolder.user.getMobile());
+//            SportData sportData = new SportData(step, calories, distance, SessionHolder.user.getMobile());
+            SportData sportData = new SportData(step, calories, distance, userInfo.getMobile());
             //把这些数据上传到服务器
             updataSportData(step, calories, distance);
             //发给首页显示
@@ -1035,7 +1158,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             Log.e("light", light_hour + "");
             int active_count = awakeCount;
             String total_hour_str = df1.format(total_hour);
-            SleepData sleepData = new SleepData(deep_hour, deep_minute, light_hour, light_minute, active_count, total_hour_str, SessionHolder.user.getMobile());
+            // SleepData sleepData = new SleepData(deep_hour, deep_minute, light_hour, light_minute, active_count, total_hour_str, SessionHolder.user.getMobile());
+            SleepData sleepData = new SleepData(deep_hour, deep_minute, light_hour, light_minute, active_count, total_hour_str, userInfo.getMobile());
             //把这些数据上传到服务器
             updataSleepData(deep_hour, light_hour, light_minute, total_hour_str);
             EventBus.getDefault().post(sleepData);//把数据传到首页面
@@ -1185,7 +1309,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private Runnable runnable_updataGPS = new Runnable() {
         @Override
         public void run() {
-            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, SessionHolder.user.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
+            // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, SessionHolder.user.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
+            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, userInfo.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GPS_UPLOAD_URL, params, null, GPS_UPLOAD_CODE, MeFragment.this);
             String sport_gps = preferences.getString(ParameterManager.SHEZHI_SPORT_GPS, "15");
             sport_gpsint = Integer.parseInt(sport_gps);
@@ -1197,7 +1322,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private Runnable runnable_updataGPS2 = new Runnable() {
         @Override
         public void run() {
-            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, SessionHolder.user.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
+            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, userInfo.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
+
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GPS_UPLOAD_URL, params, null, GPS_UPLOAD_CODE, MeFragment.this);
             String sleep_gps = preferences.getString(ParameterManager.SHEZHI_SLEEP_GPS, "2");
             sleep_gpsin = Integer.parseInt(sleep_gps);
@@ -1209,7 +1335,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private Runnable runnable_updataGPS3 = new Runnable() {
         @Override
         public void run() {
-            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, SessionHolder.user.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
+            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, userInfo.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GPS_UPLOAD_URL, params, null, GPS_UPLOAD_CODE, MeFragment.this);
             String ce_gps = preferences.getString(ParameterManager.SHEZHI_JIANCEGPS, "3");
             ce_int = Integer.parseInt(ce_gps);
@@ -1268,6 +1394,26 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             phone = contact.getPhone();
             jsonObject = new com.alibaba.fastjson.JSONObject();
             jsonObject.put("mobile", phone);
+            jsonArray.add(jsonObject);
+        }
+        object.put("contact_list", jsonArray);
+        String jsonString = object.toJSONString();
+        System.out.println(jsonString);
+        return jsonString;
+    }
+
+    /**
+     * 上传要绑定的号码
+     *
+     * @return
+     */
+    private String uploadPhoneNumber(ArrayList list) {
+        com.alibaba.fastjson.JSONObject object = new com.alibaba.fastjson.JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        com.alibaba.fastjson.JSONObject jsonObject = null;
+        for (int i = 0; i < list.size(); i++) {
+            jsonObject = new com.alibaba.fastjson.JSONObject();
+            jsonObject.put("mobile", list.get(i));
             jsonArray.add(jsonObject);
         }
         object.put("contact_list", jsonArray);

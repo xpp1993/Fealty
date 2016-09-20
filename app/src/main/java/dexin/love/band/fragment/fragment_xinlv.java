@@ -3,6 +3,8 @@ package dexin.love.band.fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -10,26 +12,36 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 import dexin.love.band.R;
 import dexin.love.band.activity.DialogActivity;
 import dexin.love.band.base.BaseFragment;
+import dexin.love.band.bean.UserInfo;
+import dexin.love.band.manager.DecodeManager;
 import dexin.love.band.manager.ParameterManager;
 import dexin.love.band.manager.SPManager;
+import dexin.love.band.manager.SessionHolder;
 import dexin.love.band.ui.picker.HeaderAndFooterPicker;
 import dexin.love.band.ui.picker.OptionPicker;
 import dexin.love.band.utils.AppUtils;
+import dexin.love.band.utils.CommonTools;
+import dexin.love.band.utils.ContextUtils;
+import dexin.love.band.utils.NetWorkAccessTools;
+import dexin.love.band.utils.ToastUtils;
 
 /**
  * Created by Administrator on 2016/8/27/0027.
  */
 @ContentView(R.layout.xinlv)
-public class fragment_xinlv extends BaseFragment implements View.OnClickListener {
+public class fragment_xinlv extends BaseFragment implements View.OnClickListener, NetWorkAccessTools.RequestTaskListener {
     @ViewInject(R.id.bar_iv_left)
     private ImageView bar_back;
     @ViewInject(R.id.bar_tv_title_left)
@@ -54,6 +66,8 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
     private TextView fanwei_show;
     @ViewInject(R.id.jaincetime_show)
     private TextView jaincetime_show;
+    public static final int REQUEST_CODE_SELF_DATA_ALTER = 0X310;
+    private MyHandler handler = new MyHandler();
 
     @Override
     protected void init() {
@@ -209,6 +223,10 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
         if (requestCode == ParameterManager.REQURST_CODE_NORMAL) {
             if (resultCode == ParameterManager.REQURST_CODE_NORMAL) {
                 fanwei_show.setText(str);
+                //上传到服务器
+                UserInfo userInfo = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
+                Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex", "xinLvFanWei"}, userInfo.getMobile(), "", "", "", "", str);
+                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_USER_MSG, params, null, REQUEST_CODE_SELF_DATA_ALTER, fragment_xinlv.this);
             }
         } else if (requestCode == ParameterManager.REQURST_CODE_SPORT) {
             if (resultCode == ParameterManager.REQURST_CODE_SPORT) {
@@ -217,6 +235,48 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
         } else if (requestCode == ParameterManager.REQURST_CODE_SLEEP) {
             if (resultCode == ParameterManager.REQURST_CODE_SLEEP) {
                 sleepxinlv_show.setText(str);
+            }
+        }
+    }
+
+
+    @Override
+    public void onRequestStart(int requestCode) {
+
+    }
+
+    @Override
+    public void onRequestLoading(int requestCode, long current, long count) {
+
+    }
+
+    @Override
+    public void onRequestSuccess(JSONObject jsonObject, int requestCode) {
+        switch (requestCode) {
+            case REQUEST_CODE_SELF_DATA_ALTER:
+                try {
+                    DecodeManager.decodeCommon(jsonObject, requestCode, handler);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    ToastUtils.showToastInUIThread("服务器返回结果错误");
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onRequestFail(int requestCode, int errorNo) {
+
+    }
+
+    private class MyHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case REQUEST_CODE_SELF_DATA_ALTER://个人信息修改
+                    if (msg.getData().getInt("code") == 1) //请求成功
+                        ToastUtils.showToastInUIThread("上传成功");
+                    break;
             }
         }
     }
