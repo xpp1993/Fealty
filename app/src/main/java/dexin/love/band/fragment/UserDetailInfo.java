@@ -85,7 +85,8 @@ public class UserDetailInfo extends BaseFragment implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bar_iv_left:
-                getActivity().onBackPressed();
+                //getActivity().onBackPressed();
+                getActivity().getSupportFragmentManager().popBackStack(null,0);
                 break;
             default:
                 break;

@@ -45,7 +45,7 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
         bar_view_left_line.setVisibility(View.VISIBLE);
         bar_biaoti.setVisibility(View.VISIBLE);
         bar_biaoti.setText("消息提醒");
-        EventBus.getDefault().register(this);
+            EventBus.getDefault().register(this);
         //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
         preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
         //2. 获得编辑器:当将数据存储到SharedPrefences对象中时，需要获得编辑器。如果取出则不需要。

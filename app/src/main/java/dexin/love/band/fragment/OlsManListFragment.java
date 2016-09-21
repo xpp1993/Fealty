@@ -18,6 +18,7 @@ import org.xutils.view.annotation.ViewInject;
 import java.util.ArrayList;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
 import dexin.love.band.R;
 import dexin.love.band.adapter.OldmanListviewAdpter;
 import dexin.love.band.base.BaseFragment;
@@ -140,7 +141,8 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bar_iv_left:
-                getActivity().onBackPressed();
+                //  getActivity().onBackPressed();
+                getActivity().getSupportFragmentManager().popBackStack(null, 0);
                 break;
             default:
                 break;

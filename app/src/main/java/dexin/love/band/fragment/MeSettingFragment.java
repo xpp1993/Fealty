@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -292,7 +293,14 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                 getActivity().onBackPressed();//返回
                 break;
             case R.id.fragment_mine_tv_exit:
-             // getActivity().finish();//推出app
+                int num = getActivity().getSupportFragmentManager().getBackStackEntryCount();
+                String numString = "++++++++++++++++++++++++++++++++++Fragment回退栈数量：" + num;
+                Log.d("Fragment", numString);
+                for (int i = 0; i < num; i++) {
+                    FragmentManager.BackStackEntry backstatck = getActivity().getSupportFragmentManager().getBackStackEntryAt(i);
+                    Log.d("Fragment", backstatck.getName());
+                }
+                getActivity().getSupportFragmentManager().popBackStack(null, 1);
                 EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));
                 break;
             case R.id.fragment_mine_rl_about:
@@ -346,7 +354,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                         newBirthDay = split[0] + "-" + split[1] + "-" + split[2];
 
                         if (!TextUtils.equals(newBirthDay, birthDayTextView.getText().toString())) {
-                           // birthDayTextView.setText(newBirthDay);
+                            // birthDayTextView.setText(newBirthDay);
                             Map<String, String> parameters = new HashMap<String, String>();
                             parameters.put("birthday", newBirthDay);
                             alterSelfData(parameters);
@@ -371,7 +379,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
             public void onClick(DialogInterface arg0, int arg1) {
                 String newGender = womanRadioButton.isChecked() ? "女生" : "男生";
                 if (!TextUtils.equals(newGender, tv_sex.getText())) {
-                   // tv_sex.setText(newGender);
+                    // tv_sex.setText(newGender);
                     Map<String, String> parameters = new HashMap<String, String>();
                     parameters.put("sex", TextUtils.equals(newGender, "女生") ? ParameterManager.USER_SEX_CODE_WOMAN : ParameterManager.USER_SEX_CODE_MAN);
                     alterSelfData(parameters);
@@ -420,7 +428,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
     private void alterSelfData(Map<String, String> parameters) {
         // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), SessionHolder.user.getUserpic(), SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
         // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), "", "", "", "");
-        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex","xinLvFanWei"}, userInfo.getMobile(), "", "", "", "","");
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex", "xinLvFanWei"}, userInfo.getMobile(), "", "", "", "", "");
         params.putAll(parameters);
         try {
 //            if (headImageFile != null && headImageFile.exists()) {

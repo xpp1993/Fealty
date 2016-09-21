@@ -48,7 +48,7 @@ public abstract class BaseFragment extends Fragment {
     }
     // 生成tag的规则：fm.findFragmentByTag(tag);
     public String getMTag(){
-        return BaseFragment.class.getName()+fId;
+        return this.getClass().getName() + fId;
     }
     // 返回Fragment的View
     public View getRootView(){

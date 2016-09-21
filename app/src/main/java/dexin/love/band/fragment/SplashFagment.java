@@ -1,8 +1,12 @@
 package dexin.love.band.fragment;
+
 import android.content.SharedPreferences;
+
 import org.xutils.view.annotation.ContentView;
+
 import java.util.Timer;
 import java.util.TimerTask;
+
 import de.greenrobot.event.EventBus;
 import dexin.love.band.R;
 import dexin.love.band.base.BaseFragment;
@@ -10,6 +14,7 @@ import dexin.love.band.event.NavFragmentEvent;
 import dexin.love.band.manager.ParameterManager;
 import dexin.love.band.manager.SPManager;
 import dexin.love.band.utils.AppUtils;
+
 /**
  * Created by Administrator on 2016/7/26.
  */
@@ -18,6 +23,7 @@ public class SplashFagment extends BaseFragment {
     Timer timer;
     private long beforeTime;//程序进入的时刻
     private SharedPreferences sharedPreferences;
+
     @Override
     protected void init() {
         beforeTime = System.currentTimeMillis();
@@ -33,7 +39,7 @@ public class SplashFagment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (beforeTime - sharedPreferences.getLong(ParameterManager.LOGIN_TIME, 0) < 1000 * 60 * 60 * 8 ) {
+        if (beforeTime - sharedPreferences.getLong(ParameterManager.LOGIN_TIME, 0) < 1000 * 60 * 60 * 8) {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -51,6 +57,7 @@ public class SplashFagment extends BaseFragment {
             }, 2000);
         }
     }
+
     @Override
     protected void initListener() {
 
@@ -63,7 +70,7 @@ public class SplashFagment extends BaseFragment {
         // MainActivity mainActivity= (MainActivity) getActivity();
         //   mainActivity.startFragment(loginFragment, null);
         EventBus.getDefault().post(new NavFragmentEvent(loginFragment));
-       finish();//2016-9-20
+        finish();//2016-9-20
     }
 
     @Override

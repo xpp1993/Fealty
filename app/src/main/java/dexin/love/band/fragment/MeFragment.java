@@ -192,7 +192,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     @Override
     protected void init() {
-        EventBus.getDefault().register(this);
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
         bar_view_left_line.setVisibility(View.VISIBLE);
         bar_biaoti.setVisibility(View.VISIBLE);
         bar_biaoti.setText("我");
@@ -367,6 +369,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }
         if (xinlvhelper != null) {
             xinlvhelper.close();
+        }
+        if (xinlvdb.isOpen()) {
+            xinlvdb.close();
         }
         if (tts != null) {
             tts.stop();
@@ -621,6 +626,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             }
         }
     }
+
     private class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -655,7 +661,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     if (message_dialog == true) {
                         dialogView = new DialogViewC(AppUtils.getBaseContext());
                     }
-                    diffNotifyShow(1, getResources().getString(R.string.disconnected), dialogView);
+                    if (isAdded())
+                        diffNotifyShow(1, getResources().getString(R.string.disconnected), dialogView);
                     String lastConnectAddr0 = sp.getString(
                             GlobalVariable.LAST_CONNECT_DEVICE_ADDRESS_SP, "");
                     boolean connectResute0 = mBLEServiceOperate
@@ -691,6 +698,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         Intent intent = new Intent();
                         intent.putExtra("tempRate", rateToday);
                         intent.setAction(HealthDataFragement.RATE_CHANGED);
+                        if (!isAdded())
+                            return;
                         getActivity().sendBroadcast(intent);
                         //判断心率是否异常
                         readSP();
@@ -709,7 +718,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                             EventBus.getDefault().post(new NavFragmentEvent(new OlsManListFragment(), bundle));
                         }
                     } else if (msg.getData().getInt("code") == 0) {
-                        //   ToastUtils.showToastInUIThread("该用户不是德信手环app用户，不能绑定!");
+                        ToastUtils.showToastInUIThread("该用户不是德信手环app用户，不能绑定!");
                     }
                     break;
                 case OFFLINE_STEP_SYNC_OK://同步了离线运动数据，显示,且上传服务器
@@ -774,6 +783,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         Map<String, List<RateListData>> map = new HashMap<>();
         RateListData rateListData = null;
         com.alibaba.fastjson.JSONObject jsonObject = null;
+        if (!xinlvdb.isOpen())
+            return;
         Cursor cursor = xinlvdb.query("xinlv", null, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             jsonObject = new com.alibaba.fastjson.JSONObject();
@@ -830,7 +841,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 params.put("cuffElectricity", battery + "");
                 alterSelfData(params);//发送到服务器
                 //电量异常，发送通知
-                setNotifyDian2(battery, getResources().getString(R.string.betty));
+                if (isAdded())
+                    setNotifyDian2(battery, getResources().getString(R.string.betty));
                 //把号码，设备名，设备地址，连接手环状态，设备电量发送给服务器，服务器判断是否低电量，像APP发送消息（）推送,app接收短信并震动
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 //获取手机电量
@@ -856,7 +868,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             Map<String, String> params = new HashMap<>();
             params.put("mobileElectricity", level + "");
             alterSelfData(params);//上传到服务器
-            setNotifyDian(level, getResources().getString(R.string.phonebetty));//电量异常发送通知
+            if (isAdded())
+                setNotifyDian(level, getResources().getString(R.string.phonebetty));//电量异常发送通知
         }
     }
 
@@ -914,7 +927,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             Intent intent = new Intent();
             intent.putExtra("tempRate", rate);
             intent.setAction(HealthDataFragement.RATE_CHANGED);
-            getActivity().sendBroadcast(intent);
+            if (isAdded())
+                getActivity().sendBroadcast(intent);
             RATE_STATUS = rate;
             Log.e("wyj", "onRateChange =" + RATE_STATUS);
             //把心率测试数据写入数据库
@@ -957,13 +971,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 if (message_dialog == true) {
                     dialogView = new DialogViewSleepLow(AppUtils.getBaseContext());
                 }
-                diffNotifyShow(0, getResources().getString(R.string.sleeplow), dialogView);
+                if (isAdded())
+                    diffNotifyShow(0, getResources().getString(R.string.sleeplow), dialogView);
             } else if (RATE_STATUS > sleepMaxRate) {//睡眠时心率偏高，消息通知
                 DialogViewSleephigh dialogView = null;
                 if (message_dialog == true) {
                     dialogView = new DialogViewSleephigh(AppUtils.getBaseContext());
                 }
-                diffNotifyShow(0, getResources().getString(R.string.sporthight), dialogView);
+                if (isAdded())
+                    diffNotifyShow(0, getResources().getString(R.string.sporthight), dialogView);
             }
         }
     }
@@ -1003,13 +1019,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 if (message_dialog == true) {
                     dialogView = new DialogViewSportLow(AppUtils.getBaseContext());
                 }
-                diffNotifyShow(0, getResources().getString(R.string.sportlow), dialogView);
+                if (isAdded())
+                    diffNotifyShow(0, getResources().getString(R.string.sportlow), dialogView);
             } else if (RATE_STATUS > sportMaxRate) {//运动时心率偏高，消息通知
                 DialogViewSporthigh dialogView = null;
                 if (message_dialog == true) {
                     dialogView = new DialogViewSporthigh(AppUtils.getBaseContext());
                 }
-                diffNotifyShow(0, getResources().getString(R.string.sporthight), dialogView);
+                if (isAdded())
+                    diffNotifyShow(0, getResources().getString(R.string.sporthight), dialogView);
             }
         }
     }
@@ -1022,7 +1040,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         if (message_dialog == true) {
             dialogView = new DialogViewRate(AppUtils.getBaseContext());
         }
-        diffNotifyShow(0, getResources().getString(R.string.xinlvabnormal), dialogView);
+        if (isAdded())
+            diffNotifyShow(0, getResources().getString(R.string.xinlvabnormal), dialogView);
     }
 
     /**

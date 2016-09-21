@@ -68,10 +68,11 @@ public class fragment_xinlv extends BaseFragment implements View.OnClickListener
     private TextView jaincetime_show;
     public static final int REQUEST_CODE_SELF_DATA_ALTER = 0X310;
     private MyHandler handler = new MyHandler();
-
     @Override
     protected void init() {
-        EventBus.getDefault().register(this);
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
         bar_back.setVisibility(View.VISIBLE);
         bar_view_left_line.setVisibility(View.VISIBLE);
         bar_biaoti.setVisibility(View.VISIBLE);

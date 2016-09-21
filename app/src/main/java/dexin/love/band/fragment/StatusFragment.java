@@ -1,17 +1,21 @@
 package dexin.love.band.fragment;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import de.greenrobot.event.EventBus;
 import dexin.love.band.R;
 import dexin.love.band.adapter.HeathMonitoringAdapter;
@@ -49,7 +53,10 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     protected void init() {
         myHandler = new MyHandler();
         userInfo = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
-        EventBus.getDefault().register(this);
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+//        EventBus.getDefault().register(this);
         mJazzy.setTransitionEffect(JazzyViewPager.TransitionEffect.ZoomIn);
         mJazzy.setPageMargin(30);
 
@@ -91,7 +98,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         @Override
         public void run() {
 
-           // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+            // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
             Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
             //1.
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null, REQUEST_CODE_UPDATA_USERIFO_INTERNET, StatusFragment.this);

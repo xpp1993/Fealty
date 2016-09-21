@@ -43,7 +43,9 @@ public class fragment_BaojinMode extends BaseFragment implements View.OnClickLis
 
     @Override
     protected void init() {
-        EventBus.getDefault().register(this);
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
         bar_back.setVisibility(View.VISIBLE);
         bar_view_left_line.setVisibility(View.VISIBLE);
         bar_biaoti.setVisibility(View.VISIBLE);

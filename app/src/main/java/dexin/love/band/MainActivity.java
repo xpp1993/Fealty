@@ -4,21 +4,26 @@ package dexin.love.band;
  * Created by Administrator on 2016/9/19.
  */
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.SystemClock;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.RadioButton;
 
-import org.xutils.view.annotation.ContentView;
 import org.xutils.x;
 
+import com.pgyersdk.update.PgyUpdateManager;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.LinkedList;
@@ -27,13 +32,12 @@ import de.greenrobot.event.EventBus;
 import dexin.love.band.base.BaseFragment;
 import dexin.love.band.event.NavFragmentEvent;
 import dexin.love.band.fragment.SplashFagment;
-import dexin.love.band.utils.ToastUtils;
 
 /**
  * fragment跳转，返回键的控制
  */
-@ContentView(R.layout.activity_main)
-public class MainActivity extends FragmentActivity {
+//@ContentView(R.layout.activity_main)
+public class MainActivity extends AppCompatActivity {
     //声明Fragmentmanager
     private FragmentManager fm;
     //tag 容器，管理Fragment的tag
@@ -45,12 +49,10 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //  setContentView(R.layout.activity_main);
-        // 注入xutils3 的view
-//        //透明状态栏
-//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-//        //透明导航栏
-//         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        setContentView(R.layout.activity_main);
+        EventBus.getDefault().register(this);
+        PgyUpdateManager.register(this);//蒲公英版本更新
+        fm = getSupportFragmentManager();
         //只对api19以上版本有效
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             setTranslucentStatus(true);
@@ -60,19 +62,21 @@ public class MainActivity extends FragmentActivity {
         tintManager.setStatusBarTintEnabled(true);
         tintManager.setStatusBarTintResource(R.color.MainTheme);
         x.view().inject(this);
-        // EventBus 注册
-        fm = getSupportFragmentManager();
-        EventBus.getDefault().register(this);
-        // LoginFragment baseFragment;
-        SplashFagment baseFragment;
-        String tag;
-        baseFragment = new SplashFagment();
-        tag = baseFragment.getMTag();
+        BaseFragment baseFragment = null;
+        String tag = null;
+        if (savedInstanceState == null) {
+            baseFragment = new SplashFagment();
+            tag = baseFragment.getMTag();
+        }
+        if (savedInstanceState != null) {
+            tag = baseFragment.getMTag();
+            baseFragment = (BaseFragment) fm.findFragmentByTag(tag);
+        }
         mFragments.add(tag);
-        //  fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commit();
-       // fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();
+        // fm.beginTransaction().add(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();
         fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();
     }
+
     private void setTranslucentStatus(boolean on) {
         Window win = getWindow();
         WindowManager.LayoutParams winParams = win.getAttributes();
@@ -102,21 +106,38 @@ public class MainActivity extends FragmentActivity {
         return super.onKeyDown(keyCode, event);
     }
 
+    private void showSetBindDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("请选择");
+        final View inflate = LayoutInflater.from(this).inflate(R.layout.dialog_radiogroup_back, null);
+        final RadioButton readRadioButton = (RadioButton) inflate.findViewById(R.id.dialog_radiogroup_finish);
+        RadioButton inRadioButton = (RadioButton) inflate.findViewById(R.id.dialog_radiogroup_backgound);
+        builder.setView(inflate);
+        builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                String newGender = readRadioButton.isChecked() ? "退出应用" : "后台运行程序";
+                if (TextUtils.equals(newGender, "退出应用")) {
+                    MainActivity.this.finish();
+                } else if (TextUtils.equals(newGender, "后台运行程序")) {
+                    moveTaskToBack(false);
+                }
+            }
+        });
+        builder.setNegativeButton("取消", null);
+        builder.setCancelable(false).create().show();
+    }
+
     private void goBack() {
         int count = fm.getBackStackEntryCount();//
         if (count == 1) {
-            if ((SystemClock.uptimeMillis() - lastClickTime) > EXIT_GAP) {
-                ToastUtils.showToastInUIThread("退出将无法监控数据，你真的要退出吗？");
-                lastClickTime = SystemClock.uptimeMillis();
-            } else {
-                MainActivity.this.finish();
-            }
+            showSetBindDialog();
         } else {
             if (mFragments.size() > 0) {
                 mFragments.pollLast();
             }
             Log.d("lanxin", "mFragments.size()" + mFragments.size());
-          //  fm.popBackStack();
+            //  fm.popBackStack();
             fm.popBackStackImmediate();
         }
     }
@@ -124,52 +145,44 @@ public class MainActivity extends FragmentActivity {
     //Fragment控制返回键
     public boolean backCurrentFragment() {
         // 获取当前的Fragment
-        BaseFragment currentFragment = (BaseFragment) getCurrentFragment();
+        BaseFragment currentFragment = (BaseFragment) getCurrentFrament();
         if (currentFragment != null) {
             return currentFragment.onBack();
         }
         return false;
     }
 
-    // 用EventBus 来导航,订阅者
     public void onEventMainThread(NavFragmentEvent event) {
         BaseFragment fragment = event.fragment;
         Bundle bundle = event.bundle;
         startFragment(fragment, bundle);
     }
 
-    // 中转站：控制Fragment之间的跳转
     public void startFragment(BaseFragment fragment, Bundle bundle) {
         if (fragment == null) {
             throw new IllegalArgumentException("fragment is null");
         }
         if (lastClickTime + LAST_CLICK_GAP < SystemClock.uptimeMillis()) {
-            //把tag添加到mFragments
             // 1 获取tag
             String tag = fragment.getMTag();
-
-            //添加传过来的Fragment
             // 2 获取事务
             FragmentTransaction ft = fm.beginTransaction();
-            // 3 添加Fragment
-            ft.add(R.id.main_container, fragment, tag);
-           //ft.replace(R.id.main_container, fragment, tag);
-            // 4 添加传过bundle
+            // 3 控制Fragment 的动画
+//            ft.setCustomAnimations(R.anim.slide_left_enter, 0, 0,R.anim.slide_right_exit);
+            // 4 添加Fragment
+            //   ft.add(R.id.main_container, fragment, tag);
+            ft.replace(R.id.main_container, fragment, tag);
             if (bundle != null) {
                 fragment.setArguments(bundle);
             }
-            //找到当前Fragment
             // 5 隐藏当前或者finish的Fragment
-            BaseFragment currFragment = (BaseFragment) getCurrentFragment();
-            //隐藏当前的Fragment
-            //控制当前Fragment onFinish
+            BaseFragment currFragment = getCurrentFrament();
             if (currFragment != null) {
                 if (currFragment.finish()) {
                     mFragments.pollLast();
-                   // fm.popBackStack();//finish
-                   fm.popBackStackImmediate();
-                    //由于当前的Fragment，被弹出去，当前的Fragment已经变化角色，需要重新找到并隐藏
-                    currFragment = (BaseFragment) getCurrentFragment();
+                    fm.popBackStack();//finish
+//                    //由于当前的Fragment，被弹出去，需要当前的Fragment已经变化角色，需要重新隐藏
+                    currFragment = (BaseFragment) getCurrentFrament();
                     if (currFragment != null) {
                         ft.hide(currFragment);
                     }
@@ -179,27 +192,26 @@ public class MainActivity extends FragmentActivity {
             }
             // 6 把tag 添加到mFragments
             mFragments.add(tag);
-
-            //Fragment添加到返回栈，commit
             // 7 添加到返回栈
             ft.addToBackStack(tag);
             // 8 添加事务
-            //   ft.commit();
+            //  ft.commit();
             ft.commitAllowingStateLoss();
             lastClickTime = SystemClock.uptimeMillis();
         }
-
     }
 
-    //找到当前的fragment
-    public Fragment getCurrentFragment() {
-        return mFragments.size() > 0 ? fm.findFragmentByTag(mFragments.peekLast()) : null;
+    // 怎么获取当前的Fragment
+    public BaseFragment getCurrentFrament() {
+        return mFragments.size() > 0 ? (BaseFragment) fm.findFragmentByTag(mFragments.peekLast()) : null;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        System.exit(0);
+        PgyUpdateManager.unregister();//蒲公英
     }
 }
 

@@ -44,8 +44,6 @@ public class LocaltionFragment extends BaseFragment {
     private TextView showxinlv;
     @ViewInject(R.id.iv_left)
     private ImageView iv_left;
-
-    // private
     @Override
     protected void init() {
         //获取BaiduMap对象
@@ -61,7 +59,6 @@ public class LocaltionFragment extends BaseFragment {
 //        setMapStatus(latLng);//设置中心坐标
         registerRateChangedReceiver();
     }
-
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
@@ -78,25 +75,22 @@ public class LocaltionFragment extends BaseFragment {
         showTextView(desctible, latLng);
         setMapStatus(latLng);//设置中心坐标
     }
-
     @Override
     protected void initListener() {
         iv_left.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().onBackPressed();
+//                getActivity().onBackPressed();
+                getActivity().getSupportFragmentManager().popBackStack(null, 0);
             }
         });
     }
-
     @Override
     protected void initData() {
 
     }
-
     int tempRate = 80;
     private RateReceiver mReceiver;
-
     private void registerRateChangedReceiver() {
         IntentFilter filter = new IntentFilter();
         try {
@@ -110,7 +104,6 @@ public class LocaltionFragment extends BaseFragment {
         filter.addAction(LocaltionFragment.RATE_CHANGED);
         getActivity().registerReceiver(mReceiver, filter);
     }
-
     //接收心率
     private class RateReceiver extends BroadcastReceiver {
         @Override

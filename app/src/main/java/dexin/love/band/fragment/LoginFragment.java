@@ -12,10 +12,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import org.json.JSONException;
 import org.xutils.view.annotation.ContentView;
 
 import org.xutils.view.annotation.ViewInject;
+
 import java.util.Map;
 
 import de.greenrobot.event.EventBus;
@@ -266,8 +268,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                         SessionHolder.initHolder(mobile, user);
                         // editor.putString(ParameterManager.USERINFO, mobile);
                         EventBus.getDefault().post(new NavFragmentEvent(new MainTabsFragemnt()));
-
-                       finish();//2016.9.14.xpp add
+                        finish();//2016.9.14.xpp add
                     } else {
                         Message msg1 = new Message();
                         msg1.what = MESSAGE_WHAT_LOGIN_LOGINFAIL;
@@ -281,7 +282,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
             }
         }
     }
-
     @Override
     public boolean onBack() {
         return false;
