@@ -1,1 +1,1 @@
-include ':app', ':mcar'
+include ':app', ':mcar', ':fastble'
