@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:gravity="center"
+    android:layout_height="wrap_content" >
+
+    <RadioGroup
+        android:id="@+id/dialog_radiogroup_bind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="30dp"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <RadioButton
+            android:id="@+id/dialog_radiogroup_read"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:checked="true"
+            android:text="导入通讯录"
+            android:textColor="#000000" />
+
+        <RadioButton
+            android:id="@+id/dialog_radiogroup_in"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="输入手机号码"
+            android:textColor="#000000" />
+    </RadioGroup>
+
+</LinearLayout>
