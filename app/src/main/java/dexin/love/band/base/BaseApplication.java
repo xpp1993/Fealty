@@ -4,18 +4,11 @@ import android.app.Application;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
-import android.os.Handler;
 import android.os.Vibrator;
-import android.util.Log;
-
-import com.baidu.mapapi.SDKInitializer;
 
 import  org.xutils.x;
 
-import java.util.Set;
-
 import cn.jpush.android.api.JPushInterface;
-import cn.jpush.android.api.TagAliasCallback;
 import dexin.love.band.BuildConfig;
 import dexin.love.band.baidugps.LocationService;
 

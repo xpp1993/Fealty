@@ -11,9 +11,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/fastble" />
-            <option value="$PROJECT_DIR$/mcar" />
-            <option value="$PROJECT_DIR$/uTEPedSdkDemoV70" />
+            <option value="$PROJECT_DIR$/blelib" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

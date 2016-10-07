@@ -13,7 +13,7 @@ android {
     buildToolsVersion "23.0.1"
     defaultConfig {
         applicationId "dexin.love.band"
-        minSdkVersion 15
+        minSdkVersion 18
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -33,6 +33,8 @@ android {
             jniLibs.srcDirs = ['libs']
         }
     }
+    productFlavors {
+    }
 }
 
 dependencies {
@@ -46,14 +48,13 @@ dependencies {
     compile files('libs/afinal_0.5.1_bin.jar')
     compile files('libs/fastjson-1.2.2.jar')
     compile files('libs/nineoldandroids-2.4.0.jar')
-    compile files('libs/ute_sdk_v1.7.0.jar')
     compile 'com.avast:android-styled-dialogs:2.3.3'
     compile 'com.github.dmytrodanylyk.circular-progress-button:library:1.1.3'
     compile files('libs/xcl-charts.jar')
-    compile files('libs/togglebuttonlib.jar')
     compile 'com.leaking.slideswitch:slideswitch:1.0.0'
     compile files('libs/BaiduLBS_Android.jar')
     compile files('libs/jpush-android-2.1.7.jar')
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'
     compile 'com.pgyersdk:sdk:2.4.0'
+    compile project(':blelib')
 }
