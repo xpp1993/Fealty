@@ -85,6 +85,7 @@ import dexin.love.band.utils.MySqliteHelper;
 import dexin.love.band.utils.NetWorkAccessTools;
 import dexin.love.band.utils.ThreadPoolUtils;
 import dexin.love.band.utils.ToastUtils;
+import dexin.love.band.utils.WorkQueue;
 import dexin.love.band.utils.XinLvSqliteHelper;
 import dexin.love.band.view.DialogView;
 import dexin.love.band.view.DialogViewC;
@@ -123,6 +124,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private ProgressDialog progressDialog;
     private final int DISCONNECT_MSG = 18;
     private final int CONNECTED_MSG = 19;
+    private WorkQueue mWorkQueue = WorkQueue.getInstance();
     private SharedPreferences sp;
     private SharedPreferences.Editor editor;
     private final int CONNECTED = 1;
@@ -178,7 +180,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private UserInfo userInfo;
     private LinearLayout layout_device_list;
     private AlertDialog dialog;
-    private boolean COMMANED_SENDED = true;//命令是否发送完成
 
     @Override
     protected void init() {
@@ -755,7 +756,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     }
 
     private void functionRateFinished() {
-        //  mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_STOP);//发送心率测试关闭
+        mWorkQueue.execute(new Runnable() {
+            @Override
+            public void run() {
+                //  mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_STOP);//发送心率测试关闭
+            }
+        });
         //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
         Log.e("wyj", "functionRateFinished");
         com.alibaba.fastjson.JSONObject object = new com.alibaba.fastjson.JSONObject();
@@ -813,7 +819,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             String action = intent.getAction();
             if (action.equals(GlobalValues.BROADCAST_INTENT_COMMAND_RECEIVED)) {
                 Log.d("wyj", "BROADCAST_INTENT_COMMAND_RECEIVED");
-                COMMANED_SENDED = true;
+                mWorkQueue.notifyState(true);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_CURRENTMOTION)) {
                 Bundle bundle = intent.getExtras();
                 Log.d("wyj", "devTime is " + bundle.getString(GlobalValues.NAME_DEVICE_TIME));
@@ -840,10 +846,31 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String state = intent.getExtras().getString(GlobalValues.NAME_CONNECT_STATE);
                 if (TextUtils.equals(state, GlobalValues.VALUE_CONNECT_STATE_YES)) {//成功连接手环
                     dialog.dismiss();
-                    commandSendThread = new CommandSendThread();
-                    commandSendThread.start();
-                    execute(runnableTime);//发送同步手环时间指令
-                    execute(runnableVibration);//发送查找手环指令,手环震动
+                    myHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mWorkQueue.notifyState(true);
+                        }
+                    }, 500);
+
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandManager.sendSynTime(mBleEngine);
+                        }
+                    });//发送同步手环时间指令
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandManager.sendGetElectricity(mBleEngine);
+                        }
+                    });//发送获取电量指令
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandManager.sendVibration(mBleEngine, 6);
+                        }
+                    });//发送手环振动指令
                 } else {
                     progressDialog.dismiss();
                     dialog.dismiss();
@@ -1168,84 +1195,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         parameters.put("deep_hour", deep_hour + "");
         parameters.put("light_minute", light_minute + "");
         alterSelfData(parameters);
-    }
-
-    /**
-     * 同步蓝牙端时间指令
-     */
-    private Runnable runnableTime = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (COMMANED_SENDED) {
-                String name = Thread.currentThread().getName();
-                COMMANED_SENDED = false;
-                CommandManager.sendSynTime(mBleEngine);
-                Log.e("xpp", name);
-            }
-        }
-    };
-    /**
-     * 发送指令,手环振动
-     */
-    private Runnable runnableVibration = new Runnable() {
-        @Override
-        public void run() {
-            //模拟任务执行的过程
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (COMMANED_SENDED) {
-                String name = Thread.currentThread().getName();
-                COMMANED_SENDED = false;
-                CommandManager.sendVibration(mBleEngine, 8);
-                Log.e("xpp", name);
-            }
-        }
-    };
-
-    /**
-     * 发送命令的线程类
-     */
-    private LinkedList queue = new LinkedList();//任务队列
-    private CommandSendThread commandSendThread;//发送命令的工作线程
-
-    private class CommandSendThread extends Thread {//发送命令的线程
-
-        @Override
-        public void run() {
-            Runnable r;
-            while (true) {
-                synchronized (queue) {
-                    while (queue.isEmpty()) {//如果任务队列中没有任务，请等待
-                        try {
-                            queue.wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    r = (Runnable) queue.removeFirst();//有任务时取出任务
-                }
-                try {
-                    r.run();// 执行任务
-                } catch (RuntimeException e) {
-                    // You might want to log something here
-                }
-            }
-        }
-    }
-
-    public void execute(Runnable r) {// 执行任务
-        synchronized (queue) {
-            queue.addLast(r);
-            queue.notifyAll();
-        }
     }
 
     /**
