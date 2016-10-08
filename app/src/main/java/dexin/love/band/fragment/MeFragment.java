@@ -6,9 +6,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -54,8 +51,10 @@ import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -71,6 +70,7 @@ import dexin.love.band.base.BaseFragment;
 import dexin.love.band.base.BaseView;
 import dexin.love.band.bean.Contacts;
 import dexin.love.band.bean.RateListData;
+import dexin.love.band.bean.SportData;
 import dexin.love.band.bean.UserInfo;
 import dexin.love.band.event.NavFragmentEvent;
 import dexin.love.band.manager.DecodeManager;
@@ -178,6 +178,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private UserInfo userInfo;
     private LinearLayout layout_device_list;
     private AlertDialog dialog;
+    private boolean COMMANED_SENDED = true;//命令是否发送完成
 
     @Override
     protected void init() {
@@ -221,15 +222,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         };
         //初始化个人资料显示
         initPersonalDataShow();
-//        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_USER_BYMOBILE, params, null, MeFragment.REQUEST_USER_BYMIBILE, this);
         mBleEngine = new BleEngine(getActivity());
         mBleEngine.initialize();
-//        sp = getActivity().getSharedPreferences(GlobalVariable.SettingSP, 0);
-//        editor = sp.edit();
-//        mySQLOperate = new UTESQLOperate(AppUtils.getBaseContext());
-        //   mBLEServiceOperate = BLEServiceOperate.getInstance(AppUtils.getBaseContext());// 用于BluetoothLeService实例化准备,必须
         mRegisterReceiver();
         xinlvhelper = new XinLvSqliteHelper(AppUtils.getBaseContext());
         xinlvdb = xinlvhelper.getReadableDatabase();
@@ -296,26 +292,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     });
                 }
             }
-
             @Override
             public void close() {
-//                if (bleManager!=null)
-//                bleManager.closeBluetoothGatt();
                 mBleEngine.disconnect();
+               // mBleEngine.close();
             }
         });
-//        jiancebaojing.setSlideListener(new SlideSwitch.SlideListener() {
-//            @Override
-//            public void open() {
-//                //跳转到报警模式设置页面
-//                EventBus.getDefault().post(new NavFragmentEvent(new fragment_BaojinMode()));
-//            }
-//
-//            @Override
-//            public void close() {
-//
-//            }
-//        });
     }
 
     /**
@@ -365,16 +347,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public void onEventMainThread(String event) {
         if (event.equals(getResources().getString(R.string.reflush))) {
             initPersonalDataShow();
-        } else if (event.contains(":")) {
-            Log.e(" deviceAddress", event);
-//            mBluetoothLeService = mBLEServiceOperate.getBleService();
-//            mBluetoothLeService.setICallback(this);
-//            mDataProcessing = DataProcessing.getInstance(AppUtils.getBaseContext());//获得数据库处理类
-//            mDataProcessing.setOnSleepChangeListener(mOnSlepChangeListener);//设置睡眠监听
-//            mDataProcessing.setOnRateListener(mOnRateListener);//心率监听
-//            mDataProcessing.setOnStepChangeListener(mOnStepChangeListener);//计步监听
-//            mWriteCommand = new WriteCommandToBLE(AppUtils.getBaseContext());
-//            mBLEServiceOperate.connect(event);//连接手环
         }
     }
 
@@ -386,16 +358,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         getActivity().unregisterReceiver(mReceiver);
         locService.unregisterListener(mListener); //注销掉监听
         locService.stop(); //停止定位服务
-        if (runnable != null)
-            myHandler.removeCallbacks(runnable);
-        if (runnable1 != null)
-            myHandler.removeCallbacks(runnable1);
-        if (runnable2 != null)
-            myHandler.removeCallbacks(runnable2);
         if (runnable3 != null)
             myHandler.removeCallbacks(runnable3);
-        if (runnable4 != null)
-            myHandler.removeCallbacks(runnable4);
         if (runnable_updataGPS != null)
             myHandler.removeCallbacks(runnable_updataGPS);
         if (runnable_updataGPS2 != null)
@@ -406,8 +370,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.removeCallbacks(runnable6);
         if (runable_startGps != null)
             myHandler.removeCallbacks(runable_startGps);
-        if (runnable_rate != null)
-            myHandler.removeCallbacks(runnable_rate);
         if (helper != null) {
             helper.close();
         }
@@ -427,7 +389,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         if (delatesqlite != null) {
             myHandler.removeCallbacks(delatesqlite);
         }
-        // mBLEServiceOperate.disConnect();
     }
 
     private void showSetPhoneNumberDialog() {
@@ -509,14 +470,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             case R.id.relative_binded://绑定用户
                 //弹出对话框1.选择从通讯录里导入号码 2.弹出输入号码对话框
                 showSetBindDialog();
-//                //1.获取手机联系人
-//                ArrayList<Contacts> contacts = (ArrayList<Contacts>) getContacts(AppUtils.getBaseContext());
-//                //2.上传通讯录,返回通讯录中,注册过  的 用户列表
-////                Log.e("telephoe", SessionHolder.user.getMobile());
-//
-//                //  Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list", "mobile"}, uploadContacts(contacts), SessionHolder.user.getMobile());
-//                Map<String, String> params = CommonTools.getParameterMap(new String[]{"contact_list", "mobile"}, uploadContacts(contacts), userInfo.getMobile());
-//                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_CONTACTS_LIST, params, null, REQUEST_CODE_UPLOAD_CONTACTS, MeFragment.this);
                 break;
             case R.id.relative_location:
                 //跳转到百度地图
@@ -698,29 +651,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     }
                     initPersonalDataShow();
                     break;
-//                case GlobalVariable.SERVER_IS_BUSY_MSG:
-//                    ToastUtils.showToastInUIThread("服务器繁忙");
-//                    break;
-                case DISCONNECT_MSG://报警并尝试连接
-                    CURRENT_STATUS = DISCONNECTED;
-                    readSP();
-                    DialogViewC dialogView = null;
-                    if (message_dialog == true) {
-                        dialogView = new DialogViewC(AppUtils.getBaseContext());
-                    }
-                    if (isAdded())
-                        diffNotifyShow(1, getResources().getString(R.string.disconnected), dialogView);
-//                    String lastConnectAddr0 = sp.getString(
-//                            GlobalVariable.LAST_CONNECT_DEVICE_ADDRESS_SP, "");
-//                    boolean connectResute0 = mBLEServiceOperate
-//                            .connect(lastConnectAddr0);
-//                    Log.i(TAG, "connectResute0=" + connectResute0);
-                    break;
-                case CONNECTED_MSG:
-                    // mBluetoothLeService.setRssiHandler(myHandler);
-                    CURRENT_STATUS = CONNECTED;
-                    ToastUtils.showToastInUIThread("已连接");
-                    break;
                 case UPDATA_REAL_RATE_MSG://处理接收到的心率数据.把心率数据写入数据库
                     Bundle rate_bundle = msg.getData();
                     int rate = rate_bundle.getInt("rate");
@@ -768,12 +698,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         ToastUtils.showToastInUIThread("该用户不是德信手环app用户，不能绑定!");
                     }
                     break;
-                case OFFLINE_STEP_SYNC_OK://同步了离线运动数据，显示,且上传服务器
-                    queryStepInfo();
-                    break;
-                case OFFLINE_SLEEP_SYNC_OK://同步了离线睡眠数据，显示,且上传服务器
-                    querySleepInfo();
-                    break;
+//                case OFFLINE_STEP_SYNC_OK://同步了离线运动数据，显示,且上传服务器
+//                    queryStepInfo();
+//                    break;
+//                case OFFLINE_SLEEP_SYNC_OK://同步了离线睡眠数据，显示,且上传服务器
+//                    querySleepInfo();
+//                    break;
                 case REQUEST_CODE_SPORTDATA_SLEEPDATA:
                     if (msg.getData().getInt("code") == 1) {
                         Log.e("upLoad:", msg.getData().getString("desc"));
@@ -878,16 +808,22 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(GlobalValues.BROADCAST_INTENT_COMMAND_RECEIVED)) {
-                Log.d("wyj","BROADCAST_INTENT_COMMAND_RECEIVED");
+                Log.d("wyj", "BROADCAST_INTENT_COMMAND_RECEIVED");
+                COMMANED_SENDED = true;
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_CURRENTMOTION)) {
                 Bundle bundle = intent.getExtras();
-               Log.d("wyj","devTime is "+bundle.getString(GlobalValues.NAME_DEVICE_TIME));
-               Log.d("wyj","step is "+bundle.getString(GlobalValues.NAME_STEPS));
-               Log.d("wyj","distance is "+bundle.getString(GlobalValues.NAME_DISTANCE));
-               Log.d("wyj","calorie is "+bundle.getString(GlobalValues.NAME_CALORIES));
-               Log.d("wyj","sleep is "+bundle.getString(GlobalValues.NAME_SLEEP));
-
-            }else if (action.equals(GlobalValues.BROADCAST_INTENT_ELECTRICITY)) {
+                Log.d("wyj", "devTime is " + bundle.getString(GlobalValues.NAME_DEVICE_TIME));
+                String steps = bundle.getString(GlobalValues.NAME_STEPS);
+                String distance = new DecimalFormat("0.00").format(bundle.getInt(GlobalValues.NAME_DISTANCE) / 1000.000); // 保留2位小数，带前导零
+                String calories = new DecimalFormat("0.0").format(bundle.getInt(GlobalValues.NAME_CALORIES) / 1000.0);
+                SportData sportData = new SportData(steps, calories, userInfo.getMobile(), distance);
+                //把计步监听的结果上传服务器
+                updataSportData(steps, calories, distance);
+                EventBus.getDefault().post(sportData);
+//            //  myHandler.sendEmptyMessage(UPDATE_STEP_UI_MSG);
+                //判断心率是否偏低偏高
+                judgeStepRate();
+            } else if (action.equals(GlobalValues.BROADCAST_INTENT_ELECTRICITY)) {
                 String value = intent.getExtras().getString(GlobalValues.NAME_ELECTRICITY);
                 ToastUtils.showToastInUIThread("当前手环电量为：" + value);
                 Map<String, String> params = new HashMap<>();
@@ -896,23 +832,26 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 //电量异常，发送通知
                 if (isAdded())
                     setNotifyDian2(Integer.parseInt(value), getResources().getString(R.string.betty));
-//                CommandManager.sendVibration(mBleEngine, 6);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_CONNECT_STATE_CHANGED)) {
                 String state = intent.getExtras().getString(GlobalValues.NAME_CONNECT_STATE);
-                if (TextUtils.equals(state, GlobalValues.VALUE_CONNECT_STATE_YES)) {
+                if (TextUtils.equals(state, GlobalValues.VALUE_CONNECT_STATE_YES)) {//成功连接手环
                     dialog.dismiss();
-                    myHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-//                            CommandManager.sendGetElectricity(mBleEngine);
-                            CommandManager.sendSynTime(mBleEngine);
-//                            CommandManager.sendVibration(mBleEngine, 6);
-                        }
-                    }, 2000);
-
+                    commandSendThread = new CommandSendThread();
+                    commandSendThread.start();
+                    execute(runnableTime);//发送同步手环时间指令
+                    execute(runnableVibration);//发送查找手环指令,手环震动
                 } else {
+                    progressDialog.dismiss();
+                    dialog.dismiss();
                     ToastUtils.showToastInUIThread("与手环失去连接！");
                     bluee_iv_left.setState(false);
+                    readSP();
+                    DialogViewC dialogView = null;
+                    if (message_dialog == true) {
+                        dialogView = new DialogViewC(AppUtils.getBaseContext());
+                    }
+                    if (isAdded())
+                        diffNotifyShow(1, getResources().getString(R.string.disconnected), dialogView);
                 }
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 //获取手机电量
@@ -984,8 +923,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         return pendingIntent;
     }
 
-    private static final int OFFLINE_STEP_SYNC_OK = 5;
-    private static final int OFFLINE_SLEEP_SYNC_OK = 7;
+//    private static final int OFFLINE_STEP_SYNC_OK = 5;
+//    private static final int OFFLINE_SLEEP_SYNC_OK = 7;
     /**
      * 第一个参数，心率值
      * 第二个参数当前心率值得状态 1.测试中 2.测试完成
@@ -1054,28 +993,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }
     }
 
-    /**
-     * 计步监听
-     */
-//    private StepChangeListener mOnStepChangeListener = new StepChangeListener() {
-//        @Override
-//        public void onStepChange(int steps, float distance, int calories) {
-//            Log.d("onStepHandler", "steps =" + steps + ",distance =" + distance
-//                    + ",calories =" + calories);
-//            SportData sportData = new SportData();
-//            sportData.setCalories(calories);
-//            sportData.setSteps(steps);
-//            sportData.setDistance(distance);
-//            // sportData.setParentphone(SessionHolder.user.getMobile());
-//            sportData.setParentphone(userInfo.getMobile());
-//            //把计步监听的结果上传服务器
-//            updataSportData(steps, calories, distance);
-//            EventBus.getDefault().post(sportData);
-//            //  myHandler.sendEmptyMessage(UPDATE_STEP_UI_MSG);
-//            //判断心率是否偏低偏高
-//            judgeStepRate();
-//        }
-//    };
     private void judgeStepRate() {
         readSP();
         if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常，app响铃报警，上传服务器，他人接收到报警
@@ -1190,33 +1107,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         message_yuyin = preferences.getBoolean(ParameterManager.MESSAGE_yuyin, false);
     }
 
-    /**
-     * 返回今天的步数、距离、卡路里的集合
-     */
-    private void queryStepInfo() {
-//        StepInfo stepInfo = mySQLOperate.queryStepInfo(CalendarUtils.getCalendar(0));
-//
-//        if (stepInfo != null) {
-//            int step = stepInfo.getStep();//运动的步数
-//            int calories = stepInfo.getCalories();//卡路里
-//            float distance = stepInfo.getDistance();//距离
-////            SportData sportData = new SportData(step, calories, distance, SessionHolder.user.getMobile());
-//            SportData sportData = new SportData(step, calories, distance, userInfo.getMobile());
-//            //把这些数据上传到服务器
-//            updataSportData(step, calories, distance);
-//            //发给首页显示
-//            EventBus.getDefault().post(sportData);
-//        } else {
-//            Log.e("stepData", stepInfo + "");
-//        }
-    }
-
     //把运动数据上传到服务器
-    private void updataSportData(int step, int calories, float distance) {
+    private void updataSportData(String step, String calories, String distance) {
         Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put("step", step + "");
-        parameters.put("calories", calories + "");
-        parameters.put("distance", distance + "");
+        parameters.put("step", step);
+        parameters.put("calories", calories);
+        parameters.put("distance", distance);
         alterSelfData(parameters);
     }
 
@@ -1271,83 +1167,83 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     }
 
     /**
-     * mBluetoothLeService.setICallback(this)检测返回的数据
-     */
-//    @Override
-//    public void OnResult(boolean result, int status) {
-//        Log.i(TAG, "result=" + result + ",status=" + status);
-//        if (status == ICallbackStatus.CONNECTED_STATUS) {
-//            myHandler.sendEmptyMessage(CONNECTED_MSG);
-//            //发送同步时间指令
-//            // myHandler.postDelayed(runnable, 1000);
-//            myHandler.postDelayed(runnable, 500);
-//        } else if (status == ICallbackStatus.DISCONNECT_STATUS) {
-//            myHandler.sendEmptyMessage(DISCONNECT_MSG);
-//        } else if (status == ICallbackStatus.SYNC_TIME_OK) {// 设置时间操作完成，发送同步睡眠数据数据指令
-//            //  myHandler.postDelayed(runnable2, 1000);
-//            myHandler.postDelayed(runnable2, 500);
-//        } else if (status == ICallbackStatus.OFFLINE_SLEEP_SYNC_OK) {//离线睡眠同步完成,发送同步心率数据指令
-//            //把睡眠数据发给健康监测页，且上传到服务器
-//            myHandler.sendEmptyMessage(OFFLINE_SLEEP_SYNC_OK);
-//            // myHandler.postDelayed(runnable_rate, 1000);//同步心率数据
-//            myHandler.postDelayed(runnable_rate, 500);//同步心率数据
-//        } else if (status == ICallbackStatus.OFFLINE_RATE_SYNC_OK) {//如果同步心率完成，发送同步运动数据指令
-//            // myHandler.postDelayed(runnable1, 1000);
-//            myHandler.postDelayed(runnable1, 500);
-//            myHandler.sendEmptyMessage(OFFLINE_RATE_SYNC_OK);
-//        } else if (status == ICallbackStatus.OFFLINE_STEP_SYNC_OK) {//离线运动同步完成，发送请求电量指令,开始测试心率指令
-//            myHandler.sendEmptyMessage(OFFLINE_STEP_SYNC_OK);//把离线同步的运动数据发送给首页
-//            myHandler.postDelayed(runnable4, 1000 * 60);//请求手环电量
-//            myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);//发送心率测试开始
-//            // myHandler.postDelayed(runnable5, 1000);//把数据上传到服务器
-//        } else if (status == ICallbackStatus.GET_BLE_BATTERY_OK) {
-//        }
-//    }
-
-    /**
      * 同步蓝牙端时间指令
      */
-    private Runnable runnable = new Runnable() {
+    private Runnable runnableTime = new Runnable() {
         @Override
         public void run() {
-//            if (mBluetoothLeService != null) {
-//                mWriteCommand.syncBLETime();
-//            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (COMMANED_SENDED) {
+                String name = Thread.currentThread().getName();
+                COMMANED_SENDED = false;
+                CommandManager.sendSynTime(mBleEngine);
+                Log.e("xpp", name);
+            }
         }
     };
     /**
-     * 同步计步数据指令
+     * 发送指令,手环振动
      */
-    private Runnable runnable1 = new Runnable() {
+    private Runnable runnableVibration = new Runnable() {
         @Override
         public void run() {
-//            if (mBluetoothLeService != null) {
-//                mWriteCommand.syncAllStepData();
-//            }
+            //模拟任务执行的过程
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (COMMANED_SENDED) {
+                String name = Thread.currentThread().getName();
+                COMMANED_SENDED = false;
+                CommandManager.sendVibration(mBleEngine, 8);
+                Log.e("xpp", name);
+            }
         }
     };
+
     /**
-     * 同步睡眠数据指令
+     * 发送命令的线程类
      */
-    private Runnable runnable2 = new Runnable() {
+    private LinkedList queue = new LinkedList();//任务队列
+    private CommandSendThread commandSendThread;//发送命令的工作线程
+
+    private class CommandSendThread extends Thread {//发送命令的线程
+
         @Override
         public void run() {
-//            if (mBluetoothLeService != null) {
-//                mWriteCommand.syncAllSleepData();
-//            }
+            Runnable r;
+            while (true) {
+                synchronized (queue) {
+                    while (queue.isEmpty()) {//如果任务队列中没有任务，请等待
+                        try {
+                            queue.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    r = (Runnable) queue.removeFirst();//有任务时取出任务
+                }
+                try {
+                    r.run();// 执行任务
+                } catch (RuntimeException e) {
+                    // You might want to log something here
+                }
+            }
         }
-    };
-    /**
-     * 同步心率数据指令
-     */
-    private Runnable runnable_rate = new Runnable() {
-        @Override
-        public void run() {
-//            if (mBluetoothLeService != null) {
-//                mWriteCommand.syncAllRateData();
-//            }
+    }
+
+    public void execute(Runnable r) {// 执行任务
+        synchronized (queue) {
+            queue.addLast(r);
+            queue.notifyAll();
         }
-    };
+    }
+
     /**
      * 发送心率测试开启
      */
@@ -1379,19 +1275,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             Log.e("xinlv_id", xinlv_id + "");
         }
     };
-    /**
-     * 请求获取电量指令
-     */
-    private Runnable runnable4 = new Runnable() {
-        @Override
-        public void run() {
-//            if (mBluetoothLeService != null) {
-//                mBluetoothLeService.readRssi();
-//                mWriteCommand.sendToReadBLEBattery();
-//            }
-            myHandler.postDelayed(this, 1000 * 60);
-        }
-    };
+
     int sport_gpsint = 15;
     //运动时每15分钟上传一次GPS
     private Runnable runnable_updataGPS = new Runnable() {
@@ -1468,27 +1352,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             locService.start();
         }
     };
-
-    /**
-     * 上传通讯录
-     */
-    private String uploadContacts(ArrayList<Contacts> contacts) {
-        com.alibaba.fastjson.JSONObject object = new com.alibaba.fastjson.JSONObject();
-        JSONArray jsonArray = new JSONArray();
-        com.alibaba.fastjson.JSONObject jsonObject = null;
-        Log.e("Tag", contacts.size() + "");
-        for (int i = 0; i < contacts.size(); i++) {
-            Contacts contact = contacts.get(i);
-            phone = contact.getPhone();
-            jsonObject = new com.alibaba.fastjson.JSONObject();
-            jsonObject.put("mobile", phone);
-            jsonArray.add(jsonObject);
-        }
-        object.put("contact_list", jsonArray);
-        String jsonString = object.toJSONString();
-        System.out.println(jsonString);
-        return jsonString;
-    }
 
     /**
      * 上传要绑定的号码

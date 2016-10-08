@@ -6,18 +6,49 @@ import java.io.Serializable;
  * Created by Administrator on 2016/8/12.
  */
 public class SportData implements Serializable {
-    private int steps;
-    private int calories;
-    private float distance;
+    private String steps;
+    private String calories;
+    private String distance;
     private String Parentphone;//用电话号码给运动数据做标识
 
-    public SportData(int steps, int calories, float distance) {
+
+    public SportData() {
+    }
+
+    public SportData(String steps, String calories, String distance) {
         this.steps = steps;
         this.calories = calories;
         this.distance = distance;
     }
 
-    public void setDistance(float distance) {
+    public SportData(String steps, String calories, String parentphone, String distance) {
+        this.steps = steps;
+        this.calories = calories;
+        Parentphone = parentphone;
+        this.distance = distance;
+    }
+
+    public String getCalories() {
+        return calories;
+    }
+
+    public void setCalories(String calories) {
+        this.calories = calories;
+    }
+
+    public String getSteps() {
+        return steps;
+    }
+
+    public void setSteps(String steps) {
+        this.steps = steps;
+    }
+
+    public String getDistance() {
+        return distance;
+    }
+
+    public void setDistance(String distance) {
         this.distance = distance;
     }
 
@@ -29,47 +60,12 @@ public class SportData implements Serializable {
         Parentphone = parentphone;
     }
 
-    public SportData(int steps, int calories, float distance, String parentphone) {
-
-        this.steps = steps;
-        this.calories = calories;
-        this.distance = distance;
-        Parentphone = parentphone;
-    }
-
-    public SportData() {
-    }
-
-    public int getSteps() {
-        return steps;
-    }
-
-    public void setSteps(int steps) {
-        this.steps = steps;
-    }
-
-    public int getCalories() {
-        return calories;
-    }
-
-    public void setCalories(int calories) {
-        this.calories = calories;
-    }
-
-    public float getDistance() {
-        return distance;
-    }
-
-    public void setDistance(int distance) {
-        this.distance = distance;
-    }
-
     @Override
     public String toString() {
         return "SportData{" +
-                "steps=" + steps +
-                ", calories=" + calories +
-                ", distance=" + distance +
+                "steps='" + steps + '\'' +
+                ", calories='" + calories + '\'' +
+                ", distance='" + distance + '\'' +
                 ", Parentphone='" + Parentphone + '\'' +
                 '}';
     }

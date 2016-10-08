@@ -32,13 +32,13 @@ public class BroadcastManager {
      * 发送当前运动信息广播
      */
 
-    public static void sendBroadcast4CURRENTMOTION(Context context, String intentAction, String devTime, String steps, String distance, String calories, String sleep) {
+    public static void sendBroadcast4CURRENTMOTION(Context context, String intentAction, String devTime, String steps, int distance, int calories, int sleep) {
         Bundle bundle = new Bundle();
         bundle.putString(GlobalValues.NAME_DEVICE_TIME, devTime);
         bundle.putString(GlobalValues.NAME_STEPS, steps);
-        bundle.putString(GlobalValues.NAME_DISTANCE, distance);
-        bundle.putString(GlobalValues.NAME_CALORIES, calories);
-        bundle.putString(GlobalValues.NAME_SLEEP, sleep);
+        bundle.putInt(GlobalValues.NAME_DISTANCE, distance);
+        bundle.putInt(GlobalValues.NAME_CALORIES, calories);
+        bundle.putInt(GlobalValues.NAME_SLEEP, sleep);
         sendBroadcast(context, intentAction, bundle);
     }
 
