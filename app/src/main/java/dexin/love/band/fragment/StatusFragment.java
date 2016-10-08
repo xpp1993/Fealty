@@ -1,21 +1,16 @@
 package dexin.love.band.fragment;
-
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
-
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import de.greenrobot.event.EventBus;
 import dexin.love.band.R;
 import dexin.love.band.adapter.HeathMonitoringAdapter;
@@ -48,7 +43,6 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     private MyHandler myHandler;
     // private HealthDataFragement healthDataFragement;
     private UserInfo userInfo;
-
     @Override
     protected void init() {
         myHandler = new MyHandler();

@@ -292,10 +292,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     });
                 }
             }
+
             @Override
             public void close() {
-                mBleEngine.disconnect();
-               // mBleEngine.close();
+                // mBleEngine.disconnect();
+                mBleEngine.close();
             }
         });
     }
@@ -315,7 +316,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             TextView txt_item_name = (TextView) itemView.findViewById(R.id.txt_item_name);
 
             final BluetoothDevice device = devices.get(i);
-            txt_item_name.setText(device.getName());
+            if (device.getName() != null && device.getName().length() > 0)
+                txt_item_name.setText(device.getName());
+//            else
+//                txt_item_name.setText("未知设备");
             layout_item_device.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

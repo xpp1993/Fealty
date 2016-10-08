@@ -175,11 +175,10 @@
         <activity
             android:name=".activity.XinlvNorActivity"
             android:theme="@style/activity_popup" />
-        <activity android:name=".activity.ContactsListActivity" />
 
-        <service
-            android:name="com.yc.peddemo.sdk.BluetoothLeService"
-            android:enabled="true" />
+        <!--<service-->
+            <!--android:name="com.yc.peddemo.sdk.BluetoothLeService"-->
+            <!--android:enabled="true" />-->
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
