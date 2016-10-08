@@ -1,12 +1,8 @@
 package com.example.xpp.blelib;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class CommandManager {
     private static final String TAG = CommandManager.class.getSimpleName();
