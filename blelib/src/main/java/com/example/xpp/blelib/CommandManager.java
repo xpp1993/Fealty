@@ -23,12 +23,12 @@ public class CommandManager {
             String calo = dataString.substring(32, 34) + dataString.substring(30, 32) + dataString.substring(28, 30) + dataString.substring(26, 28);
             String sleep = dataString.substring(38, 40) + dataString.substring(36, 38) + dataString.substring(34, 36);
             BroadcastManager.sendBroadcast4CURRENTMOTION(
-                    context,GlobalValues.BROADCAST_INTENT_CURRENTMOTION,
-                    String.valueOf(Integer.parseInt(datetime,16)),
-                    String.valueOf(Integer.parseInt(steps,16)),
-                    String.valueOf(Integer.parseInt(distance,16)),
-                    String.valueOf(Integer.parseInt(calo,16)),
-                    String.valueOf(Integer.parseInt(sleep,16)));
+                    context, GlobalValues.BROADCAST_INTENT_CURRENTMOTION,
+                    String.valueOf(Integer.parseInt(datetime, 16)),
+                    String.valueOf(Integer.parseInt(steps, 16)),
+                    Integer.parseInt(distance, 16),
+                    Integer.parseInt(calo, 16),
+                    Integer.parseInt(sleep, 16));
         }
     }
 
@@ -58,6 +58,7 @@ public class CommandManager {
 
     /**
      * 发送指令给手环，获取手环电量
+     *
      * @param bleEngine
      */
     public static void sendGetElectricity(BleEngine bleEngine) {
@@ -66,8 +67,9 @@ public class CommandManager {
 
     /**
      * 发送指令给手环，手环开始振动
+     *
      * @param bleEngine
-     * @param count 振动次数
+     * @param count     振动次数
      */
     public static void sendVibration(BleEngine bleEngine, int count) {
         send(bleEngine, Utils.hexStringToBytes(GlobalValues.BLE_COMMAND_TYPE_CODE_VIBRATION +

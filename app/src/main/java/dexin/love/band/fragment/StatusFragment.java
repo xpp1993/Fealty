@@ -148,9 +148,12 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
      */
     public void onEventMainThread(SportData sportData) {
         String phoneNumber = sportData.getParentphone();
-        String distance = new DecimalFormat("0.00").format(sportData.getDistance()); // 保留2位小数，带前导零
-        String steps = String.valueOf(sportData.getSteps());
-        String calories = String.valueOf(sportData.getCalories());
+        // String distance = new DecimalFormat("0.00").format(sportData.getDistance()); // 保留2位小数，带前导零
+        String distance = sportData.getDistance();
+//        String steps = String.valueOf(sportData.getSteps());
+//        String calories = String.valueOf(sportData.getCalories());
+        String steps = sportData.getSteps();
+        String calories = sportData.getCalories();
         Log.e("eventsport", phoneNumber + "\n" + distance + "\n" + calories + "\n" + steps);
         for (HealthDataFragement healthDataFragement : fragments) {
             if (healthDataFragement.getArguments().getString("parentPhone").equals(phoneNumber)) {
