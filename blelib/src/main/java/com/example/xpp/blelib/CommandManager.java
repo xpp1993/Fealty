@@ -2,10 +2,12 @@ package com.example.xpp.blelib;
 
 import android.content.Context;
 import android.util.Log;
-
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 public class CommandManager {
     private static final String TAG = CommandManager.class.getSimpleName();
+    static int lightSleepTime = 0;//浅睡时间
+    static int deepSleepTime = 0;//深度睡眠时间
 
     public static void decode(Context context, byte[] data) {
         String dataString = Utils.bytesToHexString(data);
@@ -25,9 +27,43 @@ public class CommandManager {
                     Integer.parseInt(distance, 16),
                     Integer.parseInt(calo, 16),
                     Integer.parseInt(sleep, 16));
+        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEP)) {//返回睡眠质量数据
+            for (int i = 10; i <= 40; i += 2) {
+                //将十六进制字符转化为二进制字符
+                String BinaryString = Utils.toFullBinaryString(Integer.parseInt(dataString.substring(i, i + 2), 16));
+                int sleepData = Integer.parseInt(BinaryString.substring(0, 2), 2);//睡眠质量数据
+                // 睡眠质量数据如果为 0 表明没有记录或没有睡眠，有记录时的取值范围为（ 1-3）。 3 为最好的睡眠质量， 1 为最差的睡眠质
+                if (sleepData == 0)
+                    return;
+                if (sleepData == 1) {
+                    //浅睡状态
+                    lightSleepTime += sleepData;
+                } else if (sleepData == 3) {
+                    //深度睡眠状态
+                    deepSleepTime += sleepData;
+                }
+            }
+            String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
+            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
+            Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000L;
+            String timeStr = sdf.format(new Date(time));
+            Log.e(TAG, sdf.format(new Date(time)));
+            if (timeStr.equals("11:45:00")) {//发送广播通知前段显示数据
+                BroadcastManager.sendBroadcast4SleepQuality(context, GlobalValues.BROADCAST_INTENT_SLEEPQ, lightSleepTime, deepSleepTime);
+            }
+        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEPNO)) {
+            Log.e(TAG, "没有睡眠数据！");
+        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTART)) {//心率测试回复数据
+            String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
+            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
+            Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000L;
+            String timeStr = sdf.format(new Date(time));//当前手环时间
+            int rate = Integer.valueOf(dataString.substring(10, 12),16);//当前心率值
+            int status = Integer.valueOf(dataString.substring(12, 14),16);//当前状态，0x00:不是睡眠状态，0x01,当前睡眠状态最差，0x03:当前睡眠状态最好
+            //发送广播给前端
+            BroadcastManager.sendBroadcast4RateData(context, GlobalValues.BROADCAST_INTENT_RATE, timeStr, rate, status);
         }
     }
-
     private static synchronized void send(final BleEngine bleEngine, final byte[] data) {
         Log.e(TAG, "sendCommand -> " + Utils.bytesToHexString(data));
         bleEngine.writeCharacteristic(data);
@@ -70,5 +106,33 @@ public class CommandManager {
     public static void sendVibration(BleEngine bleEngine, int count) {
         send(bleEngine, Utils.hexStringToBytes(GlobalValues.BLE_COMMAND_TYPE_CODE_VIBRATION +
                 Utils.bytesToHexString(new byte[]{Byte.parseByte(Integer.toHexString(count), 16)})));
+    }
+
+    /**
+     * 发送指令给手环，获取某天睡眠质量数据
+     *
+     * @param bleEngine
+     * @param count
+     */
+    public static void sendSynSleep(BleEngine bleEngine, int count) {
+        send(bleEngine, Utils.hexStringToBytes(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEP +
+                Utils.bytesToHexString(new byte[]{Byte.parseByte(Integer.toHexString(count), 16)})));
+    }
+
+    /**
+     * 发送指令给手环，心率测试开始
+     *
+     * @param bleEngine
+     * @param testTime
+     */
+    public static void sendStartRate(BleEngine bleEngine, String testTime) {
+        send(bleEngine, Utils.hexStringToBytes(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTART +testTime));
+    }
+    /**
+     * 发送指令给手环，心率测试停止
+     * @param bleEngine
+     */
+    public static void sendStopRate(BleEngine bleEngine) {
+        send(bleEngine, Utils.hexStringToBytes(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTOP));
     }
 }

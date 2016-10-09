@@ -26,6 +26,16 @@ public class GlobalValues {
      * 指令送达
      */
     public static final String BROADCAST_INTENT_COMMAND_RECEIVED = "BROADCAST_INTENT_COMMAND_RECEIVED";
+    /**
+     * 广播类型
+     * 睡眠质量数据
+     */
+    public static final String BROADCAST_INTENT_SLEEPQ = "BROADCAST_INTENT_SLEEPQ";
+    /**
+     * 广播类型
+     * 心率测试数据
+     */
+    public static final String BROADCAST_INTENT_RATE = "BROADCAST_INTENT_RATE";
     //********************************广播类型********************************
 
 
@@ -36,59 +46,114 @@ public class GlobalValues {
 
 
     //********************************名称类型********************************
-    /** 名称类型
+    /**
+     * 名称类型
      * 连接状态
      */
     public static final String NAME_CONNECT_STATE = "NAME_CONNECT_STATE";
 
-    /** 名称类型
+    /**
+     * 名称类型
      * 当前运动信息
      */
     public static final String NAME_DEVICE_TIME = "NAME_DEVICE_TIME";
 
-    /** 名称类型
+    /**
+     * 名称类型
      * 当前睡眠时间信息
      */
     public static final String NAME_SLEEP = "NAME_SLEEP";
 
-    /** 名称类型
+    /**
+     * 名称类型
      * 当前步数信息
      */
     public static final String NAME_STEPS = "NAME_STEPS";
 
-    /** 名称类型
+    /**
+     * 名称类型
      * 当前运动距离信息
      */
     public static final String NAME_DISTANCE = "NAME_DISTANCE";
 
-    /** 名称类型
+    /**
+     * 名称类型
      * 当前消耗卡路里信息
      */
     public static final String NAME_CALORIES = "NAME_CALORIES";
-    /** 名称类型
+    /**
+     * 名称类型
      * 电量
      */
     public static final String NAME_ELECTRICITY = "NAME_ELECTRICITY";
+    /**
+     * 名称类型
+     * 浅度睡眠时间
+     */
+    public static final String NAME_LIGHTSLEEP = "NAME_LIGHTSLEEP";
+    /**
+     * 名称类型
+     * 深度睡眠时间
+     */
+    public static final String NAME_DEEPSLEEP = "NAME_DEEPSLEEP";
+    /**
+     * 名称类型
+     * 心率测试当前时间
+     */
+    public static final String NAME_RATETIME = "NAME_RATETIME";
+    /**
+     * 名称类型
+     * 测试心率值
+     */
+    public static final String NAME_RATE = "NAME_RATE";
+    /**
+     * 名称类型
+     * 心率测试的状态，是否是睡眠状态，运动状态
+     */
+    public static final String NAME_RATE_STATUS = "NAME_RATE_STATUS";
     //********************************名称类型********************************
 
 
-
     //********************************蓝牙指令********************************
-    /** 蓝牙指令
+    /**
+     * 蓝牙指令
      * 电量指令
      */
     public static final String BLE_COMMAND_TYPE_CODE_ELECTRICITY = "0b";
-    /** 蓝牙指令
+    /**
+     * 蓝牙指令
      * 时间指令
      */
     public static final String BLE_COMMAND_TYPE_CODE_TIME = "01";
-    /**蓝牙指令
+    /**
+     * 蓝牙指令
      * 当前运动信息
      */
     public static final String BLE_COMMAND_TYPE_CODE_CURRENTMOTION = "03";
-    /**蓝牙指令
+    /**
+     * 蓝牙指令
      * 振动
      */
     public static final String BLE_COMMAND_TYPE_CODE_VIBRATION = "04";
+    /**
+     * 蓝牙指令
+     * 同步睡眠信息
+     */
+    public static final String BLE_COMMAND_TYPE_CODE_SYNSLEEP = "11";
+    /**
+     * 蓝牙指令
+     * 发送心率测试开始指令
+     */
+    public static final String BLE_COMMAND_TYPE_CODE_RATESTART = "14";
+    /**
+     * 蓝牙指令
+     * 发送心率测试停止指令
+     */
+    public static final String BLE_COMMAND_TYPE_CODE_RATESTOP = "15";
+    /**
+     * 蓝牙指令
+     * 同步睡眠信息回复无数据
+     */
+    public static final String BLE_COMMAND_TYPE_CODE_SYNSLEEPNO = "90";
     //********************************蓝牙指令********************************
 }

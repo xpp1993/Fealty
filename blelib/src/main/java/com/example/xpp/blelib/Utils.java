@@ -39,4 +39,14 @@ public class Utils {
     private static byte charToByte(char c) {
         return (byte) "0123456789ABCDEF".indexOf(c);
     }
+    /**
+     * 将Integer类型的数据转化为二进制的字符串
+     */
+    public static String toFullBinaryString(int num) {
+        char[] chs = new char[Integer.SIZE];
+        for (int i = 0; i < Integer.SIZE; i++) {
+            chs[Integer.SIZE - 1 - i] = (char) (((num >> i) & 1) + '0');
+        }
+        return new String(chs);
+    }
 }

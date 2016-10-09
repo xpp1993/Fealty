@@ -52,9 +52,10 @@ import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -70,6 +71,7 @@ import dexin.love.band.base.BaseFragment;
 import dexin.love.band.base.BaseView;
 import dexin.love.band.bean.Contacts;
 import dexin.love.band.bean.RateListData;
+import dexin.love.band.bean.SleepData;
 import dexin.love.band.bean.SportData;
 import dexin.love.band.bean.UserInfo;
 import dexin.love.band.event.NavFragmentEvent;
@@ -122,19 +124,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public static final int REQUEST_USER_BYMIBILE = 0x01;
     private Handler myHandler = new MyHandler();
     private ProgressDialog progressDialog;
-    private final int DISCONNECT_MSG = 18;
-    private final int CONNECTED_MSG = 19;
     private WorkQueue mWorkQueue = WorkQueue.getInstance();
-    private SharedPreferences sp;
-    private SharedPreferences.Editor editor;
-    private final int CONNECTED = 1;
-    private final int DISCONNECTED = 3;
-    private int CURRENT_STATUS = DISCONNECTED;
     private int RATE_STATUS = 95;
-    private String TAG = "xpp";
     private BleEngine mBleEngine;
     private final int UPDATA_REAL_RATE_MSG = 20;//处理心率监测数据
-    private final int OFFLINE_RATE_SYNC_OK = 0x123;
     public static final int REQUEST_CODE_UPLOAD_CONTACTS = 0X87;//上传通讯录
     public static final int REQUEST_CODE_SPORTDATA_SLEEPDATA = 0x10;//把运动数据睡眠数据上传到服务器
     public static final int REQUEST_CODE_CURRENTRATE = 0x22;//把测试的心率数据上传到服务器
@@ -180,6 +173,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private UserInfo userInfo;
     private LinearLayout layout_device_list;
     private AlertDialog dialog;
+    private SleepData sleepData;
 
     @Override
     protected void init() {
@@ -233,6 +227,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         mVibrator = ((BaseApplication) AppUtils.getBaseContext()).mVibrator;
         notificationManager = ((BaseApplication) AppUtils.getBaseContext()).notificationManager;
         tts = new TextToSpeech(AppUtils.getBaseContext(), this);
+        sleepData = new SleepData();
     }
 
     /**
@@ -267,6 +262,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         mFilter.addAction(GlobalValues.BROADCAST_INTENT_CURRENTMOTION);
         mFilter.addAction(GlobalValues.BROADCAST_INTENT_COMMAND_RECEIVED);
         mFilter.addAction(Intent.ACTION_BATTERY_CHANGED);//获取手机电量
+        mFilter.addAction(GlobalValues.BROADCAST_INTENT_SLEEPQ);//获取睡眠质量数据
+        mFilter.addAction(GlobalValues.BROADCAST_INTENT_RATE);//获取心率测试值
         //  mFilter.addAction(GlobalVariable.READ_BLE_VERSION_ACTION);
         getActivity().registerReceiver(mReceiver, mFilter);
     }
@@ -296,8 +293,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
             @Override
             public void close() {
-                // mBleEngine.disconnect();
-                mBleEngine.close();
+                if (mBleEngine != null)
+                    // mBleEngine.disconnect();
+                    mBleEngine.close();
             }
         });
     }
@@ -359,7 +357,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-        // mBLEServiceOperate.unBindService();// unBindService
         getActivity().unregisterReceiver(mReceiver);
         locService.unregisterListener(mListener); //注销掉监听
         locService.stop(); //停止定位服务
@@ -377,9 +374,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.removeCallbacks(runable_startGps);
         if (helper != null) {
             helper.close();
-        }
-        if (warn_runnable != null) {
-            myHandler.removeCallbacks(warn_runnable);
         }
         if (xinlvhelper != null) {
             xinlvhelper.close();
@@ -405,7 +399,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         editText.setSingleLine();
         builder.setView(inflate);
         builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
-
             @Override
             public void onClick(DialogInterface arg0, int arg1) {
                 String phoneNumber = editText.getText().toString().trim();
@@ -585,7 +578,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
-        ToastUtils.showToastInUIThread("网络错误");
+        //  ToastUtils.showToastInUIThread("网络错误");
     }
 
     /**
@@ -659,38 +652,24 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 case UPDATA_REAL_RATE_MSG://处理接收到的心率数据.把心率数据写入数据库
                     Bundle rate_bundle = msg.getData();
                     int rate = rate_bundle.getInt("rate");
+                    int status = rate_bundle.getInt("status");
                     String rate_time = rate_bundle.getString("time");
-                    // xinlvdb.insert("xinlv", null, toContentValues(rate_time, rate, SessionHolder.user.getMobile()));
                     xinlvdb.insert("xinlv", null, toContentValues(rate_time, rate, userInfo.getMobile()));
                     readSP();
                     if (rate < norMin || rate > norMax) {//心率不正常，app响铃报警
                         rateAbnormalNotify();
                         myHandler.postDelayed(runnable_updataGPS3, 1000 * 60 * ce_int);
+                    } else {
+                        if (status == ParameterManager.CURRENT_STATUES) {//如果为运动状态
+                            judgeStepRate();
+                        } else {//如果为睡眠状态
+                            judgeSleepRate();
+                        }
                     }
                     //上传到服务器
                     // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "currentHeart"}, SessionHolder.user.getMobile(), rate_time, rate + "");
                     Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "currentHeart"}, userInfo.getMobile(), rate_time, rate + "");
                     NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.INSERT_CURRENTRATE, params, null, REQUEST_CODE_CURRENTRATE, MeFragment.this);
-                    break;
-                case OFFLINE_RATE_SYNC_OK://同步心率数据
-                    // RateOneDayInfo rateOneDayInfo = mySQLOperate.queryRateOneDayMainInfo(CalendarUtils.getCalendar(0));
-                    //  if (rateOneDayInfo != null) {
-                    //  int rateToday = rateOneDayInfo.getCurrentRate();//获得今天最后一次测得的心率值
-                    //发给界面显示
-                    Intent intent = new Intent();
-                    //  intent.putExtra("tempRate", rateToday);
-                    intent.setAction(HealthDataFragement.RATE_CHANGED);
-                    if (!isAdded())
-                        return;
-                    getActivity().sendBroadcast(intent);
-                    //判断心率是否异常
-                    readSP();
-                    if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常，app响铃报警，他人接收到报警
-                        myHandler.postDelayed(warn_runnable, 1000);
-                        //心率不正常，实时实时上传GPS信息。然后每隔三分钟上传一次。
-                        myHandler.postDelayed(runnable_updataGPS3, 1000 * 60 * ce_int);
-                    }
-                    // }
                     break;
                 case REQUEST_CODE_UPLOAD_CONTACTS://处理上传手机通讯录返回的数据
                     if (msg.getData().getInt("code") == 1) {//请求成功
@@ -737,13 +716,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }
     }
 
-    private Runnable warn_runnable = new Runnable() {
-        @Override
-        public void run() {
-            rateAbnormalNotify();
-        }
-    };
-
     // 将数据封装为ContentValues,心率数据局放入数据库
     public ContentValues toContentValues(String time, int rate, String phone) {
         // 底部类似于Map
@@ -755,11 +727,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         return values;
     }
 
+    /**
+     * 发送命令，心率停止测试
+     */
     private void functionRateFinished() {
         mWorkQueue.execute(new Runnable() {
             @Override
             public void run() {
                 //  mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_STOP);//发送心率测试关闭
+                CommandManager.sendStopRate(mBleEngine);
             }
         });
         //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
@@ -827,12 +803,21 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String distance = new DecimalFormat("0.00").format(bundle.getInt(GlobalValues.NAME_DISTANCE) / 1000.000); // 保留2位小数，带前导零
                 String calories = new DecimalFormat("0.0").format(bundle.getInt(GlobalValues.NAME_CALORIES) / 1000.0);
                 SportData sportData = new SportData(steps, calories, userInfo.getMobile(), distance);
+                Log.d("wyj", "sleepTime is " + bundle.getInt(GlobalValues.NAME_SLEEP));
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm:ss");
+                String sleepTotal = simpleDateFormat.format(new Date(bundle.getInt(GlobalValues.NAME_SLEEP) * 1000L));
+                sleepData.setTotal_hour_str(sleepTotal);//睡眠总时间
                 //把计步监听的结果上传服务器
                 updataSportData(steps, calories, distance);
                 EventBus.getDefault().post(sportData);
-//            //  myHandler.sendEmptyMessage(UPDATE_STEP_UI_MSG);
-                //判断心率是否偏低偏高
-                judgeStepRate();
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendSynSleep(mBleEngine, 1);
+                    }
+                });//发送获取当天睡眠质量数据，0表示当天数据，1表示昨天数据，2表示前天数据
+                //发送心率测试开始
+                mWorkQueue.execute(runnable3);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_ELECTRICITY)) {
                 String value = intent.getExtras().getString(GlobalValues.NAME_ELECTRICITY);
                 ToastUtils.showToastInUIThread("当前手环电量为：" + value);
@@ -862,12 +847,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     mWorkQueue.execute(new Runnable() {
                         @Override
                         public void run() {
-                            CommandManager.sendGetElectricity(mBleEngine);
-                        }
-                    });//发送获取电量指令
-                    mWorkQueue.execute(new Runnable() {
-                        @Override
-                        public void run() {
                             CommandManager.sendVibration(mBleEngine, 6);
                         }
                     });//发送手环振动指令
@@ -887,7 +866,67 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 //获取手机电量
                 getMobileLevel(intent);
+            } else if (action.equals(GlobalValues.BROADCAST_INTENT_SLEEPQ)) {//获取睡眠质量数据
+                Bundle bundle = intent.getExtras();
+                int deepSleep = bundle.getInt(GlobalValues.NAME_DEEPSLEEP);
+                int deep_hour = deepSleep / 60;
+                int deep_minute = deepSleep % 60;
+                int lightSleep = bundle.getInt(GlobalValues.NAME_LIGHTSLEEP);
+                int light_hour = lightSleep / 60;
+                int light_minute = lightSleep % 60;
+                sleepData.setDeep_hour(deep_hour);
+                sleepData.setDeep_minute(deep_minute);
+                sleepData.setLight_hour(light_hour);
+                sleepData.setLight_minute(light_minute);
+                sleepData.setParentPhone(userInfo.getMobile());
+                Log.e("xpp", deepSleep + "," + lightSleep);
+                //把这些数据上传到服务器
+                updataSleepData(deep_hour, deep_minute, light_hour, light_minute, sleepData.getTotal_hour_str());
+                EventBus.getDefault().post(sleepData);//把数据传到首页面
+            } else if (action.equals(GlobalValues.BROADCAST_INTENT_RATE)) {//心率数据
+                Bundle bundle = intent.getExtras();
+                String rateTime = bundle.getString(GlobalValues.NAME_RATETIME);//该次心率测试的时间
+                int rate = bundle.getInt(GlobalValues.NAME_RATE);
+                int status = bundle.getInt(GlobalValues.NAME_RATE_STATUS);
+                if (rate == 0)
+                    return;
+                //将心率数据发给首页
+                Intent intent_health = new Intent();
+                intent_health.putExtra("tempRate", rate);
+                intent_health.setAction(HealthDataFragement.RATE_CHANGED);
+                if (isAdded())
+                    getActivity().sendBroadcast(intent_health);
+                //把心率测试数据写入数据库
+                Bundle rate_bundle = new Bundle();
+                rate_bundle.putString("time", rateTime);
+                rate_bundle.putInt("rate", rate);
+                rate_bundle.putInt("status", status);
+                Message message = Message.obtain();
+                message.what = UPDATA_REAL_RATE_MSG;
+                message.setData(rate_bundle);
+                myHandler.sendMessage(message);
             }
+        }
+    };
+    /**
+     * 发送心率测试开启
+     */
+    int rate_int;
+    private Runnable runnable3 = new Runnable() {
+        @Override
+        public void run() {
+            // mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_START);
+            CommandManager.sendStartRate(mBleEngine, "FFFFFFFF");
+            Log.e("wyj", "start to rate");
+            myHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    functionRateFinished();
+                }
+            }, 1000 * 30);
+            String rate_ji = preferences.getString(ParameterManager.SHEZHI_JIANCEXINLV, "3");
+            rate_int = Integer.parseInt(rate_ji);
+            myHandler.postDelayed(this, 1000 * 60 * rate_int);
         }
     };
 
@@ -954,98 +993,46 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         return pendingIntent;
     }
 
-//    private static final int OFFLINE_STEP_SYNC_OK = 5;
-//    private static final int OFFLINE_SLEEP_SYNC_OK = 7;
-    /**
-     * 第一个参数，心率值
-     * 第二个参数当前心率值得状态 1.测试中 2.测试完成
-     * 使用时，需要提前调用 mDataProcessing.setOnRateListener(mOnRateListener);
-     */
-//    private RateChangeListener mOnRateListener = new RateChangeListener() {
-//        @Override
-//        public void onRateChange(int rate, int status) {
-//            Intent intent = new Intent();
-//            intent.putExtra("tempRate", rate);
-//            intent.setAction(HealthDataFragement.RATE_CHANGED);
-//            if (isAdded())
-//                getActivity().sendBroadcast(intent);
-//            RATE_STATUS = rate;
-//            Log.e("wyj", "onRateChange =" + RATE_STATUS);
-//            //把心率测试数据写入数据库
-//            //获取系统当前时间
-//            java.sql.Timestamp time = new java.sql.Timestamp(new java.util.Date().getTime());
-//            int hour = time.getHours();//时
-//            int minute = time.getMinutes();//分
-//            int second = time.getSeconds();//秒
-//            String rate_time = hour + ":" + minute + ":" + second;//测到此刻心率的时间
-//            Bundle rate_bundle = new Bundle();
-//            rate_bundle.putString("time", rate_time);
-//            rate_bundle.putInt("rate", rate);
-//            Message message = Message.obtain();
-//            message.what = UPDATA_REAL_RATE_MSG;
-//            message.setData(rate_bundle);
-//            myHandler.sendMessage(message);
-//        }
-//    };
-//    /**
-//     * 睡眠监听
-//     */
-//    private SleepChangeListener mOnSlepChangeListener = new SleepChangeListener() {
-//        @Override
-//        public void onSleepChange() {
-//            judgeSleepRate();
-//        }
-//    };
-
     /**
      * 判断睡眠时的心率是否异常，通知提醒
      */
     private void judgeSleepRate() {
-        readSP();
-        if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常，app响铃报警，他人接收到报警
-        } else {
-            //表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
-            myHandler.postDelayed(runnable_updataGPS2, 1000 * 60 * 60 * sleep_gpsin);
-            if (RATE_STATUS < sleepMinRate) {//睡眠时心率偏低，消息通知
-                DialogViewSleepLow dialogView = null;
-                if (message_dialog == true) {
-                    dialogView = new DialogViewSleepLow(AppUtils.getBaseContext());
-                }
-                if (isAdded())
-                    diffNotifyShow(0, getResources().getString(R.string.sleeplow), dialogView);
-            } else if (RATE_STATUS > sleepMaxRate) {//睡眠时心率偏高，消息通知
-                DialogViewSleephigh dialogView = null;
-                if (message_dialog == true) {
-                    dialogView = new DialogViewSleephigh(AppUtils.getBaseContext());
-                }
-                if (isAdded())
-                    diffNotifyShow(0, getResources().getString(R.string.sporthight), dialogView);
+        //表示睡眠状态，在老人睡觉时每隔两小时上传一次手机坐标
+        myHandler.postDelayed(runnable_updataGPS2, 1000 * 60 * 60 * sleep_gpsin);
+        if (RATE_STATUS < sleepMinRate) {//睡眠时心率偏低，消息通知
+            DialogViewSleepLow dialogView = null;
+            if (message_dialog == true) {
+                dialogView = new DialogViewSleepLow(AppUtils.getBaseContext());
             }
+            if (isAdded())
+                diffNotifyShow(0, getResources().getString(R.string.sleeplow), dialogView);
+        } else if (RATE_STATUS > sleepMaxRate) {//睡眠时心率偏高，消息通知
+            DialogViewSleephigh dialogView = null;
+            if (message_dialog == true) {
+                dialogView = new DialogViewSleephigh(AppUtils.getBaseContext());
+            }
+            if (isAdded())
+                diffNotifyShow(0, getResources().getString(R.string.sporthight), dialogView);
         }
     }
 
     private void judgeStepRate() {
-        readSP();
-        if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常，app响铃报警，上传服务器，他人接收到报警
-            //  rateAbnormalNotify();
-        } else {
-            //运动时每隔15分钟上传一次GPS
-            myHandler.postDelayed(runnable_updataGPS, 1000 * 60 * sport_gpsint);
-            if (RATE_STATUS < sportMinRate) {//运动时心率偏低，消息通知
-                DialogViewSportLow dialogView = null;
-                if (message_dialog == true) {
-                    dialogView = new DialogViewSportLow(AppUtils.getBaseContext());
-                }
-                if (isAdded())
-                    diffNotifyShow(0, getResources().getString(R.string.sportlow), dialogView);
-            } else if (RATE_STATUS > sportMaxRate) {//运动时心率偏高，消息通知
-                DialogViewSporthigh dialogView = null;
-                if (message_dialog == true) {
-                    dialogView = new DialogViewSporthigh(AppUtils.getBaseContext());
-                }
-                if (isAdded())
-                    diffNotifyShow(0, getResources().getString(R.string.sporthight), dialogView);
+        //运动时每隔15分钟上传一次GPS
+        myHandler.postDelayed(runnable_updataGPS, 1000 * 60 * sport_gpsint);
+        if (RATE_STATUS < sportMinRate) {//运动时心率偏低，消息通知
+            DialogViewSportLow dialogView = null;
+            if (message_dialog == true) {
+                dialogView = new DialogViewSportLow(AppUtils.getBaseContext());
             }
+            if (isAdded())
+                diffNotifyShow(0, getResources().getString(R.string.sportlow), dialogView);
+        } else if (RATE_STATUS > sportMaxRate) {//运动时心率偏高，消息通知
+            DialogViewSporthigh dialogView = null;
+            if (message_dialog == true) {
+                dialogView = new DialogViewSporthigh(AppUtils.getBaseContext());
+            }
+            if (isAdded())
+                diffNotifyShow(0, getResources().getString(R.string.sporthight), dialogView);
         }
     }
 
@@ -1147,77 +1134,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         alterSelfData(parameters);
     }
 
-    /**
-     * 获取今天睡眠详细，并更新睡眠UI CalendarUtils.getCalendar(0)代表今天，也可写成"2016811"
-     * CalendarUtils.getCalendar(-1)代表昨天，也可写成"2016810"
-     * CalendarUtils.getCalendar(-2)代表前天，也可写成"201689" 以此类推
-     */
-    private void querySleepInfo() {
-//        SleepTimeInfo sleepTimeInfo = mySQLOperate.querySleepInfo(
-//                CalendarUtils.getCalendar(-1), CalendarUtils.getCalendar(0));
-//        int deepTime, lightTime, awakeCount, sleepTotalTime;
-//        if (sleepTimeInfo != null) {
-//            deepTime = sleepTimeInfo.getDeepTime();
-//            lightTime = sleepTimeInfo.getLightTime();
-//            awakeCount = sleepTimeInfo.getAwakeCount();
-//            sleepTotalTime = sleepTimeInfo.getSleepTotalTime();
-//            double total_hour = ((float) sleepTotalTime / 60f);
-//            DecimalFormat df1 = new DecimalFormat("0.0"); // 保留1位小数，带前导零
-//            int deep_hour = deepTime / 60;
-//            Log.e("deep", deep_hour + "");
-//            // int deep_minute = (deepTime - deep_hour * 60);
-//            int deep_minute = deepTime % 60;
-//            int light_hour = lightTime / 60;
-//            // int light_minute = (lightTime - light_hour * 60);
-//            int light_minute = lightTime % 60;
-//            Log.e("light", light_hour + "");
-//            int active_count = awakeCount;
-//            String total_hour_str = df1.format(total_hour);
-//            // SleepData sleepData = new SleepData(deep_hour, deep_minute, light_hour, light_minute, active_count, total_hour_str, SessionHolder.user.getMobile());
-//            SleepData sleepData = new SleepData(deep_hour, deep_minute, light_hour, light_minute, active_count, total_hour_str, userInfo.getMobile());
-//            //把这些数据上传到服务器
-//            updataSleepData(deep_hour, light_hour, light_minute, total_hour_str);
-//            EventBus.getDefault().post(sleepData);//把数据传到首页面
-//            if (total_hour_str.equals("0.0")) {
-//                total_hour_str = "0";
-//            }
-//        } else {
-//            Log.d("getSleepInfo", "sleepTimeInfo =" + sleepTimeInfo);
-//        }
-    }
-
     //把睡眠数据上传到服务器
-    private void updataSleepData(int deep_hour, int light_hour, int light_minute, String total_hour_str) {
+    private void updataSleepData(int deep_hour, int deep_minute, int light_hour, int light_minute, String total_hour_str) {
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put("total_hour_str", total_hour_str);
         parameters.put("light_hour", light_hour + "");
         parameters.put("light_minute", light_minute + "");
         parameters.put("deep_hour", deep_hour + "");
-        parameters.put("light_minute", light_minute + "");
+        parameters.put("deep_minute", deep_minute + "");
         alterSelfData(parameters);
     }
 
-    /**
-     * 发送心率测试开启
-     */
-    int rate_int;
-    private Runnable runnable3 = new Runnable() {
-        @Override
-        public void run() {
-            // mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_START);
-            Log.e("wyj", "start to rate");
-            myHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    functionRateFinished();
-                }
-            }, 1000 * 30);
-            String rate_ji = preferences.getString(ParameterManager.SHEZHI_JIANCEXINLV, "3");
-            rate_int = Integer.parseInt(rate_ji);
-            myHandler.postDelayed(this, 1000 * 60 * rate_int);
-
-        }
-    };
     /**
      * 删除数据库内容
      */
@@ -1256,7 +1183,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }
     };
     int ce_int = 3;
-    //心率异常时，没三分钟上传一次GPS
+    /**
+     * 心率异常时，没三分钟上传一次GPS
+     */
     private Runnable runnable_updataGPS3 = new Runnable() {
         @Override
         public void run() {

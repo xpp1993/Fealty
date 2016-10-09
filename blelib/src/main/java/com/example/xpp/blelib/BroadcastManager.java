@@ -49,4 +49,23 @@ public class BroadcastManager {
     public static void sendBroadcast4CommandReceived(Context context, String intentAction) {
         sendBroadcast(context, intentAction, null);
     }
+    /**
+     * 发送睡眠质量数据广播
+     */
+    public static void sendBroadcast4SleepQuality(Context context, String intentAction, int lightSleep, int deepSleep) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(GlobalValues.NAME_DEEPSLEEP, deepSleep);
+        bundle.putInt(GlobalValues.NAME_LIGHTSLEEP, lightSleep);
+        sendBroadcast(context, intentAction, bundle);
+    }
+    /**
+     * 发送心率测试数据广播
+     */
+    public static void sendBroadcast4RateData(Context context, String intentAction, String testTime, int rate,int status) {
+        Bundle bundle = new Bundle();
+        bundle.putString(GlobalValues.NAME_RATETIME,testTime);
+        bundle.putInt(GlobalValues.NAME_RATE,rate);
+        bundle.putInt(GlobalValues.NAME_RATE_STATUS,status);
+        sendBroadcast(context, intentAction, bundle);
+    }
 }

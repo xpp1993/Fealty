@@ -2,10 +2,7 @@ package dexin.love.band.manager;
 
 public class ParameterManager {
     public static int nickNameLength = 8;
-    //    public static int messageQueryLength = 10;//一次请求的message个数
-//    public static final int MAX_PHOTO_NUM = 8; // 可以选择的图片数量上限
-//    public static final int MAX_BODY_TEXT_NUM = 80;//限制的最大字数
-//    public static final String RECEIVER_FILTER = "com.iv-tech.youyi.receiver";//监听器标杆
+    public static final int CURRENT_STATUES = 0; // 当前状态不是睡眠状态，当前状态为运动状态
     public static final String SHEZHI_SLEEP_GPS = "sleep_gps"; //sp文件中存储睡眠定位时间间隔的key
     public static final String SHEZHI_SPORT_GPS = "sport_gps"; //sp文件中存储运动定位时间间隔的key
     public static final String SHEZHI_JIANCEGPS = "jiance_gps"; //sp文件中存储间测定位时间间隔的key
@@ -33,7 +30,7 @@ public class ParameterManager {
     public static final String SESSION_CACHE_SP_NAME = "dexin_session_cache";//sp文件名称
     public static final int TOTAL_ROCK_TIME = 60;//计时器总时长
     public static final String DEVICE_ADDRESS = "diveceAddress";//设备地址存储在sp文件中的key
-//        public static final String GET_CHECK_CODE = "http://192.168.8.133:8080/cuffapi/user/get_check_code?phone=";
+    //        public static final String GET_CHECK_CODE = "http://192.168.8.133:8080/cuffapi/user/get_check_code?phone=";
 //    public static final String SIGN_IN_SUBMIT = "http://192.168.8.133:8080/cuffapi/user/sign_in_submit";
 //    public static final String RESET_PASSWORD = "http://192.168.8.133:8080/cuffapi/user/password_submit";
 //    public static final String SIGN_UP_COMMIT = "http://192.168.8.133:8080/cuffapi/user/sign_up_submint";
