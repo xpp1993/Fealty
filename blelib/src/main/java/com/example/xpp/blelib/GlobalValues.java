@@ -42,6 +42,14 @@ public class GlobalValues {
     //********************************值类型********************************
     public static final String VALUE_CONNECT_STATE_YES = "VALUE_CONNECT_STATE_YES";
     public static final String VALUE_CONNECT_STATE_NO = "VALUE_CONNECT_STATE_NO";
+    /**
+     * 01为手环处于充电状态
+     */
+    public static final String VALUE_ISELECTRICITE_YES = "01";
+    /**
+     * 00为手环处于未充电状态
+     */
+    public static final String VALUE_ISELECTRICITE_NO = "00";
     //********************************值类型********************************
 
 
@@ -86,6 +94,11 @@ public class GlobalValues {
      * 电量
      */
     public static final String NAME_ELECTRICITY = "NAME_ELECTRICITY";
+    /**
+     * 名称类型
+     * 是否充电
+     */
+    public static final String NAME_ISELECTRICITE = "NAME_ISELECTRICITE";
     /**
      * 名称类型
      * 浅度睡眠时间

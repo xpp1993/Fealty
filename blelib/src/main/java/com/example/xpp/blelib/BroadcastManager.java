@@ -22,9 +22,10 @@ public class BroadcastManager {
         sendBroadcast(context, intentAction, bundle);
     }
 
-    public static void sendBroadcast4Electricity(Context context, String intentAction, String electricity) {
+    public static void sendBroadcast4Electricity(Context context, String intentAction, String electricity,String isElectricize) {
         Bundle bundle = new Bundle();
         bundle.putString(GlobalValues.NAME_ELECTRICITY, electricity);
+        bundle.putString(GlobalValues.NAME_ISELECTRICITE,isElectricize);
         sendBroadcast(context, intentAction, bundle);
     }
 

@@ -817,16 +817,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     }
                 });//发送获取当天睡眠质量数据，0表示当天数据，1表示昨天数据，2表示前天数据
                 //发送心率测试开始
-                mWorkQueue.execute(runnable3);
+                myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_ELECTRICITY)) {
                 String value = intent.getExtras().getString(GlobalValues.NAME_ELECTRICITY);
+                String ISELECTRICITE=intent.getExtras().getString(GlobalValues.NAME_ISELECTRICITE);//手环是否处于充电状态
                 ToastUtils.showToastInUIThread("当前手环电量为：" + value);
                 Map<String, String> params = new HashMap<>();
                 params.put("cuffElectricity", value);
                 alterSelfData(params);//发送到服务器
                 //电量异常，发送通知
                 if (isAdded())
-                    setNotifyDian2(Integer.parseInt(value), getResources().getString(R.string.betty));
+                    setNotifyDian2(Integer.parseInt(value), ISELECTRICITE,getResources().getString(R.string.betty));
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_CONNECT_STATE_CHANGED)) {
                 String state = intent.getExtras().getString(GlobalValues.NAME_CONNECT_STATE);
                 if (TextUtils.equals(state, GlobalValues.VALUE_CONNECT_STATE_YES)) {//成功连接手环
@@ -916,17 +917,23 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         @Override
         public void run() {
             // mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_START);
-            CommandManager.sendStartRate(mBleEngine, "FFFFFFFF");
-            Log.e("wyj", "start to rate");
+            mWorkQueue.execute(new Runnable() {
+                @Override
+                public void run() {
+                    CommandManager.sendStartRate(mBleEngine, "FFFFFFFF");
+                    Log.e("wyj", "start to rate");
+                }
+            });
+            String rate_ji = preferences.getString(ParameterManager.SHEZHI_JIANCEXINLV, "3");
+            rate_int = Integer.parseInt(rate_ji);
+            myHandler.postDelayed(this, 1000 * 60 * rate_int);
             myHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     functionRateFinished();
                 }
             }, 1000 * 30);
-            String rate_ji = preferences.getString(ParameterManager.SHEZHI_JIANCEXINLV, "3");
-            rate_int = Integer.parseInt(rate_ji);
-            myHandler.postDelayed(this, 1000 * 60 * rate_int);
+
         }
     };
 
@@ -953,7 +960,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     }
 
     private void setNotifyDian(int electricity, String notice) {
-        if (electricity <= 15) {//通知
+        if (electricity < 10) {//通知
             DialogView dialogView = null;
             if (message_dialog == true) {
                 dialogView = new DialogView(AppUtils.getBaseContext());
@@ -976,8 +983,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         dialog.show();
     }
 
-    private void setNotifyDian2(int electricity, String notice) {
-        if (electricity <= 15) {//通知
+    /**
+     *
+     * @param electricity 手环电量
+     * @param ISELECTRICITE 手环是否处于充电状态
+     * @param notice
+     */
+    private void setNotifyDian2(int electricity, String ISELECTRICITE,String notice) {
+        //手环电量少于15，并且处于未充电状态，发送消息通知
+        if (electricity <= 15&&ISELECTRICITE.equals(GlobalValues.VALUE_ISELECTRICITE_NO)) {//通知
             DialogViewLo dialogView = null;
             if (message_dialog == true) {
                 dialogView = new DialogViewLo(AppUtils.getBaseContext());

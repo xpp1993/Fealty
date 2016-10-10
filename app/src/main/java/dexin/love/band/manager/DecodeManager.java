@@ -132,6 +132,11 @@ public final class DecodeManager {
             data.putString("nickName", nickName);
             data.putString("headFile", headFile);
             data.putString("birthday", birthday);
+            JSONObject object2 = jsonObject.optJSONObject("json").optJSONObject("versions");//从服务器获取版本号
+            int versionCode = object2.optInt("versions");
+            String loadUrl = object2.optString("url");
+            data.putInt("versionCode", versionCode);
+            data.putString("laodUrl", loadUrl);
         }
         msg.setData(data);
         handler.sendMessage(msg);

@@ -2,8 +2,10 @@ package com.example.xpp.blelib;
 
 import android.content.Context;
 import android.util.Log;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 public class CommandManager {
     private static final String TAG = CommandManager.class.getSimpleName();
     static int lightSleepTime = 0;//浅睡时间
@@ -13,7 +15,8 @@ public class CommandManager {
         String dataString = Utils.bytesToHexString(data);
         if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_ELECTRICITY)) {
             String electricity = String.valueOf(Integer.parseInt(dataString.substring(2, 4), 16));
-            BroadcastManager.sendBroadcast4Electricity(context, GlobalValues.BROADCAST_INTENT_ELECTRICITY, electricity);
+            String isElectricize = dataString.substring(4, 6);//是否充电，00为没有充电，01为充电
+            BroadcastManager.sendBroadcast4Electricity(context, GlobalValues.BROADCAST_INTENT_ELECTRICITY, electricity,isElectricize);
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_CURRENTMOTION)) {
             String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
             String steps = dataString.substring(16, 18) + dataString.substring(14, 16) + dataString.substring(12, 14) + dataString.substring(10, 12);
@@ -45,7 +48,7 @@ public class CommandManager {
             }
             String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
             SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
-            Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000L;
+            Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000;
             String timeStr = sdf.format(new Date(time));
             Log.e(TAG, sdf.format(new Date(time)));
             if (timeStr.equals("11:45:00")) {//发送广播通知前段显示数据
@@ -56,14 +59,16 @@ public class CommandManager {
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTART)) {//心率测试回复数据
             String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
             SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
-            Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000L;
+            Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000;
             String timeStr = sdf.format(new Date(time));//当前手环时间
-            int rate = Integer.valueOf(dataString.substring(10, 12),16);//当前心率值
-            int status = Integer.valueOf(dataString.substring(12, 14),16);//当前状态，0x00:不是睡眠状态，0x01,当前睡眠状态最差，0x03:当前睡眠状态最好
+            Log.e("wyjxpp", timeStr);
+            int rate = Integer.valueOf(dataString.substring(10, 12), 16);//当前心率值
+            int status = Integer.valueOf(dataString.substring(12, 14), 16);//当前状态，0x00:不是睡眠状态，0x01,当前睡眠状态最差，0x03:当前睡眠状态最好
             //发送广播给前端
             BroadcastManager.sendBroadcast4RateData(context, GlobalValues.BROADCAST_INTENT_RATE, timeStr, rate, status);
         }
     }
+
     private static synchronized void send(final BleEngine bleEngine, final byte[] data) {
         Log.e(TAG, "sendCommand -> " + Utils.bytesToHexString(data));
         bleEngine.writeCharacteristic(data);
@@ -126,10 +131,12 @@ public class CommandManager {
      * @param testTime
      */
     public static void sendStartRate(BleEngine bleEngine, String testTime) {
-        send(bleEngine, Utils.hexStringToBytes(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTART +testTime));
+        send(bleEngine, Utils.hexStringToBytes(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTART + testTime));
     }
+
     /**
      * 发送指令给手环，心率测试停止
+     *
      * @param bleEngine
      */
     public static void sendStopRate(BleEngine bleEngine) {

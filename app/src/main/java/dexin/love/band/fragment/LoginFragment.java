@@ -249,6 +249,8 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                     String nickName = bundle.getString("nickName");
                     String headFile = bundle.getString("headFile");
                     String birthday = bundle.getString("birthday");
+                    int versionCode =bundle.getInt("versionCode");
+                    String url=bundle.getString("laodUrl");
                     int sex = bundle.getInt("sex");
                     UserInfo userInfo = new UserInfo();
                     userInfo.setMobile(phone);
@@ -257,6 +259,8 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
                     userInfo.setNickName(nickName);
                     userInfo.setBirthday(birthday);
                     userInfo.setUserpic(headFile);
+                    userInfo.setUrl(url);
+                    userInfo.setVersionCode(versionCode);
                     if (code == 1) {
 //                        SessionHolder.initHolder(mobile, userInfo);
                         login_password_edittext.setText("");

@@ -84,7 +84,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     private String latstr = "0";
     private String address = "在这里显示定位";
     private String lonStr = "0";
-    private String total_hour_str = "0";
+    private String total_hour_str = "00:00";
     private String light_hour = "0";
     private String light_minute = "0";
     private String deep_hour = "0";
@@ -328,7 +328,10 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         sleepData.putString("total_hour_str", total_hour_str);
         if (TextUtils.isEmpty(total_hour_str)) {
             return;
+        }else if (total_hour_str.equals("0")){
+            total_hour_str="00:00";
         }
+        Log.e("sleep",total_hour_str);
         Message message = Message.obtain();
         message.what = REQURST_HANDLER_SlEEPDATA;
         message.setData(sleepData);

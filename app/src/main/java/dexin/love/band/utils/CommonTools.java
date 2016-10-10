@@ -7,6 +7,9 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -80,4 +83,33 @@ public class CommonTools {
         return verName;
     }
 
+    /**
+     * 联网下载文件用
+     * @param path
+     * @return
+     */
+    public static HttpURLConnection getInputStream(String path) {
+        try {
+            URL url = new URL(path);
+            HttpURLConnection connection = (HttpURLConnection) url
+                    .openConnection();
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(8000);
+            connection.setDoInput(true);
+            connection.connect();
+            int code = connection.getResponseCode();
+            if (code == 200) {
+                Log.e("xpp",connection.getContentLength()+"");
+                return connection;
+            }
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+
+    }
 }

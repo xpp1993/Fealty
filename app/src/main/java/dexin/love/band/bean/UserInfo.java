@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Created by Administrator on 2016/7/27.
  */
-public class UserInfo implements Serializable{
+public class UserInfo implements Serializable {
     private String mobile;//手机号
     private String gender;//性别
     private String nickName;//昵称
@@ -18,15 +18,34 @@ public class UserInfo implements Serializable{
     private int currentHeart;
     private String cuffElectricity;
     private String mobileElectricity;
-    public UserInfo(String mobile, String gender, String nickName, String username, String birthday, String userpic,String password) {
+    private String url;//版本下载地址
+    private int versionCode;//版本号
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public int getVersionCode() {
+        return versionCode;
+    }
+
+    public void setVersionCode(int versionCode) {
+        this.versionCode = versionCode;
+    }
+
+    public UserInfo(String mobile, String gender, String nickName, String username, String birthday, String userpic, String password) {
         this.mobile = mobile;
         this.gender = gender;
         this.nickName = nickName;
         this.username = username;
         this.birthday = birthday;
         this.userpic = userpic;
-        this.identity=identity;
-        this.password=password;
+        this.identity = identity;
+        this.password = password;
     }
 
     public UserInfo(String identity, String mobile, int currentHeart, String address, String cuffElectricity, String mobileElectricity) {
@@ -71,6 +90,19 @@ public class UserInfo implements Serializable{
     }
 
     public UserInfo() {
+    }
+
+    public UserInfo(int versionCode, String url, String password, String userpic, String username, String nickName, String mobile, String gender, String birthday, String identity) {
+        this.versionCode = versionCode;
+        this.url = url;
+        this.password = password;
+        this.userpic = userpic;
+        this.username = username;
+        this.nickName = nickName;
+        this.mobile = mobile;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.identity = identity;
     }
 
     public String getMobile() {
@@ -152,6 +184,8 @@ public class UserInfo implements Serializable{
                 ", currentHeart=" + currentHeart +
                 ", cuffElectricity='" + cuffElectricity + '\'' +
                 ", mobileElectricity='" + mobileElectricity + '\'' +
+                ", url='" + url + '\'' +
+                ", versionCode=" + versionCode +
                 '}';
     }
 }

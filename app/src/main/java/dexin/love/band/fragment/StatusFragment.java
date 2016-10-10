@@ -1,16 +1,39 @@
 package dexin.love.band.fragment;
+
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.xpp.blelib.GlobalValues;
+
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import de.greenrobot.event.EventBus;
 import dexin.love.band.R;
 import dexin.love.band.adapter.HeathMonitoringAdapter;
@@ -21,6 +44,7 @@ import dexin.love.band.bean.SportData;
 import dexin.love.band.bean.UserInfo;
 import dexin.love.band.manager.DecodeManager;
 import dexin.love.band.manager.ParameterManager;
+import dexin.love.band.manager.SPManager;
 import dexin.love.band.utils.AppUtils;
 import dexin.love.band.utils.CommonTools;
 import dexin.love.band.utils.ContextUtils;
@@ -43,6 +67,11 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     private MyHandler myHandler;
     // private HealthDataFragement healthDataFragement;
     private UserInfo userInfo;
+    private int versionCode;
+    private ProgressDialog m_progressDlg;//更新软件进度条
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+
     @Override
     protected void init() {
         myHandler = new MyHandler();
@@ -75,6 +104,25 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_HEART, params, null, REQUEST_CODE_UPDATA_ZHEXIAN_HEART, this);
         //写个循环每一段时间刷新一次页面
         myHandler.postDelayed(LoadData, 1000 * 60 * 3);
+        m_progressDlg = new ProgressDialog(getActivity());
+        m_progressDlg.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        // 设置ProgressDialog 的进度条是否不明确 false 就是不设置为不明确
+        m_progressDlg.setIndeterminate(false);
+        m_progressDlg.setCancelable(false);
+        sharedPreferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
+        //2. 获得编辑器:当将数据存储到SharedPrefences对象中时，需要获得编辑器。如果取出则不需要。
+        editor = sharedPreferences.edit();
+        //获取版本号
+        versionCode = CommonTools.getVercode(AppUtils.getBaseContext());
+        //boolean isVersion = sharedPreferences.getBoolean(ParameterManager.ISVERSION, true);
+        // if (isVersion) {
+        if (versionCode < userInfo.getVersionCode()) {//更新版本
+            doNewVersionDlgShow();
+        } else {//提示当前是最新版本
+            notNewVersionDlgShow();
+        }
+        //   editor.putBoolean(ParameterManager.ISVERSION, false);
+        //}
     }
 
     private void initFragments() {
@@ -86,6 +134,123 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         adapter.addFragment(healthDataFragement);
         adapter.notifyDataSetChanged();
         //  healthDataFragement.setIdentity("我的");
+
+    }
+
+    /**
+     * 提示当前为最新版本
+     */
+    private void notNewVersionDlgShow() {
+        String str = "当前版本:" + CommonTools.getVerName(AppUtils.getBaseContext()) + "Code:" + versionCode + "\n已是最新版本，无需更新！";
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        View inflate = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_textview_notversion, null);
+        TextView textView = (TextView) inflate.findViewById(R.id.tv_version);
+        textView.setText(str);
+        builder.setTitle("软件更新")
+                .setView(inflate)
+                .setNegativeButton("确定", null)
+                .setCancelable(false)
+                .create()
+                .show();
+    }
+
+    /**
+     * 提示更新新版本
+     */
+    private void doNewVersionDlgShow() {
+        String str = "当前版本Code：" + versionCode + " ,发现新版本Code：" + userInfo.getVersionCode() + " ,是否更新？";
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        View inflate = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_textview_notversion, null);
+        TextView textView = (TextView) inflate.findViewById(R.id.tv_version);
+        textView.setText(str);
+        builder.setTitle("软件更新")
+                .setView(inflate)
+                .setPositiveButton("更新", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        m_progressDlg.setTitle("正在下载");
+                        m_progressDlg.setMessage("请稍后....");
+                        //开始下载软件
+                        downFile(ParameterManager.HOST + userInfo.getUrl());
+                    }
+                })
+                .setNegativeButton("暂不更新", null)
+                .setCancelable(false)
+                .create()
+                .show();
+    }
+
+    /**
+     * 将文件下载写入内存，再从内存中读取
+     *
+     * @param url
+     */
+    private void downFile(final String url) {
+        m_progressDlg.show();
+        //联网下载软件并存储在内存中
+        new Thread() {
+            public void run() {
+                try {
+                    HttpURLConnection connection = CommonTools.getInputStream(url);
+                    if (connection == null) {
+//                       myHandler.post(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                m_progressDlg.dismiss();
+//                                Toast.makeText(AppUtils.getBaseContext(), "网络错误！", Toast.LENGTH_SHORT).show();
+//                            }
+//                        });
+                        m_progressDlg.dismiss();
+                        ToastUtils.showToastInUIThread("网络错误，下载失败");
+                        return;
+                    }
+                    InputStream is = connection.getInputStream();
+                    long length = connection.getContentLength();
+                    FileOutputStream fileOutputStream = null;
+                    if (is != null) {
+                        File file = new File(
+                                Environment.getExternalStorageDirectory(),
+                                ParameterManager.APPLICATION_NAME);
+                        fileOutputStream = new FileOutputStream(file);
+                        byte[] buf = new byte[1024];
+                        int ch = -1;
+                        int count = 0;
+                        m_progressDlg.setMax((int) length);
+                        while ((ch = is.read(buf)) != -1) {
+                            fileOutputStream.write(buf, 0, ch);
+                            count += ch;
+                            if (count > 0) {
+                                m_progressDlg.setProgress(count);
+                            }
+                        }
+                    }
+                    fileOutputStream.flush();
+                    if (fileOutputStream != null) {
+                        fileOutputStream.close();
+                    }
+                    down();  //告诉HANDER已经下载完成了，可以安装了
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    /**
+     * 安装应用
+     */
+    private void down() {
+        myHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                m_progressDlg.dismiss();
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(Uri.fromFile(new File(
+                        Environment.getExternalStorageDirectory(),
+                        ParameterManager.APPLICATION_NAME)), "application/vnd.android.package-archive");
+                startActivity(intent);
+            }
+        });
     }
 
     private Runnable LoadData = new Runnable() {
@@ -181,7 +346,9 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     @Override
     public void onDestroy() {
         super.onDestroy();
+        editor.putBoolean(ParameterManager.ISVERSION, true);
         EventBus.getDefault().unregister(this);
+        Log.e("test", "zoule");
         if (LoadData != null) {
             myHandler.removeCallbacks(LoadData);
         }
@@ -331,5 +498,4 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
 
         }
     }
-
 }

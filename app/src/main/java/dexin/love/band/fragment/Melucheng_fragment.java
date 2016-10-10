@@ -63,6 +63,9 @@ public class Melucheng_fragment extends BaseFragment {
         //开启交通图
         mBaiduMap.setTrafficEnabled(true);
         helper = getHelper();
+        if (helper==null){
+            return;
+        }
         db = helper.getReadableDatabase();
         points = new ArrayList<>();
         colors = new ArrayList<>();
@@ -132,6 +135,9 @@ public class Melucheng_fragment extends BaseFragment {
 
         @Override
         public void run() {
+            if (db==null){
+                return;
+            }
             cursor = db.query("gps", new String[]{"_id,time,lat,lon"}, "time > " + (Melucheng_fragment.this.curentTime - 1000 * 60 * 30), null, null, null, null, null);
             //不断移动光标，遍历结果集
             while (cursor.moveToNext()) {

@@ -26,10 +26,13 @@ public class ParameterManager {
     public static final int REQURST_CODE_SLEEP = 0X18A;
     public static final int REQURST_CODE_SPORT = 0X19A;
     public static final int REQURST_CODE_NORMAL = 0X29A;
-    public static final int REQURST_CODE_CONNECT = 0X31A;
+    public static final String ISVERSION="ISVERSION";//是否显示版本更新
+    // public static final int REQURST_CODE_CONNECT = 0X31A;
     public static final String SESSION_CACHE_SP_NAME = "dexin_session_cache";//sp文件名称
     public static final int TOTAL_ROCK_TIME = 60;//计时器总时长
-    public static final String DEVICE_ADDRESS = "diveceAddress";//设备地址存储在sp文件中的key
+    //  public static final String DEVICE_ADDRESS = "diveceAddress";//设备地址存储在sp文件中的key
+    public static final String Local_HOST = "http://192.168.8.133:8080/";//本地服务器
+    public static final String HOST = "http://120.76.27.233:8080/";//外网服务器
     //        public static final String GET_CHECK_CODE = "http://192.168.8.133:8080/cuffapi/user/get_check_code?phone=";
 //    public static final String SIGN_IN_SUBMIT = "http://192.168.8.133:8080/cuffapi/user/sign_in_submit";
 //    public static final String RESET_PASSWORD = "http://192.168.8.133:8080/cuffapi/user/password_submit";
@@ -68,4 +71,5 @@ public class ParameterManager {
     public static final String UPLOAD_ZHEXIAN = "http://120.76.27.233:8080/cuffapi/heart/insert_user_heart";
     public static final String SELECT_USER_HEART = "http://120.76.27.233:8080/cuffapi/heart/select_user_heart";
     public static final String SELECT_USER_BINDED = "http://120.76.27.233:8080/cuffapi/current_heart/select_binded_user_msg";
+    public static final String APPLICATION_NAME = "dexin.love.band.apk";
 }

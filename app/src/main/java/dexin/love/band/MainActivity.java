@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         }
         mFragments.add(tag);
         // fm.beginTransaction().add(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();
-        fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();
+        fm.beginTransaction().add(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();
     }
 
     private void setTranslucentStatus(boolean on) {
