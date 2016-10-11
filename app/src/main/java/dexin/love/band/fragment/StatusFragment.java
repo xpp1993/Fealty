@@ -10,14 +10,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.example.xpp.blelib.GlobalValues;
 
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
@@ -71,6 +67,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     private ProgressDialog m_progressDlg;//更新软件进度条
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
+    private boolean isVersion=true;
 
     @Override
     protected void init() {
@@ -79,7 +76,6 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
-//        EventBus.getDefault().register(this);
         mJazzy.setTransitionEffect(JazzyViewPager.TransitionEffect.ZoomIn);
         mJazzy.setPageMargin(30);
 
@@ -114,15 +110,19 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         editor = sharedPreferences.edit();
         //获取版本号
         versionCode = CommonTools.getVercode(AppUtils.getBaseContext());
-        //boolean isVersion = sharedPreferences.getBoolean(ParameterManager.ISVERSION, true);
-        // if (isVersion) {
-        if (versionCode < userInfo.getVersionCode()) {//更新版本
-            doNewVersionDlgShow();
-        } else {//提示当前是最新版本
-            notNewVersionDlgShow();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isVersion) {
+            isVersion=false;
+            if (versionCode < userInfo.getVersionCode()) {//更新版本
+                doNewVersionDlgShow();
+            } else {//提示当前是最新版本
+                notNewVersionDlgShow();
+            }
         }
-        //   editor.putBoolean(ParameterManager.ISVERSION, false);
-        //}
     }
 
     private void initFragments() {
@@ -141,7 +141,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
      * 提示当前为最新版本
      */
     private void notNewVersionDlgShow() {
-        String str = "当前版本:" + CommonTools.getVerName(AppUtils.getBaseContext()) + "Code:" + versionCode + "\n已是最新版本，无需更新！";
+        String str = "当前版本:" + CommonTools.getVerName(AppUtils.getBaseContext()) + ",Code:" + versionCode + "\n已是最新版本，无需更新！";
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View inflate = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_textview_notversion, null);
         TextView textView = (TextView) inflate.findViewById(R.id.tv_version);
@@ -193,13 +193,6 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                 try {
                     HttpURLConnection connection = CommonTools.getInputStream(url);
                     if (connection == null) {
-//                       myHandler.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                m_progressDlg.dismiss();
-//                                Toast.makeText(AppUtils.getBaseContext(), "网络错误！", Toast.LENGTH_SHORT).show();
-//                            }
-//                        });
                         m_progressDlg.dismiss();
                         ToastUtils.showToastInUIThread("网络错误，下载失败");
                         return;
@@ -232,7 +225,9 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
             }
+
         }.start();
     }
 
@@ -340,13 +335,12 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
 
     @Override
     protected void initData() {
-
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        editor.putBoolean(ParameterManager.ISVERSION, true);
+        // editor.putBoolean(ParameterManager.ISVERSION, true);
         EventBus.getDefault().unregister(this);
         Log.e("test", "zoule");
         if (LoadData != null) {

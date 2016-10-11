@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -91,6 +92,7 @@ import dexin.love.band.utils.WorkQueue;
 import dexin.love.band.utils.XinLvSqliteHelper;
 import dexin.love.band.view.DialogView;
 import dexin.love.band.view.DialogViewC;
+import dexin.love.band.view.DialogViewKeyAlarm;
 import dexin.love.band.view.DialogViewLo;
 import dexin.love.band.view.DialogViewRate;
 import dexin.love.band.view.DialogViewSleepLow;
@@ -132,6 +134,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public static final int REQUEST_CODE_SPORTDATA_SLEEPDATA = 0x10;//把运动数据睡眠数据上传到服务器
     public static final int REQUEST_CODE_CURRENTRATE = 0x22;//把测试的心率数据上传到服务器
     public static final int REQUEST_CODE_RATE = 0x26;//把测试的心率数据上传到服务器
+    public static final int REQUEST_CODE_SOS = 0x31;//把测试的心率数据上传到服务器
     private String phone;
     public static final int GPS_UPLOAD_CODE = 0x11;
     @ViewInject(R.id.relative_location)
@@ -264,7 +267,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         mFilter.addAction(Intent.ACTION_BATTERY_CHANGED);//获取手机电量
         mFilter.addAction(GlobalValues.BROADCAST_INTENT_SLEEPQ);//获取睡眠质量数据
         mFilter.addAction(GlobalValues.BROADCAST_INTENT_RATE);//获取心率测试值
-        //  mFilter.addAction(GlobalVariable.READ_BLE_VERSION_ACTION);
+        mFilter.addAction(GlobalValues.BROADCAST_INTENT_A_KEY_ALARM);//一键报警
+        mFilter.addAction(GlobalValues.BROADCAST_INTENT_BAND_INFO);//获取固件版本，MAc地址
         getActivity().registerReceiver(mReceiver, mFilter);
     }
 
@@ -317,6 +321,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             final BluetoothDevice device = devices.get(i);
             if (device.getName() != null && device.getName().length() > 0)
                 txt_item_name.setText(device.getName());
+//            Log.e("wyjxpp", device.getName() + "设备地址：" + device.getAddress());
 //            else
 //                txt_item_name.setText("未知设备");
             layout_item_device.setOnClickListener(new View.OnClickListener() {
@@ -571,6 +576,14 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     ToastUtils.showToastInUIThread("服务器异常！");
                 }
                 break;
+            case REQUEST_CODE_SOS://sos求救
+                try {
+                    DecodeManager.decodeCommon(jsonObject, requestCode, myHandler);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    ToastUtils.showToastInUIThread("服务器异常！");
+                }
+                break;
             default:
                 break;
         }
@@ -578,7 +591,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
-        //  ToastUtils.showToastInUIThread("网络错误");
+        if (requestCode == REQUEST_CODE_SOS) {//发送一键求助失败
+            speakOut(getResources().getString(R.string.akeyalarmNoNet));
+        }
     }
 
     /**
@@ -682,12 +697,22 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         ToastUtils.showToastInUIThread("该用户不是德信手环app用户，不能绑定!");
                     }
                     break;
-//                case OFFLINE_STEP_SYNC_OK://同步了离线运动数据，显示,且上传服务器
-//                    queryStepInfo();
-//                    break;
-//                case OFFLINE_SLEEP_SYNC_OK://同步了离线睡眠数据，显示,且上传服务器
-//                    querySleepInfo();
-//                    break;
+                case REQUEST_CODE_SOS:
+                    if (msg.getData().getInt("code") == 1) {
+                        /**
+                         * 手机反馈你的语音信息已发出（抱紧方式可自定义）
+                         * 子女收到短信提醒
+                         */
+                        DialogViewKeyAlarm dialogView = null;
+                        if (message_dialog == true) {
+                            dialogView = new DialogViewKeyAlarm(AppUtils.getBaseContext());
+                        }
+                        if (isAdded())
+                            diffNotifyShow(2, getResources().getString(R.string.akeyalarm), dialogView);
+                    } else {
+                        speakOut(getResources().getString(R.string.akeyalarmNo));
+                    }
+                    break;
                 case REQUEST_CODE_SPORTDATA_SLEEPDATA:
                     if (msg.getData().getInt("code") == 1) {
                         Log.e("upLoad:", msg.getData().getString("desc"));
@@ -820,14 +845,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_ELECTRICITY)) {
                 String value = intent.getExtras().getString(GlobalValues.NAME_ELECTRICITY);
-                String ISELECTRICITE=intent.getExtras().getString(GlobalValues.NAME_ISELECTRICITE);//手环是否处于充电状态
+                String ISELECTRICITE = intent.getExtras().getString(GlobalValues.NAME_ISELECTRICITE);//手环是否处于充电状态
                 ToastUtils.showToastInUIThread("当前手环电量为：" + value);
                 Map<String, String> params = new HashMap<>();
                 params.put("cuffElectricity", value);
                 alterSelfData(params);//发送到服务器
                 //电量异常，发送通知
                 if (isAdded())
-                    setNotifyDian2(Integer.parseInt(value), ISELECTRICITE,getResources().getString(R.string.betty));
+                    setNotifyDian2(Integer.parseInt(value), ISELECTRICITE, getResources().getString(R.string.betty));
+            } else if (action.equals(GlobalValues.BROADCAST_INTENT_A_KEY_ALARM)) {//一键报警广播
+                //app接收到sos发送给后台
+                Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
+                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.SOS, params, null, MeFragment.REQUEST_CODE_SOS, MeFragment.this);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_CONNECT_STATE_CHANGED)) {
                 String state = intent.getExtras().getString(GlobalValues.NAME_CONNECT_STATE);
                 if (TextUtils.equals(state, GlobalValues.VALUE_CONNECT_STATE_YES)) {//成功连接手环
@@ -851,6 +880,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                             CommandManager.sendVibration(mBleEngine, 6);
                         }
                     });//发送手环振动指令
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandManager.sendGetVersionandMac(mBleEngine);
+                        }
+                    });//发送获取手环信息，比如固件版本，MAC地址
                 } else {
                     progressDialog.dismiss();
                     dialog.dismiss();
@@ -906,6 +941,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 message.what = UPDATA_REAL_RATE_MSG;
                 message.setData(rate_bundle);
                 myHandler.sendMessage(message);
+            } else if (action.equals(GlobalValues.BROADCAST_INTENT_BAND_INFO)) {//获取的固件版本和固件MAC地址，和手环穿戴状态
+                Bundle bundle = intent.getExtras();
+                String version = bundle.getString(GlobalValues.NAME_VERSION);
+                String Mac = bundle.getString(GlobalValues.NAME_MAC);
+                String status = bundle.getString(GlobalValues.NAME_BAND_STATUS);
+                Log.e("xppwyj", "固件版本：" + version + ",固件地址:" + Mac + ",穿戴状态" + status);
             }
         }
     };
@@ -943,8 +984,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
      * @param intent
      */
     private void getMobileLevel(Intent intent) {
-    /*获得当前电量  */
+         /*获得当前电量  */
         int rawlevel = intent.getIntExtra("level", -1);
+        //获取当前电池状态
+        int status = intent.getIntExtra("status", 0);
                 /*获得总电量  */
         int scale = intent.getIntExtra("scale", -1);
         int level = -1;
@@ -955,12 +998,21 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             params.put("mobileElectricity", level + "");
             alterSelfData(params);//上传到服务器
             if (isAdded())
-                setNotifyDian(level, getResources().getString(R.string.phonebetty));//电量异常发送通知
+                setNotifyDian(level, status, getResources().getString(R.string.phonebetty));//电量异常发送通知
         }
     }
 
-    private void setNotifyDian(int electricity, String notice) {
-        if (electricity < 10) {//通知
+    /**
+     * 手机电量低警报
+     *
+     * @param electricity 手机电量
+     * @param status      手机充电状态
+     * @param notice      警报方式
+     */
+    private void setNotifyDian(int electricity, int status, String notice) {
+        if (electricity < 15) {//通知
+            if (status == BatteryManager.BATTERY_STATUS_CHARGING)//如果处于充电状态
+                return;
             DialogView dialogView = null;
             if (message_dialog == true) {
                 dialogView = new DialogView(AppUtils.getBaseContext());
@@ -984,14 +1036,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     }
 
     /**
-     *
-     * @param electricity 手环电量
+     * @param electricity   手环电量
      * @param ISELECTRICITE 手环是否处于充电状态
      * @param notice
      */
-    private void setNotifyDian2(int electricity, String ISELECTRICITE,String notice) {
+    private void setNotifyDian2(int electricity, String ISELECTRICITE, String notice) {
         //手环电量少于15，并且处于未充电状态，发送消息通知
-        if (electricity <= 15&&ISELECTRICITE.equals(GlobalValues.VALUE_ISELECTRICITE_NO)) {//通知
+        if (electricity <= 15 && ISELECTRICITE.equals(GlobalValues.VALUE_ISELECTRICITE_NO)) {//通知
             DialogViewLo dialogView = null;
             if (message_dialog == true) {
                 dialogView = new DialogViewLo(AppUtils.getBaseContext());

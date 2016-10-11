@@ -13,11 +13,11 @@ public class CommandManager {
 
     public static void decode(Context context, byte[] data) {
         String dataString = Utils.bytesToHexString(data);
-        if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_ELECTRICITY)) {
+        if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_ELECTRICITY)) {//获取手环电量
             String electricity = String.valueOf(Integer.parseInt(dataString.substring(2, 4), 16));
             String isElectricize = dataString.substring(4, 6);//是否充电，00为没有充电，01为充电
-            BroadcastManager.sendBroadcast4Electricity(context, GlobalValues.BROADCAST_INTENT_ELECTRICITY, electricity,isElectricize);
-        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_CURRENTMOTION)) {
+            BroadcastManager.sendBroadcast4Electricity(context, GlobalValues.BROADCAST_INTENT_ELECTRICITY, electricity, isElectricize);
+        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_CURRENTMOTION)) {//获取手环运动数据
             String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
             String steps = dataString.substring(16, 18) + dataString.substring(14, 16) + dataString.substring(12, 14) + dataString.substring(10, 12);
             String distance = dataString.substring(24, 26) + dataString.substring(22, 24) + dataString.substring(20, 22) + dataString.substring(18, 20);
@@ -66,6 +66,21 @@ public class CommandManager {
             int status = Integer.valueOf(dataString.substring(12, 14), 16);//当前状态，0x00:不是睡眠状态，0x01,当前睡眠状态最差，0x03:当前睡眠状态最好
             //发送广播给前端
             BroadcastManager.sendBroadcast4RateData(context, GlobalValues.BROADCAST_INTENT_RATE, timeStr, rate, status);
+        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_A_KEY_ALARM)) {//一键报警信息
+            //发送一键报警广播给前端
+            BroadcastManager.sendBroadcast4AKEYALARM(context, GlobalValues.BROADCAST_INTENT_A_KEY_ALARM);
+        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_VERSIONMAC)) {//获取手环信息系和MAC地址
+            Log.e("MAC", dataString);
+            String version = "V" + Integer.parseInt(dataString.substring(4, 6) + dataString.substring(2, 4), 16);
+            String MAC = dataString.substring(6, 8) + ":" + dataString.substring(8, 10) + ":" + dataString.substring(10, 12) + ":" + dataString.substring(12, 14);
+            String status = dataString.substring(14, 16);
+            BroadcastManager.sendBroadcast4BandInfo(context, GlobalValues.BROADCAST_INTENT_BAND_INFO, version, MAC, status);
+        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_TIME)) {
+            String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd  hh:mm:ss");
+            Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000;
+            String timeStr = sdf.format(new Date(time));//当前手环时间
+            Log.e("wyjxpp", timeStr);
         }
     }
 
@@ -100,6 +115,15 @@ public class CommandManager {
      */
     public static void sendGetElectricity(BleEngine bleEngine) {
         send(bleEngine, Utils.hexStringToBytes(GlobalValues.BLE_COMMAND_TYPE_CODE_ELECTRICITY));
+    }
+
+    /**
+     * 发送指令给手环，读取手环信息
+     *
+     * @param bleEngine
+     */
+    public static void sendGetVersionandMac(BleEngine bleEngine) {
+        send(bleEngine, Utils.hexStringToBytes(GlobalValues.BLE_COMMAND_TYPE_CODE_VERSIONMAC));
     }
 
     /**

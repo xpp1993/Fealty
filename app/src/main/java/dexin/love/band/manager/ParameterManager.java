@@ -26,7 +26,6 @@ public class ParameterManager {
     public static final int REQURST_CODE_SLEEP = 0X18A;
     public static final int REQURST_CODE_SPORT = 0X19A;
     public static final int REQURST_CODE_NORMAL = 0X29A;
-    public static final String ISVERSION="ISVERSION";//是否显示版本更新
     // public static final int REQURST_CODE_CONNECT = 0X31A;
     public static final String SESSION_CACHE_SP_NAME = "dexin_session_cache";//sp文件名称
     public static final int TOTAL_ROCK_TIME = 60;//计时器总时长
@@ -52,6 +51,7 @@ public class ParameterManager {
 //    public static final String UPLOAD_ZHEXIAN = "http://192.168.8.133:8080/cuffapi/heart/insert_user_heart";
 //    public static final String SELECT_USER_HEART="http://192.168.8.133:8080/cuffapi/heart/select_user_heart";
 //    public static final String SELECT_USER_BINDED="http://192.168.8.133:8080/cuffapi/current_heart/select_binded_user_msg";
+    public static final String SOS = "cuffapi/user/send_sms_sos";
     public static final String GET_CHECK_CODE = "http://120.76.27.233:8080/cuffapi/user/get_check_code?phone=";
     public static final String SIGN_IN_SUBMIT = "http://120.76.27.233:8080/cuffapi/user/sign_in_submit";
     public static final String RESET_PASSWORD = "http://120.76.27.233:8080/cuffapi/user/password_submit";

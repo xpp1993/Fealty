@@ -22,10 +22,10 @@ public class BroadcastManager {
         sendBroadcast(context, intentAction, bundle);
     }
 
-    public static void sendBroadcast4Electricity(Context context, String intentAction, String electricity,String isElectricize) {
+    public static void sendBroadcast4Electricity(Context context, String intentAction, String electricity, String isElectricize) {
         Bundle bundle = new Bundle();
         bundle.putString(GlobalValues.NAME_ELECTRICITY, electricity);
-        bundle.putString(GlobalValues.NAME_ISELECTRICITE,isElectricize);
+        bundle.putString(GlobalValues.NAME_ISELECTRICITE, isElectricize);
         sendBroadcast(context, intentAction, bundle);
     }
 
@@ -50,6 +50,27 @@ public class BroadcastManager {
     public static void sendBroadcast4CommandReceived(Context context, String intentAction) {
         sendBroadcast(context, intentAction, null);
     }
+
+    /**
+     * 发送一键报警广播
+     */
+
+    public static void sendBroadcast4AKEYALARM(Context context, String intentAction) {
+        sendBroadcast(context, intentAction, null);
+    }
+
+    /**
+     * 发送手环信息广播（固件版本，MAC地址，以及是否穿戴状态）
+     */
+
+    public static void sendBroadcast4BandInfo(Context context, String intentAction, String Version, String deviceAddress, String status) {
+        Bundle bundle = new Bundle();
+        bundle.putString(GlobalValues.NAME_VERSION, Version);
+        bundle.putString(GlobalValues.NAME_MAC, deviceAddress);
+        bundle.putString(GlobalValues.NAME_BAND_STATUS, status);
+        sendBroadcast(context, intentAction, bundle);
+    }
+
     /**
      * 发送睡眠质量数据广播
      */
@@ -59,14 +80,15 @@ public class BroadcastManager {
         bundle.putInt(GlobalValues.NAME_LIGHTSLEEP, lightSleep);
         sendBroadcast(context, intentAction, bundle);
     }
+
     /**
      * 发送心率测试数据广播
      */
-    public static void sendBroadcast4RateData(Context context, String intentAction, String testTime, int rate,int status) {
+    public static void sendBroadcast4RateData(Context context, String intentAction, String testTime, int rate, int status) {
         Bundle bundle = new Bundle();
-        bundle.putString(GlobalValues.NAME_RATETIME,testTime);
-        bundle.putInt(GlobalValues.NAME_RATE,rate);
-        bundle.putInt(GlobalValues.NAME_RATE_STATUS,status);
+        bundle.putString(GlobalValues.NAME_RATETIME, testTime);
+        bundle.putInt(GlobalValues.NAME_RATE, rate);
+        bundle.putInt(GlobalValues.NAME_RATE_STATUS, status);
         sendBroadcast(context, intentAction, bundle);
     }
 }

@@ -33,9 +33,19 @@ public class GlobalValues {
     public static final String BROADCAST_INTENT_SLEEPQ = "BROADCAST_INTENT_SLEEPQ";
     /**
      * 广播类型
+     * 一键报警
+     */
+    public static final String BROADCAST_INTENT_A_KEY_ALARM = "BROADCAST_INTENT_A_KEY_ALARM";
+    /**
+     * 广播类型
      * 心率测试数据
      */
     public static final String BROADCAST_INTENT_RATE = "BROADCAST_INTENT_RATE";
+    /**
+     * 广播类型
+     * 发送手环信息数据，固件版本，MAC以及穿戴状态
+     */
+    public static final String BROADCAST_INTENT_BAND_INFO = "BROADCAST_INTENT_BAND_INFO";
     //********************************广播类型********************************
 
 
@@ -124,6 +134,21 @@ public class GlobalValues {
      * 心率测试的状态，是否是睡眠状态，运动状态
      */
     public static final String NAME_RATE_STATUS = "NAME_RATE_STATUS";
+    /**
+     * 名称类型
+     * 手环固件版本
+     */
+    public static final String NAME_VERSION = "NAME_VERSION";
+    /**
+     * 名称类型
+     * 手环MAC地址
+     */
+    public static final String NAME_MAC = "NAME_MAC";
+    /**
+     * 名称类型
+     * 手环的状态，是否是穿戴状态
+     */
+    public static final String NAME_BAND_STATUS = "NAME_BAND_STATUS";
     //********************************名称类型********************************
 
 
@@ -133,6 +158,11 @@ public class GlobalValues {
      * 电量指令
      */
     public static final String BLE_COMMAND_TYPE_CODE_ELECTRICITY = "0b";
+    /**
+     * 蓝牙指令
+     * 读取手环信息指令（固件版本，MAC地址）
+     */
+    public static final String BLE_COMMAND_TYPE_CODE_VERSIONMAC = "0c";
     /**
      * 蓝牙指令
      * 时间指令
@@ -168,5 +198,10 @@ public class GlobalValues {
      * 同步睡眠信息回复无数据
      */
     public static final String BLE_COMMAND_TYPE_CODE_SYNSLEEPNO = "90";
+    /**
+     * 蓝牙指令
+     * 一键报警
+     */
+    public static final String BLE_COMMAND_TYPE_CODE_A_KEY_ALARM= "20";
     //********************************蓝牙指令********************************
 }
