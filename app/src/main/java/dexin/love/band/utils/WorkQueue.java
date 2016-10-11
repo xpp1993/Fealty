@@ -25,23 +25,16 @@ public class WorkQueue {
             public void run() {
                 Runnable r;
                 while (true) {
-//					synchronized (queue) {
                     while (queue.isEmpty() || !state) {// 如果任务队列中没有任务，等待
-//							System.err.println("false");
-//							try {
-//								queue.wait();
-//							} catch (InterruptedException ignored) {
-//							}
                     }
-                    r = (Runnable) queue.removeFirst();// 有任务时，取出任务
+
                     try {
                         state = false;
+                        r = (Runnable) queue.removeFirst();// 有任务时，取出任务
                         System.out.println(Thread.currentThread().getName());
                         r.run();// 执行任务
                     } catch (RuntimeException e) {
-                        // You might want to log something here
                     }
-//					}
                 }
             }
         }.start();
