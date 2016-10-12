@@ -1,0 +1,27 @@
+diff a/app/src/main/java/dexin/love/band/utils/WorkQueue.java b/app/src/main/java/dexin/love/band/utils/WorkQueue.java	(rejected hunks)
+@@ -25,23 +25,16 @@
+             public void run() {
+                 Runnable r;
+                 while (true) {
+-//					synchronized (queue) {
+                     while (queue.isEmpty() || !state) {// å¦‚æžœä»»åŠ¡é˜Ÿåˆ—ä¸­æ²¡æœ‰ä»»åŠ¡ï¼Œç­‰å¾…
+-//							System.err.println("false");
+-//							try {
+-//								queue.wait();
+-//							} catch (InterruptedException ignored) {
+-//							}
+                     }
+-                    r = (Runnable) queue.removeFirst();// æœ‰ä»»åŠ¡æ—¶ï¼Œå–å‡ºä»»åŠ¡
++
+                     try {
+                         state = false;
++                        r = (Runnable) queue.removeFirst();// æœ‰ä»»åŠ¡æ—¶ï¼Œå–å‡ºä»»åŠ¡
+                         System.out.println(Thread.currentThread().getName());
+                         r.run();// æ‰§è¡Œä»»åŠ¡
+                     } catch (RuntimeException e) {
+-                        // You might want to log something here
+                     }
+-//					}
+                 }
+             }
+         }.start();

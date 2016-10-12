@@ -81,8 +81,6 @@ public class CommandManager {
             Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000;
             String timeStr = sdf.format(new Date(time));//当前手环时间
             Log.e("wyjxpp", timeStr);
-        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_FIRMWOREUPGRADE)) {//固件升级模式命令返回
-            Log.e("xpp", "进入升级模式");
         }
     }
 

@@ -31,10 +31,21 @@ android {
     sourceSets {
         main {
             jniLibs.srcDirs = ['libs']
+            assets.srcDirs = ['src/main/assets', 'src/main/assets/']
         }
     }
     productFlavors {
     }
+    //2016-10-10 xpp add
+    lintOptions {
+        //lint 遇到 error 时继续 构建
+        abortOnError false
+        //build release 版本 时 开启lint 检测
+        checkReleaseBuilds false
+        // 防止在发布的时候出现因MissingTranslation导致Build Failed!
+        disable 'MissingTranslation'
+    }
+    //2016-10-10 xpp add
 }
 
 dependencies {
