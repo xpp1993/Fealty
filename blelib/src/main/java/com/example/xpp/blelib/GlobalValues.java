@@ -203,5 +203,10 @@ public class GlobalValues {
      * 一键报警
      */
     public static final String BLE_COMMAND_TYPE_CODE_A_KEY_ALARM= "20";
+    /**
+     * 蓝牙指令
+     * 进入固件升级模式命令
+     */
+    public static final String BLE_COMMAND_TYPE_CODE_FIRMWOREUPGRADE= "0E12345678FEDCBA98";
     //********************************蓝牙指令********************************
 }

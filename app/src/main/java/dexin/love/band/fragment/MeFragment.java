@@ -18,6 +18,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -52,6 +53,11 @@ import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -99,6 +105,8 @@ import dexin.love.band.view.DialogViewSleepLow;
 import dexin.love.band.view.DialogViewSleephigh;
 import dexin.love.band.view.DialogViewSportLow;
 import dexin.love.band.view.DialogViewSporthigh;
+
+import static dexin.love.band.utils.AppUtils.getBaseContext;
 
 /**
  * Created by Administrator on 2016/7/26.
@@ -151,7 +159,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private double lat;
     private double lon;
     private String locationdescrible;
-    private String address;
     private MyLocationListener.CallBack mCallback;
     private MySqliteHelper helper;
     private long currentTime;
@@ -177,6 +184,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private LinearLayout layout_device_list;
     private AlertDialog dialog;
     private SleepData sleepData;
+    private String address;
 
     @Override
     protected void init() {
@@ -321,6 +329,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             final BluetoothDevice device = devices.get(i);
             if (device.getName() != null && device.getName().length() > 0)
                 txt_item_name.setText(device.getName());
+            address = device.getAddress();
 //            Log.e("wyjxpp", device.getName() + "设备地址：" + device.getAddress());
 //            else
 //                txt_item_name.setText("未知设备");
@@ -489,10 +498,76 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 //跳入设置界面
                 EventBus.getDefault().post(new NavFragmentEvent(new Fragment_Shezhi()));
                 break;
+            case R.id.relative_about://关于我们
+                downFile(ParameterManager.HOST+"uploads/authentication/image/upgrade.bin");
+                break;
             default:
                 break;
         }
     }
+    /**
+     * 将文件下载写入内存，再从内存中读取
+     *
+     * @param url
+     */
+    private void downFile(final String url) {
+       progressDialog.show();
+        //联网下载软件并存储在内存中
+        new Thread() {
+            public void run() {
+                try {
+                    HttpURLConnection connection = CommonTools.getInputStream(url);
+                    if (connection == null) {
+                        progressDialog.dismiss();
+                        ToastUtils.showToastInUIThread("网络错误，下载失败");
+                        return;
+                    }
+                    InputStream is = connection.getInputStream();
+                    long length = connection.getContentLength();
+                    FileOutputStream fileOutputStream = null;
+                    if (is != null) {
+                        File file = new File(
+                                Environment.getExternalStorageDirectory(),
+                                ParameterManager.FIRMWARE_NAME);
+                        fileOutputStream = new FileOutputStream(file);
+                        byte[] buf = new byte[1024];
+                        int ch = -1;
+                        int count = 0;
+                       progressDialog.setMax((int) length);
+                        while ((ch = is.read(buf)) != -1) {
+                            fileOutputStream.write(buf, 0, ch);
+                            count += ch;
+                            if (count > 0) {
+                                progressDialog.setProgress(count);
+                            }
+                        }
+                    }
+                    fileOutputStream.flush();
+                    if (fileOutputStream != null) {
+                        fileOutputStream.close();
+                    }
+                    myHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressDialog.dismiss();
+                            mWorkQueue.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+                                }
+                            });
+                        }
+                    });
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+        }.start();
+    }
+
 
     LocationService locService;
     LocationClientOption mOption;
@@ -740,7 +815,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             }
         }
     }
-
     // 将数据封装为ContentValues,心率数据局放入数据库
     public ContentValues toContentValues(String time, int rate, String phone) {
         // 底部类似于Map

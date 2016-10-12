@@ -72,4 +72,5 @@ public class ParameterManager {
     public static final String SELECT_USER_HEART = "http://120.76.27.233:8080/cuffapi/heart/select_user_heart";
     public static final String SELECT_USER_BINDED = "http://120.76.27.233:8080/cuffapi/current_heart/select_binded_user_msg";
     public static final String APPLICATION_NAME = "dexin.love.band.apk";
+    public static final String FIRMWARE_NAME = "upgrade.bin";
 }
