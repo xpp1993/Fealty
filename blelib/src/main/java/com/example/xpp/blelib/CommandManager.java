@@ -22,7 +22,7 @@ public class CommandManager {
             String steps = dataString.substring(16, 18) + dataString.substring(14, 16) + dataString.substring(12, 14) + dataString.substring(10, 12);
             String distance = dataString.substring(24, 26) + dataString.substring(22, 24) + dataString.substring(20, 22) + dataString.substring(18, 20);
             String calo = dataString.substring(32, 34) + dataString.substring(30, 32) + dataString.substring(28, 30) + dataString.substring(26, 28);
-            String sleep = dataString.substring(38, 40) + dataString.substring(36, 38) + dataString.substring(34, 36);
+            String sleep = "00"+dataString.substring(38, 40) + dataString.substring(36, 38) + dataString.substring(34, 36);
             BroadcastManager.sendBroadcast4CURRENTMOTION(
                     context, GlobalValues.BROADCAST_INTENT_CURRENTMOTION,
                     String.valueOf(Integer.parseInt(datetime, 16)),
@@ -30,18 +30,19 @@ public class CommandManager {
                     Integer.parseInt(distance, 16),
                     Integer.parseInt(calo, 16),
                     Integer.parseInt(sleep, 16));
-        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEP)) {//返回睡眠质量数据
-            for (int i = 10; i <= 40; i += 2) {
+        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEP_BACK)) {//返回睡眠质量数据
+            Log.e("xpp","同步睡眠数据完成:"+dataString.toString());
+            for (int i = 10; i < 40; i += 2) {
                 //将十六进制字符转化为二进制字符
                 String BinaryString = Utils.toFullBinaryString(Integer.parseInt(dataString.substring(i, i + 2), 16));
-                int sleepData = Integer.parseInt(BinaryString.substring(0, 2), 2);//睡眠质量数据
+                int sleepData = Integer.parseInt(BinaryString.substring(24, 26), 2);//睡眠质量数据
                 // 睡眠质量数据如果为 0 表明没有记录或没有睡眠，有记录时的取值范围为（ 1-3）。 3 为最好的睡眠质量， 1 为最差的睡眠质
                 if (sleepData == 0)
                     return;
                 if (sleepData == 1) {
                     //浅睡状态
                     lightSleepTime += sleepData;
-                } else if (sleepData == 3) {
+                } else if (sleepData == 2||sleepData==3) {
                     //深度睡眠状态
                     deepSleepTime += sleepData;
                 }
@@ -51,14 +52,15 @@ public class CommandManager {
             Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000;
             String timeStr = sdf.format(new Date(time));
             Log.e(TAG, sdf.format(new Date(time)));
-            if (timeStr.equals("11:45:00")) {//发送广播通知前段显示数据
+            Log.e(TAG,"sleepLight"+lightSleepTime+",sleepdeep"+deepSleepTime);
+           // if (timeStr.equals("11:45:00")) {//发送广播通知前段显示数据
                 BroadcastManager.sendBroadcast4SleepQuality(context, GlobalValues.BROADCAST_INTENT_SLEEPQ, lightSleepTime, deepSleepTime);
-            }
+           // }
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEPNO)) {
             Log.e(TAG, "没有睡眠数据！");
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTART)) {//心率测试回复数据
             String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
-            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
             Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000;
             String timeStr = sdf.format(new Date(time));//当前手环时间
             Log.e("wyjxpp", timeStr);
@@ -81,6 +83,8 @@ public class CommandManager {
             Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000;
             String timeStr = sdf.format(new Date(time));//当前手环时间
             Log.e("wyjxpp", timeStr);
+        }else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTOP)){//心率停止回复
+            BroadcastManager.sendBroadcast4StopRate(context,GlobalValues.BROADCAST_INTENT_STOPRATE);
         }
     }
 

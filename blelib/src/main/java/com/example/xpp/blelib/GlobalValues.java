@@ -46,6 +46,11 @@ public class GlobalValues {
      * 发送手环信息数据，固件版本，MAC以及穿戴状态
      */
     public static final String BROADCAST_INTENT_BAND_INFO = "BROADCAST_INTENT_BAND_INFO";
+    /**
+     * 广播类型
+     * 发送心率停止测试
+     */
+    public static final String BROADCAST_INTENT_STOPRATE = "BROADCAST_INTENT_STOPRATE";
     //********************************广播类型********************************
 
 
@@ -182,7 +187,12 @@ public class GlobalValues {
      * 蓝牙指令
      * 同步睡眠信息
      */
-    public static final String BLE_COMMAND_TYPE_CODE_SYNSLEEP = "11";
+    public static final String BLE_COMMAND_TYPE_CODE_SYNSLEEP = "10";
+    /**
+     * 蓝牙指令
+     * 同步睡眠信息返回
+     */
+    public static final String BLE_COMMAND_TYPE_CODE_SYNSLEEP_BACK = "11";
     /**
      * 蓝牙指令
      * 发送心率测试开始指令

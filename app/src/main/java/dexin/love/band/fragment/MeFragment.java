@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.speech.tts.TextToSpeech;
@@ -106,7 +107,7 @@ import dexin.love.band.view.DialogViewSleephigh;
 import dexin.love.band.view.DialogViewSportLow;
 import dexin.love.band.view.DialogViewSporthigh;
 
-import static dexin.love.band.utils.AppUtils.getBaseContext;
+import static android.os.SystemClock.uptimeMillis;
 
 /**
  * Created by Administrator on 2016/7/26.
@@ -143,7 +144,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public static final int REQUEST_CODE_CURRENTRATE = 0x22;//把测试的心率数据上传到服务器
     public static final int REQUEST_CODE_RATE = 0x26;//把测试的心率数据上传到服务器
     public static final int REQUEST_CODE_SOS = 0x31;//把测试的心率数据上传到服务器
-    private String phone;
     public static final int GPS_UPLOAD_CODE = 0x11;
     @ViewInject(R.id.relative_location)
     private RelativeLayout see_myGPSINFO;
@@ -185,6 +185,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private AlertDialog dialog;
     private SleepData sleepData;
     private String address;
+    public static final int EXIT_GAP = 30000;
+    public long lastSysTime = 0;
 
     @Override
     protected void init() {
@@ -277,6 +279,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         mFilter.addAction(GlobalValues.BROADCAST_INTENT_RATE);//获取心率测试值
         mFilter.addAction(GlobalValues.BROADCAST_INTENT_A_KEY_ALARM);//一键报警
         mFilter.addAction(GlobalValues.BROADCAST_INTENT_BAND_INFO);//获取固件版本，MAc地址
+        mFilter.addAction(GlobalValues.BROADCAST_INTENT_STOPRATE);//获取心率停止测试
         getActivity().registerReceiver(mReceiver, mFilter);
     }
 
@@ -305,7 +308,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
             @Override
             public void close() {
-                if (mBleEngine != null)
+                //if (mBleEngine != null)
                     // mBleEngine.disconnect();
                     mBleEngine.close();
             }
@@ -499,19 +502,20 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 EventBus.getDefault().post(new NavFragmentEvent(new Fragment_Shezhi()));
                 break;
             case R.id.relative_about://关于我们
-                downFile(ParameterManager.HOST+"uploads/authentication/image/upgrade.bin");
+                // downFile(ParameterManager.HOST+"uploads/authentication/image/upgrade.bin");
                 break;
             default:
                 break;
         }
     }
+
     /**
      * 将文件下载写入内存，再从内存中读取
      *
      * @param url
      */
     private void downFile(final String url) {
-       progressDialog.show();
+        progressDialog.show();
         //联网下载软件并存储在内存中
         new Thread() {
             public void run() {
@@ -533,7 +537,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         byte[] buf = new byte[1024];
                         int ch = -1;
                         int count = 0;
-                       progressDialog.setMax((int) length);
+                        progressDialog.setMax((int) length);
                         while ((ch = is.read(buf)) != -1) {
                             fileOutputStream.write(buf, 0, ch);
                             count += ch;
@@ -815,6 +819,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             }
         }
     }
+
     // 将数据封装为ContentValues,心率数据局放入数据库
     public ContentValues toContentValues(String time, int rate, String phone) {
         // 底部类似于Map
@@ -826,19 +831,22 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         return values;
     }
 
-    /**
-     * 发送命令，心率停止测试
-     */
-    private void functionRateFinished() {
-        mWorkQueue.execute(new Runnable() {
-            @Override
-            public void run() {
-                //  mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_STOP);//发送心率测试关闭
-                CommandManager.sendStopRate(mBleEngine);
-            }
-        });
+//    /**
+//     * 发送命令，心率停止测试
+//     */
+//    private void functionRateFinished() {
+//        mWorkQueue.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                //  mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_STOP);//发送心率测试关闭
+//                CommandManager.sendStopRate(mBleEngine);
+//                Log.e("wyj", "stop to rate");
+//            }
+//        });
+//    }
+
+    private void afterStopRateHandler() {
         //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
-        Log.e("wyj", "functionRateFinished");
         com.alibaba.fastjson.JSONObject object = new com.alibaba.fastjson.JSONObject();
         JSONArray jsonArray = new JSONArray();
         List<RateListData> rateList = new ArrayList<>();
@@ -903,16 +911,22 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String calories = new DecimalFormat("0.0").format(bundle.getInt(GlobalValues.NAME_CALORIES) / 1000.0);
                 SportData sportData = new SportData(steps, calories, userInfo.getMobile(), distance);
                 Log.d("wyj", "sleepTime is " + bundle.getInt(GlobalValues.NAME_SLEEP));
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm:ss");
-                String sleepTotal = simpleDateFormat.format(new Date(bundle.getInt(GlobalValues.NAME_SLEEP) * 1000L));
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
+                String sleepTotal = simpleDateFormat.format(new Date((bundle.getInt(GlobalValues.NAME_SLEEP)-8*60*60)*1000L));
                 sleepData.setTotal_hour_str(sleepTotal);//睡眠总时间
                 //把计步监听的结果上传服务器
                 updataSportData(steps, calories, distance);
                 EventBus.getDefault().post(sportData);
+//                mWorkQueue.execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        CommandManager.sendSynSleep(mBleEngine, 1);
+//                    }
+//                });
                 mWorkQueue.execute(new Runnable() {
                     @Override
                     public void run() {
-                        CommandManager.sendSynSleep(mBleEngine, 1);
+                        CommandManager.sendSynSleep(mBleEngine, 0);
                     }
                 });//发送获取当天睡眠质量数据，0表示当天数据，1表示昨天数据，2表示前天数据
                 //发送心率测试开始
@@ -1000,6 +1014,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 int status = bundle.getInt(GlobalValues.NAME_RATE_STATUS);
                 if (rate == 0)
                     return;
+                if (lastSysTime + EXIT_GAP <= System.currentTimeMillis()) {//如果测试时间超过30秒
+                    //发送停止心率测试指令
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandManager.sendStopRate(mBleEngine);
+                            Log.e("wyj","stop to rate");
+                        }
+                    });
+
+                }
                 //将心率数据发给首页
                 Intent intent_health = new Intent();
                 intent_health.putExtra("tempRate", rate);
@@ -1021,6 +1046,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String Mac = bundle.getString(GlobalValues.NAME_MAC);
                 String status = bundle.getString(GlobalValues.NAME_BAND_STATUS);
                 Log.e("xppwyj", "固件版本：" + version + ",固件地址:" + Mac + ",穿戴状态" + status);
+                //比较服务器的固件版本号，如果不一样则固件升级
+                //1.打开升级通道
+//                mWorkQueue.execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+//                    }
+//                });
+            } else if (action.equals(GlobalValues.BROADCAST_INTENT_STOPRATE)) {//心率停止测试
+                //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
+                afterStopRateHandler();
             }
         }
     };
@@ -1036,19 +1072,14 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 @Override
                 public void run() {
                     CommandManager.sendStartRate(mBleEngine, "FFFFFFFF");
+                    //记录当前时间
+                    lastSysTime = System.currentTimeMillis();
                     Log.e("wyj", "start to rate");
                 }
             });
             String rate_ji = preferences.getString(ParameterManager.SHEZHI_JIANCEXINLV, "3");
             rate_int = Integer.parseInt(rate_ji);
             myHandler.postDelayed(this, 1000 * 60 * rate_int);
-            myHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    functionRateFinished();
-                }
-            }, 1000 * 30);
-
         }
     };
 

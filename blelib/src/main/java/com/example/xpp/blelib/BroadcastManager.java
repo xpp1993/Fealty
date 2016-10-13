@@ -50,7 +50,12 @@ public class BroadcastManager {
     public static void sendBroadcast4CommandReceived(Context context, String intentAction) {
         sendBroadcast(context, intentAction, null);
     }
-
+    /**
+     * 发送指令心率停止测试广播
+     */
+    public static void sendBroadcast4StopRate(Context context, String intentAction) {
+        sendBroadcast(context, intentAction, null);
+    }
     /**
      * 发送一键报警广播
      */
