@@ -143,6 +143,33 @@ public final class DecodeManager {
     }
 
     /**
+     * 固件升级
+     * @param jsonObject
+     * @param messageWhat
+     * @param handler
+     * @throws JSONException
+     */
+    public static void decodeFirmware(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
+        Log.v("decodeFirmware", jsonObject.toString());
+        Message msg = new Message();
+        Bundle data = new Bundle();
+        msg.what = messageWhat;
+        insertRecInformation(data, jsonObject);
+        if (isRequestOK(jsonObject)) {
+            int code = jsonObject.optInt("code");
+            String desc = jsonObject.optString("desc");
+            data.putInt("code", code);
+            data.putString("desc", desc);
+            JSONObject object = jsonObject.optJSONObject("json").optJSONObject("version");
+            String versions = object.optString("versions");
+            String url = object.optString("url");
+            data.putString("versions", versions);
+            data.putString("url", url);
+        }
+        msg.setData(data);
+        handler.sendMessage(msg);
+    }
+    /**
      * 解析 GPS信息
      *
      * @param jsonObject

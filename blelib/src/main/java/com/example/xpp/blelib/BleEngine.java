@@ -1,5 +1,6 @@
 package com.example.xpp.blelib;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -9,11 +10,23 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -85,14 +98,14 @@ public class BleEngine {
                     + " " + characteristic.getUuid().toString()
                     + " -> " + Utils.bytesToHexString(characteristic.getValue())
             );
-            CommandManager.decode(mContext,characteristic.getValue());
+            CommandManager.decode(mContext, characteristic.getValue());
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
-            Log.d("wyj","onCharacteristicWrite");
-            BroadcastManager.sendBroadcast4CommandReceived(mContext,GlobalValues.BROADCAST_INTENT_COMMAND_RECEIVED);
+            Log.d("wyj", "onCharacteristicWrite");
+            BroadcastManager.sendBroadcast4CommandReceived(mContext, GlobalValues.BROADCAST_INTENT_COMMAND_RECEIVED);
         }
     };
 
@@ -212,10 +225,45 @@ public class BleEngine {
     }
 
     public boolean writeCharacteristic(byte[] data) {
-        if(mBluetoothGattCharacteristicWriteable == null || mBluetoothGatt == null)
+        if (mBluetoothGattCharacteristicWriteable == null || mBluetoothGatt == null)
             return false;
         mBluetoothGattCharacteristicWriteable.setValue(data);
-       return mBluetoothGatt.writeCharacteristic(mBluetoothGattCharacteristicWriteable);
+        return mBluetoothGatt.writeCharacteristic(mBluetoothGattCharacteristicWriteable);
+    }
+
+    /************************************xpp firmwareupgrade************************************/
+
+    /**
+     * 手环进入升级模式重新扫描连接手环
+     */
+    public void scanBleDeviceFirmwaraUpgarde(final boolean enable, int scanTimeMillisecond, final ListScanCallback callback) {
+        final BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
+            @Override
+            public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+                List<UUID> uuids = Uuid.parseFromAdvertisementData(scanRecord);
+                for (UUID uuid : uuids) {
+                    if (uuid.equals(Statics.SPOTA_SERVICE_UUID) && !mBluetoothDevices.contains(device)) {
+                        mBluetoothDevices.add(device);
+                        Log.e("固件升级", device.getName() + "\n" + device.getAddress());
+                    }
+                }
+            }
+        };
+        if (enable) {
+            // Stops scanning after a pre-defined scan period.
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    callback.onDeviceFound(mBluetoothDevices);
+                }
+            }, scanTimeMillisecond);
+            mBluetoothDevices.clear();
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+        } else {
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            callback.onDeviceFound(mBluetoothDevices);
+        }
     }
 }
 

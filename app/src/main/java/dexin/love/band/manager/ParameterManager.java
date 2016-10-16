@@ -1,5 +1,7 @@
 package dexin.love.band.manager;
 
+import android.os.Environment;
+
 public class ParameterManager {
     public static int nickNameLength = 8;
     public static final int CURRENT_STATUES = 0; // 当前状态不是睡眠状态，当前状态为运动状态
@@ -52,6 +54,7 @@ public class ParameterManager {
 //    public static final String SELECT_USER_HEART="http://192.168.8.133:8080/cuffapi/heart/select_user_heart";
 //    public static final String SELECT_USER_BINDED="http://192.168.8.133:8080/cuffapi/current_heart/select_binded_user_msg";
     public static final String SOS = "cuffapi/user/send_sms_sos";
+    public static final String FIRMWAREUPGRADE = "cuffapi/user/get_fierware_msg";
     public static final String GET_CHECK_CODE = "http://120.76.27.233:8080/cuffapi/user/get_check_code?phone=";
     public static final String SIGN_IN_SUBMIT = "http://120.76.27.233:8080/cuffapi/user/sign_in_submit";
     public static final String RESET_PASSWORD = "http://120.76.27.233:8080/cuffapi/user/password_submit";
@@ -73,4 +76,5 @@ public class ParameterManager {
     public static final String SELECT_USER_BINDED = "http://120.76.27.233:8080/cuffapi/current_heart/select_binded_user_msg";
     public static final String APPLICATION_NAME = "dexin.love.band.apk";
     public static final String FIRMWARE_NAME = "upgrade.bin";
+    public  static String filesDir = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Suota";
 }
