@@ -218,7 +218,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         lat = Double.parseDouble(latstr);
         lon = Double.parseDouble(lonStr);
 
-        shuimiantotal.setText("睡眠总时间  " + total_hour_str);
+        shuimiantotal.setText("睡眠时间  " + total_hour_str);
         shuimiandetail2.setText("浅度睡眠" + light_hour + "小时" + light_minute + "分钟");
         shuimiandetail.setText("深度度睡眠" + deep_hour + "小时" + deep_minute + "分钟");
 

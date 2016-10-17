@@ -120,7 +120,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
             if (versionCode < userInfo.getVersionCode()) {//更新版本
                 doNewVersionDlgShow();
             } else {//提示当前是最新版本
-                notNewVersionDlgShow();
+               // notNewVersionDlgShow();
             }
         }
     }

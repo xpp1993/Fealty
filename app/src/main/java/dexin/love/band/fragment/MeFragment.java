@@ -14,9 +14,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -70,6 +72,7 @@ import java.util.Map;
 import de.greenrobot.event.EventBus;
 import de.hdodenhof.circleimageview.CircleImageView;
 import dexin.love.band.MainActivity;
+import dexin.love.band.Manifest;
 import dexin.love.band.R;
 import dexin.love.band.baidugps.LocationService;
 import dexin.love.band.baidugps.MyLocationListener;
@@ -186,7 +189,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public long lastSysTime = 0;
     private String version = null;//固件版本号
     private ProgressDialog m_progressDlg;//更新软件进度条
-
+    private boolean isFirm = false;//是否是固件升级状态
+   //private  String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION};
+//    private  String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION};
     @Override
     protected void init() {
         if (!EventBus.getDefault().isRegistered(this)) {
@@ -240,6 +245,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         notificationManager = ((BaseApplication) AppUtils.getBaseContext()).notificationManager;
         tts = new TextToSpeech(AppUtils.getBaseContext(), this);
         sleepData = new SleepData();
+        //判断是否有权限
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            if (getActivity().checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//               getActivity().requestPermissions(permissions, 17);//请求权限
+//                //判断是否需要 向用户解释，为什么要申请该权限
+//                shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION);
+//                Log.e("xpppermission","Manifest.permission.ACCESS_COARSE_LOCATION");
+//            }
+//        }
     }
 
     /**
@@ -564,7 +578,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     });
                     //代表发送命令进入升级模式的过程
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(500);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -572,6 +586,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     myHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            isFirm = true;//固件升级状态标杆
                             scanAndConnectforName();
                         }
                     });
@@ -858,7 +873,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 case REQUEST_CODE_RATE:
                     if (msg.getData().getInt("code") == 1) {
                         Log.e("upLoad:", msg.getData().getString("desc"));
-                        ToastUtils.showToastInUIThread("心率数据已上传到服务器！");
+                      //  ToastUtils.showToastInUIThread("心率数据已上传到服务器！");
                     }
                     break;
                 case REQUEST_CODE_CURRENTRATE://上传实时心率
@@ -955,7 +970,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String calories = new DecimalFormat("0.0").format(bundle.getInt(GlobalValues.NAME_CALORIES) / 1000.0);
                 SportData sportData = new SportData(steps, calories, userInfo.getMobile(), distance);
                 Log.d("wyj", "sleepTime is " + bundle.getInt(GlobalValues.NAME_SLEEP));
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
                 String sleepTotal = simpleDateFormat.format(new Date((bundle.getInt(GlobalValues.NAME_SLEEP) - 8 * 60 * 60) * 1000L));
                 sleepData.setTotal_hour_str(sleepTotal);//睡眠总时间
                 //把计步监听的结果上传服务器
@@ -1013,7 +1028,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String state = intent.getExtras().getString(GlobalValues.NAME_CONNECT_STATE);
                 if (TextUtils.equals(state, GlobalValues.VALUE_CONNECT_STATE_YES)) {//成功连接手环
                     dialog.dismiss();
-                  // bluee_iv_left.setState(true);
+                    // bluee_iv_left.setState(true);
                     myHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -1022,7 +1037,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     }, 500);
                 } else {
                     progressDialog.dismiss();
-                    //dialog.dismiss();
+                    if (!isFirm)
+                        dialog.dismiss();
                     ToastUtils.showToastInUIThread("与手环失去连接！");
                     bluee_iv_left.setState(false);
                     readSP();
@@ -1060,7 +1076,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 int status = bundle.getInt(GlobalValues.NAME_RATE_STATUS);
                 if (rate == 0)
                     return;
-                if (lastSysTime + 30000 <= System.currentTimeMillis()) {//如果测试时间超过30秒
+                // if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
+                if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
+                    Log.e("lastSysTime", lastSysTime + "," + ParameterManager.Time + "," + System.currentTimeMillis());
                     //发送停止心率测试指令
                     mWorkQueue.execute(new Runnable() {
                         @Override
@@ -1095,7 +1113,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 //比较服务器的固件版本号，如果不一样则固件升级
                 //1.下载升级包
 //                Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
-                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.FIRMWAREUPGRADE, null, null, MeFragment.REQUEST_CODE_FIRMEUPGRADE, MeFragment.this);
+                // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.FIRMWAREUPGRADE, null, null, MeFragment.REQUEST_CODE_FIRMEUPGRADE, MeFragment.this);
                 //2.打开升级通道
 //                mWorkQueue.execute(new Runnable() {
 //                    @Override
@@ -1157,10 +1175,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             mWorkQueue.execute(new Runnable() {
                 @Override
                 public void run() {
-                    CommandManager.sendStartRate(mBleEngine, "FFFFFFFF");
                     //记录当前时间
                     lastSysTime = System.currentTimeMillis();
                     Log.e("wyj", "start to rate");
+                    CommandManager.sendStartRate(mBleEngine, "FFFFFFFF");
                 }
             });
             String rate_ji = preferences.getString(ParameterManager.SHEZHI_JIANCEXINLV, "3");

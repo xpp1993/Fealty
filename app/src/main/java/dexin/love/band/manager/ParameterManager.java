@@ -77,4 +77,5 @@ public class ParameterManager {
     public static final String APPLICATION_NAME = "dexin.love.band.apk";
     public static final String FIRMWARE_NAME = "upgrade.bin";
     public  static String filesDir = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Suota";
+    public static long  Time = 30000;
 }

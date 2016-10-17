@@ -2,7 +2,7 @@ package com.example.xpp.blelib;
 
 import android.content.Context;
 import android.util.Log;
-
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -22,7 +22,7 @@ public class CommandManager {
             String steps = dataString.substring(16, 18) + dataString.substring(14, 16) + dataString.substring(12, 14) + dataString.substring(10, 12);
             String distance = dataString.substring(24, 26) + dataString.substring(22, 24) + dataString.substring(20, 22) + dataString.substring(18, 20);
             String calo = dataString.substring(32, 34) + dataString.substring(30, 32) + dataString.substring(28, 30) + dataString.substring(26, 28);
-            String sleep = "00"+dataString.substring(38, 40) + dataString.substring(36, 38) + dataString.substring(34, 36);
+            String sleep = "00" + dataString.substring(38, 40) + dataString.substring(36, 38) + dataString.substring(34, 36);
             BroadcastManager.sendBroadcast4CURRENTMOTION(
                     context, GlobalValues.BROADCAST_INTENT_CURRENTMOTION,
                     String.valueOf(Integer.parseInt(datetime, 16)),
@@ -31,31 +31,38 @@ public class CommandManager {
                     Integer.parseInt(calo, 16),
                     Integer.parseInt(sleep, 16));
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEP_BACK)) {//返回睡眠质量数据
-            Log.e("xpp","同步睡眠数据完成:"+dataString.toString());
-            for (int i = 10; i < 40; i += 2) {
-                //将十六进制字符转化为二进制字符
-                String BinaryString = Utils.toFullBinaryString(Integer.parseInt(dataString.substring(i, i + 2), 16));
-                int sleepData = Integer.parseInt(BinaryString.substring(24, 26), 2);//睡眠质量数据
-                // 睡眠质量数据如果为 0 表明没有记录或没有睡眠，有记录时的取值范围为（ 1-3）。 3 为最好的睡眠质量， 1 为最差的睡眠质
-                if (sleepData == 0)
-                    return;
-                if (sleepData == 1) {
-                    //浅睡状态
-                    lightSleepTime += sleepData;
-                } else if (sleepData == 2||sleepData==3) {
-                    //深度睡眠状态
-                    deepSleepTime += sleepData;
-                }
-            }
+            Log.e("xpp", "同步睡眠数据完成:" + dataString.toString());
             String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
-            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
             Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000;
             String timeStr = sdf.format(new Date(time));
-            Log.e(TAG, sdf.format(new Date(time)));
-            Log.e(TAG,"sleepLight"+lightSleepTime+",sleepdeep"+deepSleepTime);
-           // if (timeStr.equals("11:45:00")) {//发送广播通知前段显示数据
-                BroadcastManager.sendBroadcast4SleepQuality(context, GlobalValues.BROADCAST_INTENT_SLEEPQ, lightSleepTime, deepSleepTime);
+            //判断时
+            //int k=DateCompare(timeStr,"23:45:00","HH:mm:ss");
+            int j=DateCompare(timeStr,"21:00:00","HH:mm:ss");
+         //   if (j==1){//如果时间早于23:45:00 晚于08:00:00
+              //  Log.e(TAG, sdf.format(new Date(time))+","+timeStr+","+k+","+j);1
+                Log.e(TAG, sdf.format(new Date(time))+","+timeStr+","+j);
+                for (int i = 10; i < 40; i += 2) {
+                    //将十六进制字符转化为二进制字符
+                    String BinaryString = Utils.toFullBinaryString(Integer.parseInt(dataString.substring(i, i + 2), 16));
+                    int sleepData = Integer.parseInt(BinaryString.substring(24, 26), 2);//睡眠质量数据
+                    Log.e(TAG,sleepData+"");
+                    // 睡眠质量数据如果为 0 表明没有记录或没有睡眠，有记录时的取值范围为（ 1-3）。 3 为最好的睡眠质量， 1 为最差的睡眠质
+                    if (sleepData == 0)
+                        return;
+                    if (sleepData == 1) {
+                        //浅睡状态
+                        lightSleepTime += 1;
+                    } else if (sleepData == 2 || sleepData == 3) {
+                        //深度睡眠状态
+                        deepSleepTime += 1;
+                    }
+               }
+                Log.e(TAG, "sleepLight" + lightSleepTime + ",sleepdeep" + deepSleepTime);
            // }
+            // if (timeStr.equals("11:45:00")) {//发送广播通知前段显示数据
+            BroadcastManager.sendBroadcast4SleepQuality(context, GlobalValues.BROADCAST_INTENT_SLEEPQ, lightSleepTime, deepSleepTime);
+            // }
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEPNO)) {
             Log.e(TAG, "没有睡眠数据！");
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTART)) {//心率测试回复数据
@@ -63,7 +70,7 @@ public class CommandManager {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
             Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000;
             String timeStr = sdf.format(new Date(time));//当前手环时间
-            Log.e("wyjxpp", timeStr);
+          //  Log.e(TAG, timeStr);
             int rate = Integer.valueOf(dataString.substring(10, 12), 16);//当前心率值
             int status = Integer.valueOf(dataString.substring(12, 14), 16);//当前状态，0x00:不是睡眠状态，0x01,当前睡眠状态最差，0x03:当前睡眠状态最好
             //发送广播给前端
@@ -82,15 +89,41 @@ public class CommandManager {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd  hh:mm:ss");
             Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000;
             String timeStr = sdf.format(new Date(time));//当前手环时间
-            Log.e("wyjxpp", timeStr);
-        }else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTOP)){//心率停止回复
-            BroadcastManager.sendBroadcast4StopRate(context,GlobalValues.BROADCAST_INTENT_STOPRATE);
+            Log.e(TAG, timeStr);
+        } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTOP)) {//心率停止回复
+            BroadcastManager.sendBroadcast4StopRate(context, GlobalValues.BROADCAST_INTENT_STOPRATE);
         }
     }
+
 
     private static synchronized void send(final BleEngine bleEngine, final byte[] data) {
         Log.e(TAG, "sendCommand -> " + Utils.bytesToHexString(data));
         bleEngine.writeCharacteristic(data);
+    }
+
+    /***
+     * 根据时间类型比较时间大小
+     *
+     * @param source
+     * @param traget
+     * @param type      "YYYY-MM-DD" "yyyyMMdd HH:mm:ss"  类型可自定义
+     * @return 0 ：source和traget时间相同
+     * 1 ：source比traget时间大
+     * -1：source比traget时间小
+     * @throws Exception
+     */
+    public static  int DateCompare(String source, String traget, String type) {
+        int ret = 2;
+        SimpleDateFormat format = new SimpleDateFormat(type);
+        Date sourcedate = null;
+        try {
+            sourcedate = format.parse(source);
+            Date tragetdate = format.parse(traget);
+            ret = sourcedate.compareTo(tragetdate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 
     /**

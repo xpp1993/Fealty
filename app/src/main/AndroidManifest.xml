@@ -33,6 +33,19 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
     <!-- 访问网络，网络定位需要上网-->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- android 6.0 自定义权限-->
+    <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission-sdk-23 android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <permission
+        android:name="${applicationId}.permission.ACCESS_COARSE_LOCATION"
+        android:protectionLevel="dangerous" />
+    <uses-permission android:name="${applicationId}.permission.ACCESS_COARSE_LOCATION" />
+    <permission
+        android:name="${applicationId}.permission.ACCESS_FINE_LOCATION"
+        android:protectionLevel="dangerous" />
+    <uses-permission android:name="${applicationId}.permission.ACCESS_FINE_LOCATION" />
+
+
     <permission
         android:name="${applicationId}.permission.JPUSH_MESSAGE"
         android:protectionLevel="signature" />
@@ -189,6 +202,6 @@
         </service>
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="rrewVcsNhyaeQ8pOgYpdEYDYZiwVptuk" />
+            android:value="nPPfD6Cvhv7kSky2qtiHcxYrFVOwHMUG" />
     </application>
 </manifest>
