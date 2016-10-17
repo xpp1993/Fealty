@@ -18,6 +18,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -186,6 +187,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public long lastSysTime = 0;
     private String version = null;//固件版本号
     private ProgressDialog m_progressDlg;//更新软件进度条
+    private boolean isFirm = false;//是否进入升级模式
+
 
     @Override
     protected void init() {
@@ -502,7 +505,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 EventBus.getDefault().post(new NavFragmentEvent(new Fragment_Shezhi()));
                 break;
             case R.id.relative_about://关于我们
-                // downFile(ParameterManager.HOST+"uploads/authentication/image/upgrade.bin");
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+                    }
+                });
                 break;
             default:
                 break;
@@ -572,6 +580,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     myHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            isFirm = true;
                             scanAndConnectforName();
                         }
                     });
@@ -1013,7 +1022,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String state = intent.getExtras().getString(GlobalValues.NAME_CONNECT_STATE);
                 if (TextUtils.equals(state, GlobalValues.VALUE_CONNECT_STATE_YES)) {//成功连接手环
                     dialog.dismiss();
-                  // bluee_iv_left.setState(true);
+                    // bluee_iv_left.setState(true);
+                    if (isFirm) {//进入升级模式连接成功扫描内存中的升级文件
+                        File fileFirm = new File(ParameterManager.filesDir, ParameterManager.FIRMWARE_NAME);//获取内存里的升级包文件
+
+
+                    }
                     myHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {

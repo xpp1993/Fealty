@@ -20,6 +20,14 @@ import static dexin.love.band.manager.ParameterManager.filesDir;
  * Created by wouter on 9-10-14.
  */
 public class File {
+    private InputStream inputStream;
+    private int bytesAvailable;
+
+    public File(InputStream inputStream) throws IOException {
+        this.inputStream = inputStream;
+        this.bytesAvailable = this.inputStream.available();
+    }
+
     /**
      * 创建文件
      */
@@ -31,6 +39,12 @@ public class File {
         if (!directory.exists() && directory.isDirectory())
             directory.mkdirs();
         else
-            System.out.println(filesDir+"文件存在");
+            System.out.println(filesDir + "文件存在");
+    }
+
+    public static File getByFileName(String filename) throws IOException {
+        // Get the file and store it in fileStream
+        InputStream is = new FileInputStream(filesDir + "/" + filename);
+        return new File(is);
     }
 }
