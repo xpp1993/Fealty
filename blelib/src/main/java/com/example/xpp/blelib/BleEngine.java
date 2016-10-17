@@ -1,6 +1,4 @@
 package com.example.xpp.blelib;
-
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -10,26 +8,12 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
@@ -45,7 +29,7 @@ public class BleEngine {
     private BluetoothGattCharacteristic mBluetoothGattCharacteristicWriteable;
     private BluetoothGattCharacteristic mBluetoothGattCharacteristicListenable;
     private Handler mHandler = new Handler();
-
+    private BluetoothDevice device;
     public interface ListScanCallback {
         void onDeviceFound(final List<BluetoothDevice> devices);
     }

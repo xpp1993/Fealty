@@ -10,11 +10,11 @@ android {
         }
     }
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "24.0.3"
     defaultConfig {
         applicationId "dexin.love.band"
-        minSdkVersion 18
-        targetSdkVersion 23
+        minSdkVersion 15
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
     }
@@ -38,11 +38,11 @@ android {
     }
     //2016-10-10 xpp add
     lintOptions {
-        //lint 遇到 error 时继续 构建
+        //lint
         abortOnError false
-        //build release 版本 时 开启lint 检测
+        //build release
         checkReleaseBuilds false
-        // 防止在发布的时候出现因MissingTranslation导致Build Failed!
+        //
         disable 'MissingTranslation'
     }
     //2016-10-10 xpp add
