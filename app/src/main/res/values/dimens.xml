@@ -11,4 +11,6 @@
     <dimen name="text_size">30dp</dimen>
     <!-- card item space -->
     <dimen name="card_item_space">8dp</dimen>
+
+    <dimen name="radio_button_padding">7dp</dimen>
 </resources>

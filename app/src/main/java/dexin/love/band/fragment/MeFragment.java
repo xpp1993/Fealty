@@ -72,7 +72,6 @@ import java.util.Map;
 import de.greenrobot.event.EventBus;
 import de.hdodenhof.circleimageview.CircleImageView;
 import dexin.love.band.MainActivity;
-import dexin.love.band.Manifest;
 import dexin.love.band.R;
 import dexin.love.band.baidugps.LocationService;
 import dexin.love.band.baidugps.MyLocationListener;
@@ -85,6 +84,7 @@ import dexin.love.band.bean.SleepData;
 import dexin.love.band.bean.SportData;
 import dexin.love.band.bean.UserInfo;
 import dexin.love.band.event.NavFragmentEvent;
+import dexin.love.band.firmwareupgrade.ScanActivity;
 import dexin.love.band.manager.DecodeManager;
 import dexin.love.band.manager.ParameterManager;
 import dexin.love.band.manager.SPManager;
@@ -190,7 +190,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private String version = null;//固件版本号
     private ProgressDialog m_progressDlg;//更新软件进度条
     private boolean isFirm = false;//是否是固件升级状态
-   //private  String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION};
+    @ViewInject(R.id.relative_firmupgrade)
+    private RelativeLayout layout_firmupgrade;
+    //private long sosTime = 0;
+
+    //private  String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION};
 //    private  String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION};
     @Override
     protected void init() {
@@ -304,6 +308,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         me_shezhi.setOnClickListener(this);
         relative_about.setOnClickListener(this);
         relative_location.setOnClickListener(this);
+        layout_firmupgrade.setOnClickListener(this);
         bluee_iv_left.setSlideListener(new SlideSwitch.SlideListener() {
             @Override
             public void open() {
@@ -517,6 +522,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 break;
             case R.id.relative_about://关于我们
                 // downFile(ParameterManager.HOST+"uploads/authentication/image/upgrade.bin");
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+                    }
+                });//进入固件升级模式
+                break;
+            case R.id.relative_firmupgrade: //固件升级
+                Intent i = new Intent(this.getActivity(), ScanActivity.class);
+                startActivity(i);
                 break;
             default:
                 break;
@@ -840,6 +855,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                          * 手机反馈你的语音信息已发出（抱紧方式可自定义）
                          * 子女收到短信提醒
                          */
+                        // sosTime = System.currentTimeMillis();
                         DialogViewKeyAlarm dialogView = null;
                         if (message_dialog == true) {
                             dialogView = new DialogViewKeyAlarm(AppUtils.getBaseContext());
@@ -873,7 +889,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 case REQUEST_CODE_RATE:
                     if (msg.getData().getInt("code") == 1) {
                         Log.e("upLoad:", msg.getData().getString("desc"));
-                      //  ToastUtils.showToastInUIThread("心率数据已上传到服务器！");
+                        //  ToastUtils.showToastInUIThread("心率数据已上传到服务器！");
                     }
                     break;
                 case REQUEST_CODE_CURRENTRATE://上传实时心率
@@ -1022,6 +1038,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 });//发送获取手环信息，比如固件版本，MAC地址
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_A_KEY_ALARM)) {//一键报警广播
                 //app接收到sos发送给后台
+//                if (sosTime+3*60*1000>System.currentTimeMillis()){
+//
+//                }else{
+//
+//                }
                 Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.SOS, params, null, MeFragment.REQUEST_CODE_SOS, MeFragment.this);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_CONNECT_STATE_CHANGED)) {
@@ -1074,7 +1095,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String rateTime = bundle.getString(GlobalValues.NAME_RATETIME);//该次心率测试的时间
                 int rate = bundle.getInt(GlobalValues.NAME_RATE);
                 int status = bundle.getInt(GlobalValues.NAME_RATE_STATUS);
-                if (rate == 0)
+                if (rate <=43)
                     return;
                 // if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
                 if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
@@ -1087,7 +1108,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                             Log.e("wyj", "stop to rate");
                         }
                     });
-
                 }
                 //将心率数据发给首页
                 Intent intent_health = new Intent();
