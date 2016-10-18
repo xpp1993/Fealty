@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
+
 /**
  * Created by wouter on 6-11-14.
  */
@@ -60,6 +61,9 @@ public class SuotaManager extends BluetoothManager {
                         "Please wait until the progress is\n" +
                         "completed.");
                 setSpotaMemDev();
+                Log.e("Tag","Uploading " + fileName + " to " + device.getName() + ".\n" +
+                        "Please wait until the progress is\n" +
+                        "completed.");
                 //activity.fileListView.setVisibility(View.GONE);
                 activity.progressBar.setVisibility(View.VISIBLE);
                 break;

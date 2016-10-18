@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 import dexin.love.band.R;
+//import io.fabric.sdk.android.Fabric;
 
 public class ScanActivity extends SuotaActivity implements OnItemClickListener {
     private final static String TAG = "ScanActivity";
@@ -40,7 +41,7 @@ public class ScanActivity extends SuotaActivity implements OnItemClickListener {
 
     // Layout varbiables;
     private ListView deviceListView;
-//    private Menu menu;
+    //    private Menu menu;
     private MenuItem menuItemRefesh;
 
     private Handler handler;
@@ -102,22 +103,22 @@ public class ScanActivity extends SuotaActivity implements OnItemClickListener {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_scan);
         this.initialize();
-		if(!Statics.fileDirectoriesCreated(this) || true) {
-			File.createFileDirectories(this);
-			Statics.setFileDirectoriesCreated(this);
-		}
+        if(!Statics.fileDirectoriesCreated(this) || true) {
+            File.createFileDirectories(this);
+            Statics.setFileDirectoriesCreated(this);
+        }
     }
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// Check which request we're responding to
-		if (requestCode == REQUEST_ENABLE_BT) {
-			// Make sure the request was successful
-			if (resultCode == Activity.RESULT_OK) {
-				this.startDeviceScan();
-			}
-		}
-	}
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == REQUEST_ENABLE_BT) {
+            // Make sure the request was successful
+            if (resultCode == Activity.RESULT_OK) {
+                this.startDeviceScan();
+            }
+        }
+    }
 
     @Override
     protected void onDestroy() {
