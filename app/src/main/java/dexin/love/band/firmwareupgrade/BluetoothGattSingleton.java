@@ -17,10 +17,10 @@ public class BluetoothGattSingleton {
     public static void setGatt(BluetoothGatt newGatt) {
         gatt = newGatt;
     }
-
-    public static BluetoothGattCharacteristic getSpotaMemInfoCharacteristic() {
-        return spotaMemInfoCharacteristic;
-    }
+//
+//    public static BluetoothGattCharacteristic getSpotaMemInfoCharacteristic() {
+//        return spotaMemInfoCharacteristic;
+//    }
 
     public static void setSpotaMemInfoCharacteristic(BluetoothGattCharacteristic spotaMemInfoCharacteristic) {
         BluetoothGattSingleton.spotaMemInfoCharacteristic = spotaMemInfoCharacteristic;

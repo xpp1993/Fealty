@@ -29,13 +29,6 @@ public class Callback extends BluetoothGattCallback {
             Log.i(TAG, "le device connected");
             gatt.discoverServices();
 
-            /*Log.i(TAG, "onServicesDiscovered");
-			BluetoothGattSingleton.setGatt(gatt);
-            Intent intent = new Intent();
-            intent.setAction(Statics.BLUETOOTH_GATT_UPDATE);
-            intent.putExtra("step", 0);
-            task.context.sendBroadcast(intent);*/
-
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             Log.i(TAG, "le device disconnected");
         }
@@ -72,9 +65,6 @@ public class Callback extends BluetoothGattCallback {
         }
         // SPOTA
         else if (characteristic.getUuid().equals(Statics.SPOTA_MEM_INFO_UUID)) {
-//			int memInfoValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0);
-//			Log.d("mem info", memInfoValue + "");
-//			DeviceActivity.getInstance().logMemInfoValue(memInfoValue);
             step = 5;
         } else {
             sendUpdate = false;
@@ -114,16 +104,8 @@ public class Callback extends BluetoothGattCallback {
             } else if (characteristic.getUuid().equals(Statics.SPOTA_MEM_DEV_UUID)) {
             }
             else if (characteristic.getUuid().equals(Statics.SPOTA_PATCH_DATA_UUID)
-                    //&& DeviceActivity.getInstance().bluetoothManager.type == SuotaManager.TYPE
                     && DeviceActivity.getInstance().bluetoothManager.chunkCounter != -1
                     ) {
-                //step = DeviceActivity.getInstance().bluetoothManager.type == SuotaManager.TYPE ? 5 : 7;
-                /*DeviceActivity.getInstance().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        DeviceActivity.getInstance().bluetoothManager.sendBlock();
-                    }
-                });*/
                 Log.d(TAG, "Next block in chunk " + DeviceActivity.getInstance().bluetoothManager.chunkCounter);
                 DeviceActivity.getInstance().bluetoothManager.sendBlock();
             }

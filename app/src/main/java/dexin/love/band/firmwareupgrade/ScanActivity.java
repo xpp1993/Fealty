@@ -140,8 +140,8 @@ public class ScanActivity extends SuotaActivity implements OnItemClickListener {
         if (mBluetoothAdapter == null) {
             // Device does not support Bluetooth
             Log.e(TAG, "Bluetooth not supported.");
-            super.showAlertDialog("Error",
-                    "Bluetooth is not supported on this device");
+//            super.showAlertDialog("Error",
+//                    "Bluetooth is not supported on this device");
         }
 
         handler = new Handler();

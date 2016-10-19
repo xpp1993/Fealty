@@ -69,7 +69,8 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 	LinearLayout imageBankContainer, patchBaseAddressContainer, blockSizeContainer;
 	View parameterI2cView, parameterSpiView;
 	Spinner sclGpioSpinner, sdaGpioSpinner, misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner, imageBankSpinner;
-	EditText patchBaseAddress, I2CDeviceAddress, blockSize;
+	//EditText patchBaseAddress, I2CDeviceAddress, blockSize;
+	EditText I2CDeviceAddress, blockSize;
 	Button sendToDeviceButton, closeButton;
 
 	int memoryType;
@@ -301,8 +302,8 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 		parameterSpiView = deviceParameterSettings.findViewById(R.id.pSpiContainer);
 
 		// SPOTA patch base address
-		patchBaseAddress = (EditText) deviceParameterSettings.findViewById(R.id.patchBaseAddress);
-		patchBaseAddress.setText(previousSettings.get(String.valueOf(R.id.patchBaseAddress)));
+//		patchBaseAddress = (EditText) deviceParameterSettings.findViewById(R.id.patchBaseAddress);
+//		patchBaseAddress.setText(previousSettings.get(String.valueOf(R.id.patchBaseAddress)));
 
 		// SUOTA image bank
 		imageBankSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.imageBank);
