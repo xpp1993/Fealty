@@ -60,12 +60,10 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 	// Progress layout attributes
 	public ProgressBar progressBar;
 	public TextView progressText;
-    ScrollView scroll;
-	TextView logWindow;
-	Button patchDevice, updateDevice;
+	Button  updateDevice;
 	RadioButton memoryTypeSPI;
 	LinearLayout imageBankContainer, blockSizeContainer;
-	View parameterI2cView, parameterSpiView;
+	View  parameterSpiView;
 	Spinner sclGpioSpinner, sdaGpioSpinner, misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner, imageBankSpinner;
 	EditText I2CDeviceAddress, blockSize;
 	Button sendToDeviceButton, closeButton;
@@ -142,12 +140,12 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 		//dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                //bluetoothManager.disconnect();
-                finish();
-            }
-        });
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				//bluetoothManager.disconnect();
+				finish();
+			}
+		});
 		dialog.show();
 
 		inflater = LayoutInflater.from(this);
@@ -159,9 +157,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 		switchView(0);
 		progressText = (TextView) progressLayout.findViewById(R.id.progress_text);
 		progressBar = (ProgressBar) progressLayout.findViewById(R.id.progress_bar);
-        scroll = (ScrollView) progressLayout.findViewById(R.id.logScroll);
-		logWindow = (TextView) progressLayout.findViewById(R.id.logWindow);
-        logWindow.setText(null, TextView.BufferType.EDITABLE);
 		progressBar.setProgress(0);
 		progressBar.setMax(100);
 	}
@@ -207,7 +202,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 		initMainScreenItems();
 
 		updateDevice = (Button) deviceMain.findViewById(R.id.updateButton);
-		patchDevice = (Button) deviceMain.findViewById(R.id.patchButton);
 		updateDevice.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -285,7 +279,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 		}
 
 		// Different views for memory types
-		parameterI2cView = deviceParameterSettings.findViewById(R.id.pI2cContainer);
 		parameterSpiView = deviceParameterSettings.findViewById(R.id.pSpiContainer);
 
 		// SUOTA image bank
@@ -421,7 +414,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 		this.clearMemoryTypeChecked();
 		this.memoryType = memoryType;
 		bluetoothManager.setMemoryType(memoryType);
-		parameterI2cView.setVisibility(View.GONE);
 		parameterSpiView.setVisibility(View.GONE);
 
             Statics.setPreviousInput(this, Statics.MEMORY_TYPE_SUOTA_INDEX, String.valueOf(memoryType));
@@ -442,7 +434,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 		}
 	}
 	private void clearMemoryTypeChecked() {
-		//memoryTypeI2C.setChecked(false);
 		memoryTypeSPI.setChecked(false);
 	}
 
@@ -461,27 +452,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 			}
 		}
 	}
-
-	public void logMemInfoValue(int memInfoValue) {
-		String message = "Patch Memory Info:\n";
-		int numberOfPatches = (memInfoValue >> 16) & 0xff;
-		int numberOfBytes = memInfoValue & 0xff;
-		int sizeOfPatches = (int) Math.ceil((double)numberOfBytes / (double)4);
-		message += "\tNumber of patches = " + numberOfPatches + "\n" +
-				"\tSize of patches = " + sizeOfPatches + " words (" + numberOfBytes + " bytes)";
-		this.log(message);
-	}
-
-	public void log(String message) {
-		this.logWindow.getEditableText().append(message + "\n");
-        this.scroll.post(new Runnable() {
-            @Override
-            public void run() {
-                scroll.fullScroll(ScrollView.FOCUS_DOWN);
-            }
-        });
-    }
-
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 							long id) {

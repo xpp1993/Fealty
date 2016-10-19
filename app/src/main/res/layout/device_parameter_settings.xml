@@ -42,7 +42,8 @@
                         android:gravity="center"
                         android:textSize="11sp"
                         android:textColor="@drawable/radio_button_text_color"
-                        android:padding="@dimen/radio_button_padding"/>
+                        android:padding="@dimen/radio_button_padding"
+                        android:visibility="gone"/>
 
                     <RadioButton
                         android:id="@+id/memoryTypeRetentionRam"
@@ -55,7 +56,8 @@
                         android:gravity="center"
                         android:textSize="11sp"
                         android:textColor="@drawable/radio_button_text_color"
-                        android:padding="@dimen/radio_button_padding"/>
+                        android:padding="@dimen/radio_button_padding"
+                        android:visibility="gone"/>
 
                     <RadioButton
                         android:id="@+id/memoryTypeI2C"
@@ -68,7 +70,8 @@
                         android:gravity="center"
                         android:textSize="11sp"
                         android:textColor="@drawable/radio_button_text_color"
-                        android:padding="@dimen/radio_button_padding"/>
+                        android:padding="@dimen/radio_button_padding"
+                        android:visibility="gone"/>
 
                     <RadioButton
                         android:id="@+id/memoryTypeSPI"
@@ -90,7 +93,8 @@
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:orientation="vertical"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="10dp"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -206,7 +210,8 @@
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:orientation="vertical"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="10dp"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_height="wrap_content"

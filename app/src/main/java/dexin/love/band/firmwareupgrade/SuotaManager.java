@@ -113,7 +113,7 @@ public class SuotaManager extends BluetoothManager {
 		switch (step) {
 			case 2:
 				if(memDevValue == 0x1) {
-					activity.log("Set SPOTA_MEM_DEV: 0x1");
+					Log.d(TAG,"Set SPOTA_MEM_DEV: 0x1");
 					goToStep(3);
 				}
 				else {

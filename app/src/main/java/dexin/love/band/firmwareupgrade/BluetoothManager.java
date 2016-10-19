@@ -141,16 +141,16 @@ public abstract class BluetoothManager {
 
 	public void enableNotifications() {
 		Log.d(TAG, "- enableNotifications");
-		activity.log("- Enable notifications for SPOTA_SERV_STATUS characteristic");
+		Log .d(TAG,"- Enable notifications for SPOTA_SERV_STATUS characteristic");
 		// Get the service status UUID from the gatt and enable notifications
 		List<BluetoothGattService> services = BluetoothGattSingleton.getGatt().getServices();
 		for (BluetoothGattService service : services) {
-			activity.log("  Found service: " + service.getUuid().toString());
+			Log.d(TAG,"  Found service: " + service.getUuid().toString());
 			List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
 			for (BluetoothGattCharacteristic characteristic : characteristics) {
-				activity.log("  Found characteristic: " + characteristic.getUuid().toString());
+				Log.d(TAG, "  Found characteristic: " + characteristic.getUuid().toString());
 				if (characteristic.getUuid().equals(Statics.SPOTA_SERV_STATUS_UUID)) {
-					activity.log("*** Found SUOTA service");
+					Log.d(TAG, "*** Found SUOTA service");
 					BluetoothGattSingleton.getGatt().setCharacteristicNotification(characteristic, true);
 					BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
 							Statics.SPOTA_DESCRIPTOR_UUID);
@@ -171,7 +171,7 @@ public abstract class BluetoothManager {
 		characteristic.setValue(memType, BluetoothGattCharacteristic.FORMAT_UINT32, 0);
 		BluetoothGattSingleton.getGatt().writeCharacteristic(characteristic);
 		Log.d(TAG, "setSpotaMemDev: " + String.format("%#10x", memType));
-		activity.log("Set SPOTA_MEM_DEV: " + String.format("%#10x", memType));
+		Log.d(TAG, "Set SPOTA_MEM_DEV: " + String.format("%#10x", memType));
 	}
 
 	/**
@@ -214,14 +214,14 @@ public abstract class BluetoothManager {
 		}
 		if (valid) {
 			Log.d(TAG, "setSpotaGpioMap: " + String.format("%#10x", memInfoData));
-			activity.log("Set SPOTA_GPIO_MAP: " + String.format("%#10x", memInfoData));
+			Log.d(TAG, "Set SPOTA_GPIO_MAP: " + String.format("%#10x", memInfoData));
 			BluetoothGattCharacteristic characteristic = BluetoothGattSingleton.getGatt().getService(Statics.SPOTA_SERVICE_UUID)
 					.getCharacteristic(Statics.SPOTA_GPIO_MAP_UUID);
 			characteristic.setValue(memInfoData, BluetoothGattCharacteristic.FORMAT_UINT32, 0);
 			BluetoothGattSingleton.getGatt().writeCharacteristic(characteristic);
 		} else {
 			Log.e(TAG, "Memory type not set.");
-			activity.log("Set SPOTA_GPIO_MAP: Memory type not set.");
+			Log.d(TAG, "Set SPOTA_GPIO_MAP: Memory type not set.");
 		}
 	}
 
@@ -233,7 +233,7 @@ public abstract class BluetoothManager {
 			preparedForLastBlock = true;
 		}
 		Log.d(TAG, "setPatchLength: " + blocksize + " - " + String.format("%#4x", blocksize));
-		activity.log("Set SPOTA_PATCH_LENGTH: " + blocksize);
+		Log.d(TAG, "Set SPOTA_PATCH_LENGTH: " + blocksize);
 		BluetoothGattCharacteristic characteristic = BluetoothGattSingleton.getGatt().getService(Statics.SPOTA_SERVICE_UUID)
 				.getCharacteristic(Statics.SPOTA_PATCH_LEN_UUID);
 		characteristic.setValue(blocksize, BluetoothGattCharacteristic.FORMAT_UINT16, 0);
@@ -270,10 +270,9 @@ public abstract class BluetoothManager {
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					activity.log(message);
+					Log.d(TAG, message);
 				}
 			});
-			//activity.log(message);
 			String systemLogMessage = "Sending block " + (blockCounter + 1) + ", chunk " + (i + 1) + ", blocksize: " + block.length + ", chunksize " + chunk.length;
 			Log.d(TAG, systemLogMessage);
 			BluetoothGattCharacteristic characteristic = BluetoothGattSingleton.getGatt().getService(Statics.SPOTA_SERVICE_UUID)
@@ -302,7 +301,7 @@ public abstract class BluetoothManager {
 
 	public void sendEndSignal() {
 		Log.d(TAG, "sendEndSignal");
-		activity.log("send SUOTA END command");
+		Log.d(TAG, "send SUOTA END command");
 		BluetoothGattCharacteristic characteristic = BluetoothGattSingleton.getGatt().getService(Statics.SPOTA_SERVICE_UUID)
 				.getCharacteristic(Statics.SPOTA_MEM_DEV_UUID);
 		characteristic.setValue(END_SIGNAL, BluetoothGattCharacteristic.FORMAT_UINT32, 0);
@@ -312,7 +311,7 @@ public abstract class BluetoothManager {
 
 	public void sendRebootSignal() {
 		Log.d(TAG, "sendRebootSignal");
-		activity.log("send SUOTA REBOOT command");
+		Log.d(TAG, "send SUOTA REBOOT command");
 		BluetoothGattCharacteristic characteristic = BluetoothGattSingleton.getGatt().getService(Statics.SPOTA_SERVICE_UUID)
 				.getCharacteristic(Statics.SPOTA_MEM_DEV_UUID);
 		characteristic.setValue(REBOOT_SIGNAL, BluetoothGattCharacteristic.FORMAT_UINT32, 0);
@@ -337,10 +336,10 @@ public abstract class BluetoothManager {
 		try {
 			BluetoothGattSingleton.getGatt().disconnect();
 			BluetoothGattSingleton.getGatt().close();
-			activity.log("Disconnect from device");
+			Log.d(TAG, "Disconnect from device");
 		} catch (Exception e) {
 			e.printStackTrace();
-			activity.log("Error disconnecting from device");
+			Log.d(TAG, "Error disconnecting from device");
 		}
 		try {
 			if(file != null) {
@@ -352,7 +351,7 @@ public abstract class BluetoothManager {
 
 	protected void onSuccess() {
 		finished = true;
-		activity.log("Upload completed");
+		Log.d(TAG, "Upload completed");
 		new AlertDialog.Builder(context)
 				.setTitle("Upload completed")
 				.setMessage("Reboot device?")
@@ -373,7 +372,7 @@ public abstract class BluetoothManager {
 	public void onError(int errorCode) {
 		if (!hasError) {
 			String error = (String) errors.get(errorCode);
-			activity.log("Error: " + error);
+			Log.d(TAG, "Error: " + error);
 			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
 			dialogBuilder.setTitle("An error occurred.")
 					.setMessage(error);
@@ -382,11 +381,6 @@ public abstract class BluetoothManager {
                     activity.finish();
 				}
 			});
-			/*dialogBuilder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-					// do nothing
-				}
-			});*/
             dialogBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
