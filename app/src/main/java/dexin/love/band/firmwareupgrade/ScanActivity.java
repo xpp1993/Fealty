@@ -86,12 +86,6 @@ public class ScanActivity extends SuotaActivity implements OnItemClickListener {
                 Log.d(TAG,
                         "Found device: " + device.getName() + " "
                                 + device.getAddress());
-//                String name = device.getName();
-//                if (name == null || name.equals("null")) {
-//                    name = "unknown";
-//                }
-//                String address = device.getAddress();
-                // deviceArrayList.add(name + "\n" + address);
             }
         }
     };

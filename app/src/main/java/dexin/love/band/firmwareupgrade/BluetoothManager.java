@@ -42,8 +42,6 @@ public abstract class BluetoothManager {
 	// SUOTA
 	int imageBank;
 
-	// SPOTA
-	int patchBaseAddress;
 
 	DeviceActivity activity;
 	File file;
@@ -91,9 +89,6 @@ public abstract class BluetoothManager {
 		this.file.setType(this.type);
 	}
 
-	public String getFileName() {
-		return fileName;
-	}
 
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
@@ -111,9 +106,6 @@ public abstract class BluetoothManager {
 		this.memoryType = memoryType;
 	}
 
-	public void setPatchBaseAddress(int patchBaseAddress) {
-		this.patchBaseAddress = patchBaseAddress;
-	}
 
 	public void setImageBank(int imageBank) {
 		this.imageBank = imageBank;

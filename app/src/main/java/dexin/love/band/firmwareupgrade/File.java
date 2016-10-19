@@ -162,25 +162,8 @@ public class File {
             map.put(file[i].getName(), file[i].getName());
         }
 
-//		Field[] fields = R.raw.class.getFields();
-//		for (int count = 0; count < fields.length; count++) {
-//			Field file = fields[count];
-//			int resourceID = -1;
-//			try {
-//				resourceID = file.getInt(file);
-//			} catch (IllegalAccessException e) {
-//				e.printStackTrace();
-//			}
-//			String name = file.getName();
-//			map.put(resourceID, name);
-//		}
         return map;
     }
-
-//	public static InputStream get(Context c, String filename) {
-//		InputStream inputStream = c.getResources().openRawResource(resourceID);
-//		return inputStream;
-//	}
 
     public static void createFileDirectories(Context c) {
         String directoryName = filesDir;
