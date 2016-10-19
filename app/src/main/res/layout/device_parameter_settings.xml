@@ -294,10 +294,11 @@
                     android:layout_height="20dp"
                     android:text="Image bank"/>
 
-                <Spinner
+                <EditText
                     android:id="@+id/imageBank"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"/>
+                    android:layout_height="50dp"
+                    android:text="0"/>
             </LinearLayout>
 
             <LinearLayout

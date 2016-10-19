@@ -4,12 +4,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -33,7 +30,6 @@ import android.widget.ViewFlipper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import dexin.love.band.R;
@@ -42,7 +38,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
     final static String TAG = "DeviceActivity";
     DeviceConnectTask connectTask;
     BroadcastReceiver bluetoothGattReceiver, progressUpdateReceiver, connectionStateReceiver;
-    String[] viewTitles;
     Map filesMap;
     ArrayList filesList = new ArrayList<Integer>();
     LayoutInflater inflater;
@@ -62,8 +57,8 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
     RadioButton memoryTypeSPI;
     LinearLayout imageBankContainer, blockSizeContainer;
     View parameterSpiView;
-    Spinner misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner, imageBankSpinner;
-    EditText blockSize;
+    Spinner misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner;
+    EditText blockSize,imageBankSpinner;
     Button sendToDeviceButton, closeButton;
 
     int memoryType;
@@ -83,8 +78,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
         bluetoothManager = new SuotaManager(this);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.device_container);
-        viewTitles = getResources().getStringArray(R.array.app_device_titles);
-
         this.bluetoothGattReceiver = new BluetoothGattReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -137,13 +130,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
         dialog.setMessage("Connecting, please wait...");
         //dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
-        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                //bluetoothManager.disconnect();
-                finish();
-            }
-        });
         dialog.show();
 
         inflater = LayoutInflater.from(this);
@@ -196,8 +182,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 
     public void initMainScreen() {
         Log.d(TAG, "initMainScreen");
-        initMainScreenItems();
-
         updateDevice = (Button) deviceMain.findViewById(R.id.updateButton);
         updateDevice.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -215,29 +199,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
         }
 
     }
-
-    private void initMainScreenItems() {
-        Log.d(TAG, "initMainScreenItems");
-        List<BluetoothGattService> services = BluetoothGattSingleton.getGatt().getServices();
-        for (BluetoothGattService service : services) {
-            List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
-            for (BluetoothGattCharacteristic characteristic : characteristics) {
-                if (characteristic.getUuid().equals(Statics.ORG_BLUETOOTH_CHARACTERISTIC_MANUFACTURER_NAME_STRING)) {
-                    bluetoothManager.characteristicsQueue.add(characteristic);
-                } else if (characteristic.getUuid().equals(Statics.ORG_BLUETOOTH_CHARACTERISTIC_MODEL_NUMBER_STRING)) {
-                    bluetoothManager.characteristicsQueue.add(characteristic);
-                } else if (characteristic.getUuid().equals(Statics.ORG_BLUETOOTH_CHARACTERISTIC_FIRMWARE_REVISION_STRING)) {
-                    bluetoothManager.characteristicsQueue.add(characteristic);
-                } else if (characteristic.getUuid().equals(Statics.ORG_BLUETOOTH_CHARACTERISTIC_SOFTWARE_REVISION_STRING)) {
-                    bluetoothManager.characteristicsQueue.add(characteristic);
-                } else if (characteristic.getUuid().equals(Statics.SPOTA_MEM_INFO_UUID)) {
-                    BluetoothGattSingleton.setSpotaMemInfoCharacteristic(characteristic);
-                }
-            }
-        }
-        bluetoothManager.readNextCharacteristic();
-    }
-
     private void initFileList() {
         fileListView = (ListView) deviceFileListView.findViewById(R.id.file_list);
 
@@ -279,17 +240,10 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
         parameterSpiView = deviceParameterSettings.findViewById(R.id.pSpiContainer);
 
         // SUOTA image bank
-        imageBankSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.imageBank);
-        ArrayAdapter<CharSequence> imageBankAdapter = ArrayAdapter.createFromResource(this,
-                R.array.image_bank_addresses, android.R.layout.simple_spinner_item);
-        imageBankAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        imageBankSpinner.setAdapter(imageBankAdapter);
-        imageBankSpinner.setOnItemSelectedListener(this);
-        int position = imageBankAdapter.getPosition(previousSettings.get(String.valueOf(R.id.imageBank)));
-        imageBankSpinner.setSelection(position);
-
+        imageBankSpinner = (EditText) deviceParameterSettings.findViewById(R.id.imageBank);
+        imageBankSpinner.setText(previousSettings.get(String.valueOf(R.id.imageBank)));
         // Spinners for SPI
+        int position;
         misoGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.misoGpioSpinner);
         mosiGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.mosiGpioSpinner);
         csGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.csGpioSpinner);
@@ -381,10 +335,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 
     public void switchView(int viewIndex) {
         this.deviceContainer.setDisplayedChild(viewIndex);
-        setTitle(viewTitles[viewIndex]);
-        if (viewIndex == 0) {
-            setTitle(bluetoothManager.getDevice().getName());
-        }
     }
 
     private void clearMemoryTypeChecked() {

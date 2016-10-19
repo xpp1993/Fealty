@@ -22,7 +22,7 @@ public class BluetoothGattSingleton {
 //        return spotaMemInfoCharacteristic;
 //    }
 
-    public static void setSpotaMemInfoCharacteristic(BluetoothGattCharacteristic spotaMemInfoCharacteristic) {
-        BluetoothGattSingleton.spotaMemInfoCharacteristic = spotaMemInfoCharacteristic;
-    }
+//    public static void setSpotaMemInfoCharacteristic(BluetoothGattCharacteristic spotaMemInfoCharacteristic) {
+//        BluetoothGattSingleton.spotaMemInfoCharacteristic = spotaMemInfoCharacteristic;
+//    }
 }

@@ -38,14 +38,6 @@
     <string name="akeyalarmNo">您的求助信息发送失败！</string>
     <string name="reflush">刷新界面</string>
 
-    <string-array name="app_device_titles">
-        <item>Device info</item>
-        <item>File selection</item>
-        <item>Parameter settings</item>
-        <item>Uploading file</item>
-    </string-array>
-    <!--<string name="menu_refresh">Refresh</string>-->
-    <!--<string name="menu_disconnect">Disconnect</string>-->
     <string name="app_devices_title">Device selection</string>
     <string-array name="gpio_values">
         <item id="0x00">P0_0</item>
