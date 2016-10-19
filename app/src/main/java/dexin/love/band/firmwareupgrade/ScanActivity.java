@@ -10,8 +10,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -25,9 +23,8 @@ import java.util.List;
 import java.util.UUID;
 
 import dexin.love.band.R;
-//import io.fabric.sdk.android.Fabric;
 
-public class ScanActivity extends SuotaActivity implements OnItemClickListener {
+public class ScanActivity extends Activity implements OnItemClickListener {
     private final static String TAG = "ScanActivity";
     private final static int REQUEST_ENABLE_BT = 1;
 
@@ -42,7 +39,7 @@ public class ScanActivity extends SuotaActivity implements OnItemClickListener {
     // Layout varbiables;
     private ListView deviceListView;
     //    private Menu menu;
-    private MenuItem menuItemRefesh;
+  //  private MenuItem menuItemRefesh;
 
     private Handler handler;
 
@@ -93,7 +90,6 @@ public class ScanActivity extends SuotaActivity implements OnItemClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       // Fabric.with(this, new Crashlytics());
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_scan);
         this.initialize();
@@ -140,8 +136,6 @@ public class ScanActivity extends SuotaActivity implements OnItemClickListener {
         if (mBluetoothAdapter == null) {
             // Device does not support Bluetooth
             Log.e(TAG, "Bluetooth not supported.");
-//            super.showAlertDialog("Error",
-//                    "Bluetooth is not supported on this device");
         }
 
         handler = new Handler();
@@ -167,9 +161,6 @@ public class ScanActivity extends SuotaActivity implements OnItemClickListener {
         mArrayAdapter.clear();
         bluetoothDeviceList.clear();
         scannedDevices.clear();
-        if(menuItemRefesh != null) {
-            menuItemRefesh.setVisible(false);
-        }
         Log.d(TAG, "Start scanning");
         setProgressBarIndeterminateVisibility(true);
 
@@ -191,9 +182,6 @@ public class ScanActivity extends SuotaActivity implements OnItemClickListener {
             Log.d(TAG, "Stop scanning");
             setProgressBarIndeterminateVisibility(false);
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
-            if (menuItemRefesh != null) {
-                menuItemRefesh.setVisible(true);
-            }
         }
     }
     /**

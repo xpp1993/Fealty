@@ -1,5 +1,6 @@
 package dexin.love.band.firmwareupgrade;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -14,8 +15,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -26,7 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -41,7 +39,7 @@ import java.util.Map;
 
 import dexin.love.band.R;
 
-public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemClickListener, View.OnClickListener, AdapterView.OnItemSelectedListener {
+public class DeviceActivity extends Activity implements AdapterView.OnItemClickListener, View.OnClickListener, AdapterView.OnItemSelectedListener {
 	final static String TAG = "DeviceActivity";
 	DeviceConnectTask connectTask;
 	BroadcastReceiver bluetoothGattReceiver, progressUpdateReceiver, connectionStateReceiver;
@@ -65,11 +63,10 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
     ScrollView scroll;
 	TextView logWindow;
 	Button patchDevice, updateDevice;
-	RadioButton memoryTypeSPI, memoryTypeI2C;
-	LinearLayout imageBankContainer, patchBaseAddressContainer, blockSizeContainer;
+	RadioButton memoryTypeSPI;
+	LinearLayout imageBankContainer, blockSizeContainer;
 	View parameterI2cView, parameterSpiView;
 	Spinner sclGpioSpinner, sdaGpioSpinner, misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner, imageBankSpinner;
-	//EditText patchBaseAddress, I2CDeviceAddress, blockSize;
 	EditText I2CDeviceAddress, blockSize;
 	Button sendToDeviceButton, closeButton;
 
@@ -272,22 +269,12 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 		int gpioValuesId = R.array.gpio_values;
 		memoryTypeSPI = (RadioButton) deviceParameterSettings.findViewById(R.id.memoryTypeSPI);
 		memoryTypeSPI.setOnClickListener(this);
-		memoryTypeI2C = (RadioButton) deviceParameterSettings.findViewById(R.id.memoryTypeI2C);
-		memoryTypeI2C.setOnClickListener(this);
-
 		closeButton = (Button) deviceParameterSettings.findViewById(R.id.buttonClose);
 		closeButton.setOnClickListener(this);
-
-		// SUOTA ONLY
 		imageBankContainer = (LinearLayout) deviceParameterSettings.findViewById(R.id.imageBankContainer);
 		blockSizeContainer = (LinearLayout) deviceParameterSettings.findViewById(R.id.blockSizeContainer);
 		blockSize = (EditText) deviceParameterSettings.findViewById(R.id.blockSize);
-
-		// SPOTA ONLY
-		patchBaseAddressContainer = (LinearLayout) deviceParameterSettings.findViewById(R.id.patchBaseAddressContainer);
-
 		if (bluetoothManager.type == SuotaManager.TYPE) {
-			patchBaseAddressContainer.setVisibility(View.GONE);
 			imageBankContainer.setVisibility(View.VISIBLE);
 			blockSizeContainer.setVisibility(View.VISIBLE);
 			String previousText = previousSettings.get(String.valueOf(R.id.blockSize));
@@ -300,10 +287,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 		// Different views for memory types
 		parameterI2cView = deviceParameterSettings.findViewById(R.id.pI2cContainer);
 		parameterSpiView = deviceParameterSettings.findViewById(R.id.pSpiContainer);
-
-		// SPOTA patch base address
-//		patchBaseAddress = (EditText) deviceParameterSettings.findViewById(R.id.patchBaseAddress);
-//		patchBaseAddress.setText(previousSettings.get(String.valueOf(R.id.patchBaseAddress)));
 
 		// SUOTA image bank
 		imageBankSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.imageBank);
@@ -448,11 +431,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 				parameterSpiView.setVisibility(View.VISIBLE);
 				memoryTypeSPI.setChecked(true);
 				break;
-
-			case Statics.MEMORY_TYPE_I2C:
-				parameterI2cView.setVisibility(View.VISIBLE);
-				memoryTypeI2C.setChecked(true);
-				break;
 		}
 	}
 
@@ -464,7 +442,7 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 		}
 	}
 	private void clearMemoryTypeChecked() {
-		memoryTypeI2C.setChecked(false);
+		//memoryTypeI2C.setChecked(false);
 		memoryTypeSPI.setChecked(false);
 	}
 
@@ -525,9 +503,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 		switch (v.getId()) {
 			case R.id.memoryTypeSPI:
 				setMemoryType(Statics.MEMORY_TYPE_SPI);
-				break;
-			case R.id.memoryTypeI2C:
-				setMemoryType(Statics.MEMORY_TYPE_I2C);
 				break;
 			case R.id.buttonClose:
 				finish();
