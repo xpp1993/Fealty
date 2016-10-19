@@ -44,8 +44,8 @@
         <item>Parameter settings</item>
         <item>Uploading file</item>
     </string-array>
-    <string name="menu_refresh">Refresh</string>
-    <string name="menu_disconnect">Disconnect</string>
+    <!--<string name="menu_refresh">Refresh</string>-->
+    <!--<string name="menu_disconnect">Disconnect</string>-->
     <string name="app_devices_title">Device selection</string>
     <string-array name="gpio_values">
         <item id="0x00">P0_0</item>

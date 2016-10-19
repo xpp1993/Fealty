@@ -127,18 +127,6 @@ public abstract class BluetoothManager {
 		this.SCK_GPIO = SCK_GPIO;
 	}
 
-	public void setSCL_GPIO(int SCL_GPIO) {
-		this.SCL_GPIO = SCL_GPIO;
-	}
-
-	public void setSDA_GPIO(int SDA_GPIO) {
-		this.SDA_GPIO = SDA_GPIO;
-	}
-
-	public void setI2CDeviceAddress(int I2CDeviceAddress) {
-		this.I2CDeviceAddress = I2CDeviceAddress;
-	}
-
 	public void enableNotifications() {
 		Log.d(TAG, "- enableNotifications");
 		Log .d(TAG,"- Enable notifications for SPOTA_SERV_STATUS characteristic");
@@ -186,18 +174,6 @@ public abstract class BluetoothManager {
 	private int getMemParamsSPI() {
 		return (MISO_GPIO << 24) | (MOSI_GPIO << 16) | (CS_GPIO << 8) | SCK_GPIO;
 	}
-
-	/**
-	 * 0x01230203 when
-	 * mem_type:			"External I2C" (0x12)
-	 * I2C device addr:		0x0123
-	 * SCL GPIO:			P0_2
-	 * SDA GPIO:			P0_3
-	 */
-	private int getMemParamsI2C() {
-		return (I2CDeviceAddress << 16) | (SCL_GPIO << 8) | SDA_GPIO;
-	}
-
 	// Step 8 in documentation
 	public void setSpotaGpioMap() {
 		int memInfoData = 0;
@@ -205,10 +181,6 @@ public abstract class BluetoothManager {
 		switch (memoryType) {
 			case Statics.MEMORY_TYPE_SPI:
 				memInfoData = this.getMemParamsSPI();
-				valid = true;
-				break;
-			case Statics.MEMORY_TYPE_I2C:
-				memInfoData = this.getMemParamsI2C();
 				valid = true;
 				break;
 		}
