@@ -39,9 +39,6 @@ public class SuotaManager extends BluetoothManager {
         }
         // If no step is set, check if Bluetooth characteristic information is set
         else {
-            int index = intent.getIntExtra("characteristic", -1);
-            String value = intent.getStringExtra("value");
-            activity.setItemValue(index, value);
             readNextCharacteristic();
         }
         Log.d(TAG, "step " + this.step);

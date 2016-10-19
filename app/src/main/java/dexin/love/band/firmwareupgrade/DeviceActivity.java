@@ -212,27 +212,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 
 	public void initMainScreen() {
 		Log.d(TAG, "initMainScreen");
-		mainItemsView = (LinearLayout) deviceMain.findViewById(R.id.mainItemsList);
-		manufacturerItem = (RelativeLayout) inflater.inflate(R.layout.device_info_item, null);
-		modelNumberItem = (RelativeLayout) inflater.inflate(R.layout.device_info_item, null);
-		firmWareVersionItem = (RelativeLayout) inflater.inflate(R.layout.device_info_item, null);
-		softwareRevisionItem = (RelativeLayout) inflater.inflate(R.layout.device_info_item, null);
-
-		TextView itemName = (TextView) manufacturerItem.findViewById(R.id.itemName);
-		itemName.setText("Manufacturer");
-		itemName = (TextView) modelNumberItem.findViewById(R.id.itemName);
-		itemName.setText("Model number");
-		itemName = (TextView) firmWareVersionItem.findViewById(R.id.itemName);
-		itemName.setText("Firmware revision");
-		itemName = (TextView) softwareRevisionItem.findViewById(R.id.itemName);
-		itemName.setText("Software revision");
-
-		if(mainItemsView.getChildCount() == 0) {
-			mainItemsView.addView(manufacturerItem);
-			mainItemsView.addView(modelNumberItem);
-			mainItemsView.addView(firmWareVersionItem);
-			mainItemsView.addView(softwareRevisionItem);
-		}
 		initMainScreenItems();
 
 		updateDevice = (Button) deviceMain.findViewById(R.id.updateButton);
@@ -274,15 +253,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 			}
 		}
 		bluetoothManager.readNextCharacteristic();
-	}
-
-	public void setItemValue(int index, String value) {
-		if (index >= 0) {
-			Log.d("test", value);
-			RelativeLayout item = (RelativeLayout) mainItemsView.getChildAt(index);
-			TextView itemValue = (TextView) item.findViewById(R.id.itemValue);
-			itemValue.setText(value);
-		}
 	}
 
 	private void initFileList() {
