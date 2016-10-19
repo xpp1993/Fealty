@@ -64,14 +64,8 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 	public TextView progressText;
     ScrollView scroll;
 	TextView logWindow;
-
-	// Layout attributes for device main view
-	LinearLayout mainItemsView;
 	Button patchDevice, updateDevice;
-	RelativeLayout manufacturerItem, modelNumberItem, firmWareVersionItem, softwareRevisionItem;
-
-	// Layout attributes for parameter settings view
-	RadioButton memoryTypeSPI, memoryTypeI2C, memoryTypeSystemRam, memoryTypeRetentionRam;
+	RadioButton memoryTypeSPI, memoryTypeI2C;
 	LinearLayout imageBankContainer, patchBaseAddressContainer, blockSizeContainer;
 	View parameterI2cView, parameterSpiView;
 	Spinner sclGpioSpinner, sdaGpioSpinner, misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner, imageBankSpinner;
@@ -275,11 +269,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 
 	private void initParameterSettings() {
 		int gpioValuesId = R.array.gpio_values;
-
-		memoryTypeSystemRam = (RadioButton) deviceParameterSettings.findViewById(R.id.memoryTypeSystemRam);
-		memoryTypeSystemRam.setOnClickListener(this);
-		memoryTypeRetentionRam = (RadioButton) deviceParameterSettings.findViewById(R.id.memoryTypeRetentionRam);
-		memoryTypeRetentionRam.setOnClickListener(this);
 		memoryTypeSPI = (RadioButton) deviceParameterSettings.findViewById(R.id.memoryTypeSPI);
 		memoryTypeSPI.setOnClickListener(this);
 		memoryTypeI2C = (RadioButton) deviceParameterSettings.findViewById(R.id.memoryTypeI2C);
@@ -299,8 +288,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 		if (bluetoothManager.type == SuotaManager.TYPE) {
 			patchBaseAddressContainer.setVisibility(View.GONE);
 			imageBankContainer.setVisibility(View.VISIBLE);
-			memoryTypeSystemRam.setVisibility(View.GONE);
-			memoryTypeRetentionRam.setVisibility(View.GONE);
 			blockSizeContainer.setVisibility(View.VISIBLE);
 			String previousText = previousSettings.get(String.valueOf(R.id.blockSize));
 			if(previousText == null || previousText.equals("")) {
@@ -456,14 +443,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
             Statics.setPreviousInput(this, Statics.MEMORY_TYPE_SUOTA_INDEX, String.valueOf(memoryType));
 
 		switch (memoryType) {
-			case Statics.MEMORY_TYPE_SYSTEM_RAM:
-				patchBaseAddressContainer.setVisibility(View.GONE);
-				memoryTypeSystemRam.setChecked(true);
-				break;
-			case Statics.MEMORY_TYPE_RETENTION_RAM:
-				patchBaseAddressContainer.setVisibility(View.GONE);
-				memoryTypeRetentionRam.setChecked(true);
-				break;
 			case Statics.MEMORY_TYPE_SPI:
 				parameterSpiView.setVisibility(View.VISIBLE);
 				memoryTypeSPI.setChecked(true);
@@ -483,10 +462,7 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 			setTitle(bluetoothManager.getDevice().getName());
 		}
 	}
-
 	private void clearMemoryTypeChecked() {
-		memoryTypeSystemRam.setChecked(false);
-		memoryTypeRetentionRam.setChecked(false);
 		memoryTypeI2C.setChecked(false);
 		memoryTypeSPI.setChecked(false);
 	}
@@ -546,12 +522,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-			case R.id.memoryTypeSystemRam:
-				setMemoryType(Statics.MEMORY_TYPE_SYSTEM_RAM);
-				break;
-			case R.id.memoryTypeRetentionRam:
-				setMemoryType(Statics.MEMORY_TYPE_RETENTION_RAM);
-				break;
 			case R.id.memoryTypeSPI:
 				setMemoryType(Statics.MEMORY_TYPE_SPI);
 				break;
