@@ -55,7 +55,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
     ViewFlipper deviceContainer;
     // All layout views used in this activity
     View deviceFileListView, deviceMain, deviceParameterSettings, progressLayout;
-
     // Progress layout attributes
     public ProgressBar progressBar;
     public TextView progressText;
@@ -63,8 +62,8 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
     RadioButton memoryTypeSPI;
     LinearLayout imageBankContainer, blockSizeContainer;
     View parameterSpiView;
-    Spinner sclGpioSpinner, sdaGpioSpinner, misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner, imageBankSpinner;
-    EditText I2CDeviceAddress, blockSize;
+    Spinner misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner, imageBankSpinner;
+    EditText blockSize;
     Button sendToDeviceButton, closeButton;
 
     int memoryType;
@@ -290,14 +289,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
         int position = imageBankAdapter.getPosition(previousSettings.get(String.valueOf(R.id.imageBank)));
         imageBankSpinner.setSelection(position);
 
-        // I2C Device address
-        I2CDeviceAddress = (EditText) deviceParameterSettings.findViewById(R.id.I2CDeviceAddress);
-        I2CDeviceAddress.setText(previousSettings.get(String.valueOf(R.id.I2CDeviceAddress)));
-
-        // Spinners for I2C
-        sclGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.sclGpioSpinner);
-        sdaGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.sdaGpioSpinner);
-
         // Spinners for SPI
         misoGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.misoGpioSpinner);
         mosiGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.mosiGpioSpinner);
@@ -306,24 +297,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 
         ArrayAdapter<CharSequence> gpioAdapter = ArrayAdapter.createFromResource(this,
                 gpioValuesId, android.R.layout.simple_spinner_item);
-        gpioAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        sclGpioSpinner.setAdapter(gpioAdapter);
-        sclGpioSpinner.setOnItemSelectedListener(this);
-        position = gpioAdapter.getPosition(previousSettings.get(String.valueOf(R.id.sclGpioSpinner)));
-        if (position <= 0) {
-            position = Statics.DEFAULT_SCL_GPIO_VALUE;
-        }
-        sclGpioSpinner.setSelection(position);
-
-        sdaGpioSpinner.setAdapter(gpioAdapter);
-        sdaGpioSpinner.setOnItemSelectedListener(this);
-        position = gpioAdapter.getPosition(previousSettings.get(String.valueOf(R.id.sdaGpioSpinner)));
-        if (position <= 0) {
-            position = Statics.DEFAULT_SDA_GPIO_VALUE;
-        }
-        sdaGpioSpinner.setSelection(position);
-
         misoGpioSpinner.setAdapter(gpioAdapter);
         misoGpioSpinner.setOnItemSelectedListener(this);
         position = gpioAdapter.getPosition(previousSettings.get(String.valueOf(R.id.misoGpioSpinner)));
@@ -366,13 +339,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
 
         int previousMemoryType;
         previousMemoryType = Integer.parseInt(Statics.getPreviousInput(DeviceActivity.this, Statics.MEMORY_TYPE_SUOTA_INDEX));
-
-        String previousText = previousSettings.get(String.valueOf(R.id.I2CDeviceAddress));
-        if (previousText == null || previousText.equals("")) {
-            previousText = Statics.DEFAULT_I2C_DEVICE_ADDRESS;
-        }
-        I2CDeviceAddress.setText(previousText);
-
         if (previousMemoryType > 0) {
             setMemoryType(previousMemoryType);
         } else {
@@ -407,12 +373,9 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
         parameterSpiView.setVisibility(View.GONE);
 
         Statics.setPreviousInput(this, Statics.MEMORY_TYPE_SUOTA_INDEX, String.valueOf(memoryType));
-
-        switch (memoryType) {
-            case Statics.MEMORY_TYPE_SPI:
-                parameterSpiView.setVisibility(View.VISIBLE);
-                memoryTypeSPI.setChecked(true);
-                break;
+        if (memoryType == Statics.MEMORY_TYPE_SPI) {
+            parameterSpiView.setVisibility(View.VISIBLE);
+            memoryTypeSPI.setChecked(true);
         }
     }
 
