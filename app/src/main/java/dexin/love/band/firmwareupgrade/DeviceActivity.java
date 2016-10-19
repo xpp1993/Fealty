@@ -86,9 +86,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 
 	Map<String, String> previousSettings;
 
-	//    private Menu menu;
-	private MenuItem menuItemDisconnect;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -634,21 +631,5 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 
 	@Override
 	public void onNothingSelected(AdapterView<?> parent) {
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		boolean status = super.onCreateOptionsMenu(menu);
-		menuItemDisconnect = menu.findItem(R.id.disconnect);
-		menuItemDisconnect.setVisible(true);
-		menuItemDisconnect.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				bluetoothManager.disconnect();
-				finish();
-				return false;
-			}
-		});
-		return status;
 	}
 }

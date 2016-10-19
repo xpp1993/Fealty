@@ -202,26 +202,6 @@ public class ScanActivity extends SuotaActivity implements OnItemClickListener {
             }
         }
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        boolean status = super.onCreateOptionsMenu(menu);
-        menuItemRefesh = menu.findItem(R.id.restart_scan);
-        if(isScanning) {
-            menuItemRefesh.setVisible(false);
-        }
-        return status;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.restart_scan) {
-            this.startDeviceScan();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     /**
      * On click listener for scanned devices
      *
