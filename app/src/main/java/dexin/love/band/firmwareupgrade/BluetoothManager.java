@@ -303,11 +303,6 @@ public abstract class BluetoothManager {
 				if (blockCounter + 1 == file.getNumberOfBlocks()) {
 					lastBlock = true;
 				}
-
-				// SPOTA
-				if (type == SpotaManager.TYPE) {
-					lastBlockSent = true;
-				}
 			}
 		}
 		return progress;

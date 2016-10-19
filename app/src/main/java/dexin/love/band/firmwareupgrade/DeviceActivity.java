@@ -250,17 +250,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 				switchView(1);
 			}
 		});
-		patchDevice.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO: Dirty fix to switch to the SpotaManager
-				BluetoothDevice device = bluetoothManager.getDevice();
-				bluetoothManager = new SpotaManager(DeviceActivity.this);
-				bluetoothManager.setDevice(device);
-				initFileList();
-				switchView(1);
-			}
-		});
 
 		if (this.dialog.isShowing()) {
 			this.dialog.dismiss();
@@ -340,13 +329,7 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 		// SPOTA ONLY
 		patchBaseAddressContainer = (LinearLayout) deviceParameterSettings.findViewById(R.id.patchBaseAddressContainer);
 
-		if (bluetoothManager.type == SpotaManager.TYPE) {
-			patchBaseAddressContainer.setVisibility(View.VISIBLE);
-			imageBankContainer.setVisibility(View.GONE);
-			memoryTypeSystemRam.setVisibility(View.VISIBLE);
-			memoryTypeRetentionRam.setVisibility(View.VISIBLE);
-			blockSizeContainer.setVisibility(View.GONE);
-		} else if (bluetoothManager.type == SuotaManager.TYPE) {
+		if (bluetoothManager.type == SuotaManager.TYPE) {
 			patchBaseAddressContainer.setVisibility(View.GONE);
 			imageBankContainer.setVisibility(View.VISIBLE);
 			memoryTypeSystemRam.setVisibility(View.GONE);
@@ -453,10 +436,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 		});
 
         int previousMemoryType;
-        if (bluetoothManager.type == SpotaManager.TYPE) {
-            previousMemoryType = Integer.parseInt(Statics.getPreviousInput(DeviceActivity.this, Statics.MEMORY_TYPE_SPOTA_INDEX));
-        }
-        else {
             previousMemoryType = Integer.parseInt(Statics.getPreviousInput(DeviceActivity.this, Statics.MEMORY_TYPE_SUOTA_INDEX));
 
             String previousText = previousSettings.get(String.valueOf(R.id.I2CDeviceAddress));
@@ -464,7 +443,6 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
                 previousText = Statics.DEFAULT_I2C_DEVICE_ADDRESS;
             }
             I2CDeviceAddress.setText(previousText);
-        }
 
         if (previousMemoryType > 0) {
             setMemoryType(previousMemoryType);
@@ -478,11 +456,7 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 	private void startUpdate() {
 		Intent intent = new Intent();
 
-		if (bluetoothManager.type == SpotaManager.TYPE) {
-			int patchBaseAddressValue = Integer.decode(patchBaseAddress.getText().toString());
-			Statics.setPreviousInput(this, R.id.patchBaseAddress, String.format("%#10x", patchBaseAddressValue));
-			bluetoothManager.setPatchBaseAddress(patchBaseAddressValue);
-		} else if (bluetoothManager.type == SuotaManager.TYPE) {
+		if (bluetoothManager.type == SuotaManager.TYPE) {
 			Statics.setPreviousInput(this, R.id.blockSize, blockSize.getText().toString());
 		}
 
@@ -512,12 +486,7 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 		parameterI2cView.setVisibility(View.GONE);
 		parameterSpiView.setVisibility(View.GONE);
 
-        if (bluetoothManager.type == SpotaManager.TYPE) {
-            Statics.setPreviousInput(this, Statics.MEMORY_TYPE_SPOTA_INDEX, String.valueOf(memoryType));
-        }
-        else {
             Statics.setPreviousInput(this, Statics.MEMORY_TYPE_SUOTA_INDEX, String.valueOf(memoryType));
-        }
 
 		switch (memoryType) {
 			case Statics.MEMORY_TYPE_SYSTEM_RAM:
@@ -529,17 +498,11 @@ public class DeviceActivity extends SuotaActivity implements AdapterView.OnItemC
 				memoryTypeRetentionRam.setChecked(true);
 				break;
 			case Statics.MEMORY_TYPE_SPI:
-				if (bluetoothManager.type == SpotaManager.TYPE) {
-					patchBaseAddressContainer.setVisibility(View.VISIBLE);
-				}
 				parameterSpiView.setVisibility(View.VISIBLE);
 				memoryTypeSPI.setChecked(true);
 				break;
 
 			case Statics.MEMORY_TYPE_I2C:
-				if (bluetoothManager.type == SpotaManager.TYPE) {
-					patchBaseAddressContainer.setVisibility(View.VISIBLE);
-				}
 				parameterI2cView.setVisibility(View.VISIBLE);
 				memoryTypeI2C.setChecked(true);
 				break;

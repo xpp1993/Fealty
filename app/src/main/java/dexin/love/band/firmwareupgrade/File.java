@@ -101,29 +101,10 @@ public class File {
     }
 
 
-    private void initBlocksSpota() {
-        this.numberOfBlocks = 1;
-        this.fileBlockSize = this.bytes.length;
-        this.totalChunkCount = (int) Math.ceil((double) this.bytes.length / (double) Statics.fileChunkSize);
-        this.blocks = new byte[numberOfBlocks][this.totalChunkCount][];
-        int byteOffset = 0;
-        int chunkSize = Statics.fileChunkSize;
-        for (int i = 0; i < this.totalChunkCount; i++) {
-            if (byteOffset + Statics.fileChunkSize > this.bytes.length) {
-                chunkSize = this.bytes.length - byteOffset;
-            }
-            byte[] chunk = Arrays.copyOfRange(this.bytes, byteOffset, byteOffset + chunkSize);
-            blocks[0][i] = chunk;
-            byteOffset += Statics.fileChunkSize;
-        }
-    }
-
     // Create the array of blocks using the given block size.
     private void initBlocks() {
         if (this.type == SuotaManager.TYPE) {
             this.initBlocksSuota();
-        } else if (this.type == SpotaManager.TYPE) {
-            this.initBlocksSpota();
         }
     }
 
