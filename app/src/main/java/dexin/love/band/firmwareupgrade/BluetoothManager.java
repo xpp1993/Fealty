@@ -34,11 +34,6 @@ public abstract class BluetoothManager {
 	int CS_GPIO;    // P0_3 (0x03)
 	int SCK_GPIO;   // P0_0 (0x00)
 
-	// I2C
-	int I2CDeviceAddress;
-	int SCL_GPIO;
-	int SDA_GPIO;
-
 	// SUOTA
 	int imageBank;
 

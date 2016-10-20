@@ -29,6 +29,8 @@ public class Statics {
 
     // Default SPI memory settings
 	public static final int DEFAULT_MISO_VALUE = 5;
+	//public static final String  DEFAULT_MISO_VALUE = "P1_3";
+	public static final String  DEFAULT_IMAGEBANK_VALUE = "0";
 	public static final int DEFAULT_MOSI_VALUE = 6;
 	public static final int DEFAULT_CS_VALUE = 3;
 	public static final String DEFAULT_BLOCK_SIZE_VALUE = "240";

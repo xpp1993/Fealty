@@ -58,7 +58,7 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
     LinearLayout imageBankContainer, blockSizeContainer;
     View parameterSpiView;
     Spinner misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner;
-    EditText blockSize,imageBankSpinner;
+    TextView blockSize, imageBankSpinner;
     Button sendToDeviceButton, closeButton;
 
     int memoryType;
@@ -199,6 +199,7 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
         }
 
     }
+
     private void initFileList() {
         fileListView = (ListView) deviceFileListView.findViewById(R.id.file_list);
 
@@ -225,11 +226,12 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
         closeButton.setOnClickListener(this);
         imageBankContainer = (LinearLayout) deviceParameterSettings.findViewById(R.id.imageBankContainer);
         blockSizeContainer = (LinearLayout) deviceParameterSettings.findViewById(R.id.blockSizeContainer);
-        blockSize = (EditText) deviceParameterSettings.findViewById(R.id.blockSize);
+        blockSize = (TextView) deviceParameterSettings.findViewById(R.id.blockSize);
+        String previousText = null;
         if (bluetoothManager.type == SuotaManager.TYPE) {
             imageBankContainer.setVisibility(View.VISIBLE);
             blockSizeContainer.setVisibility(View.VISIBLE);
-            String previousText = previousSettings.get(String.valueOf(R.id.blockSize));
+            previousText = previousSettings.get(String.valueOf(R.id.blockSize));
             if (previousText == null || previousText.equals("")) {
                 previousText = Statics.DEFAULT_BLOCK_SIZE_VALUE;
             }
@@ -240,8 +242,12 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
         parameterSpiView = deviceParameterSettings.findViewById(R.id.pSpiContainer);
 
         // SUOTA image bank
-        imageBankSpinner = (EditText) deviceParameterSettings.findViewById(R.id.imageBank);
-        imageBankSpinner.setText(previousSettings.get(String.valueOf(R.id.imageBank)));
+        imageBankSpinner = (TextView) deviceParameterSettings.findViewById(R.id.imageBank);
+        previousText = previousSettings.get(String.valueOf(R.id.imageBank));
+        if (previousText == null || previousText.equals("")) {
+            previousText = "0";
+        }
+        imageBankSpinner.setText(previousText);
         // Spinners for SPI
         int position;
         misoGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.misoGpioSpinner);
@@ -404,10 +410,6 @@ public class DeviceActivity extends Activity implements AdapterView.OnItemClickL
                 break;
             case R.id.sckGpioSpinner:
                 bluetoothManager.setSCK_GPIO(value);
-                break;
-            // SUOTA
-            case R.id.imageBank:
-                bluetoothManager.setImageBank(value);
                 break;
         }
     }

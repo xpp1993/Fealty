@@ -294,7 +294,7 @@
                     android:layout_height="20dp"
                     android:text="Image bank"/>
 
-                <EditText
+                <TextView
                     android:id="@+id/imageBank"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -312,11 +312,11 @@
                     android:layout_height="20dp"
                     android:text="Block size"/>
 
-                <EditText
+                <TextView
                     android:id="@+id/blockSize"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
-                    android:text="1"/>
+                    android:text="240"/>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

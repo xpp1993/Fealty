@@ -528,6 +528,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         CommandManager.sendStartFirmWareUpgrade(mBleEngine);
                     }
                 });//进入固件升级模式
+                layout_firmupgrade.setVisibility(View.VISIBLE);
                 break;
             case R.id.relative_firmupgrade: //固件升级
                 Intent i = new Intent(this.getActivity(), ScanActivity.class);
@@ -582,60 +583,27 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         @Override
                         public void run() {
                             m_progressDlg.dismiss();
-                            Toast.makeText(AppUtils.getBaseContext(), "固件升级包下载成功", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AppUtils.getBaseContext(), "固件升级包下载成功！", Toast.LENGTH_SHORT).show();
                             mWorkQueue.execute(new Runnable() {
                                 @Override
                                 public void run() {
                                     CommandManager.sendStartFirmWareUpgrade(mBleEngine);
                                 }
                             });
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            layout_firmupgrade.setVisibility(View.VISIBLE);
                         }
                     });
-                    //代表发送命令进入升级模式的过程
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    //重新扫描，连接升级模式的手环
-                    myHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            isFirm = true;//固件升级状态标杆
-                            scanAndConnectforName();
-                        }
-                    });
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
 
         }.start();
-    }
-
-    /**
-     * 手环进入升级模式重新扫描连接手环
-     */
-    private void scanAndConnectforName() {
-        if (mBleEngine.enableBle()) {
-            progressDialog.show();
-            mBleEngine.scanBleDeviceFirmwaraUpgarde(true, 5000, new BleEngine.ListScanCallback() {
-                @Override
-                public void onDeviceFound(List<BluetoothDevice> devices) {
-                    progressDialog.dismiss();
-                    if (devices.size() == 0)
-                        scanAndConnectforName();
-                    else {
-                        showDeviceList(devices);
-                        for (int i = 0; i < devices.size(); i++) {
-                            Log.e("MeFragment", devices.get(i).getName() + "," + devices.get(i).getName());
-                        }
-                    }
-                }
-            });
-        }
     }
 
     LocationService locService;
@@ -862,6 +830,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         }
                         if (isAdded())
                             diffNotifyShow(2, getResources().getString(R.string.akeyalarm), dialogView);
+                    } else if (msg.getData().getInt("code") == 2) {
+                        String desc = msg.getData().getString("desc");
+                        Log.d("xppwy", desc);
+                        speakOut(desc);
                     } else {
                         speakOut(getResources().getString(R.string.akeyalarmNo));
                     }
@@ -1037,12 +1009,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     }
                 });//发送获取手环信息，比如固件版本，MAC地址
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_A_KEY_ALARM)) {//一键报警广播
-                //app接收到sos发送给后台
-//                if (sosTime+3*60*1000>System.currentTimeMillis()){
-//
-//                }else{
-//
-//                }
                 Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.SOS, params, null, MeFragment.REQUEST_CODE_SOS, MeFragment.this);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_CONNECT_STATE_CHANGED)) {
@@ -1095,7 +1061,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String rateTime = bundle.getString(GlobalValues.NAME_RATETIME);//该次心率测试的时间
                 int rate = bundle.getInt(GlobalValues.NAME_RATE);
                 int status = bundle.getInt(GlobalValues.NAME_RATE_STATUS);
-                if (rate <=43)
+                if (rate <= 43)
                     return;
                 // if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
                 if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
@@ -1132,20 +1098,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 Log.e("xppwyj", "固件版本：" + version + ",固件地址:" + Mac + ",穿戴状态" + status);
                 //比较服务器的固件版本号，如果不一样则固件升级
                 //1.下载升级包
-//                Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
-                // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.FIRMWAREUPGRADE, null, null, MeFragment.REQUEST_CODE_FIRMEUPGRADE, MeFragment.this);
-                //2.打开升级通道
-//                mWorkQueue.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
-//                    }
-//                });
-                //3.通过名字扫描手环，连接
-                //4.扫描文件
-                //5.给手环发送升级包
-                //6.升级完毕，发送重启手环命令
-                //7.通过名字二次连接
+                Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
+                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.FIRMWAREUPGRADE, null, null, MeFragment.REQUEST_CODE_FIRMEUPGRADE, MeFragment.this);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_STOPRATE)) {//心率停止测试
                 //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
                 afterStopRateHandler();
@@ -1160,25 +1114,30 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
      * @param url
      */
     private void doNewVersionDlgShow(String versions, final String url) {
-        String str = "当前固件版本：" + version + " ,发现新固件版本：" + versions + " ,是否升级固件？";
+        String str = "当前固件版本：" + version + " ,发现新固件版本：" + versions + " ,是否下载升级包？";
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View inflate = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_textview_notversion, null);
         TextView textView = (TextView) inflate.findViewById(R.id.tv_version);
         textView.setText(str);
-        builder.setTitle("固件升级")
+        builder.setTitle("固件升级包下载")
                 .setView(inflate)
-                .setPositiveButton("升级", new DialogInterface.OnClickListener() {
+                .setPositiveButton("下载", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //创建文件
-                        dexin.love.band.firmwareupgrade.File.createFileDirectories();
+                        dexin.love.band.firmwareupgrade.File.createFileDirectories(AppUtils.getBaseContext());
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         m_progressDlg.setTitle("正在下载固件升级包");
                         m_progressDlg.setMessage("请稍后....");
                         //下载升级包在创建的文件中
                         downFile(ParameterManager.HOST + url);
                     }
                 })
-                .setNegativeButton("暂不升级", null)
+                .setNegativeButton("暂不下载", null)
                 .setCancelable(false)
                 .create()
                 .show();

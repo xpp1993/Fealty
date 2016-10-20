@@ -83,29 +83,6 @@ public final class DecodeManager {
      * @param handler
      * @throws JSONException
      */
-//    public static void decodeLogin(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
-//        Log.v("decodeLogin", jsonObject.toString());
-//        Message msg = new Message();
-//        Bundle data = new Bundle();
-//        msg.what = messageWhat;
-//        insertRecInformation(data, jsonObject);
-//        if (isRequestOK(jsonObject)) {
-//            int identity = jsonObject.optInt("identity", 0);
-//            int binded = jsonObject.optInt("binded", 0);
-//            String mobile = jsonObject.optString("mobile");
-//            String password = jsonObject.optString("password");
-//            String nickName = jsonObject.optString("nickName");
-//            String headFile = jsonObject.optString("headFile");
-//            data.putInt("identity", identity);
-//            data.putInt("binded", binded);
-//            data.putString("mobile", mobile);
-//            data.putString("password", password);
-//            data.putString("nickName", nickName);
-//            data.putString("headFile", headFile);
-//        }
-//        msg.setData(data);
-//        handler.sendMessage(msg);
-//    }
     public static void decodeLogin(JSONObject jsonObject, int messageWhat, Handler handler) throws JSONException {
         Log.v("decodeLogin", jsonObject.toString());
         Message msg = new Message();
@@ -255,7 +232,7 @@ public final class DecodeManager {
         Message msg = new Message();
         Bundle data = new Bundle();
         msg.what = messageWhat;
-        // insertRecInformation(data, jsonObject);
+         insertRecInformation(data, jsonObject);
         if (isRequestOK(jsonObject)) {
             int code = jsonObject.optInt("code");
             String desc = jsonObject.optString("desc");
