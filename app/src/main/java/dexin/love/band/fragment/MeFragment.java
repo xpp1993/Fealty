@@ -479,10 +479,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         return;
                     }
                     for (int i = 0; i < contacts.size(); i++) {
-
-                        contact[i] = contacts.get(i).toString();
+                        // contact[i] = contacts.get(i).toString();
+                        String[] namePhone = contacts.get(i).toString().split(":");
+                        contact[i]=namePhone[0]+"\n\r"+namePhone[1];
+                        Log.e("contact",contact[i]);
                     }
-                    ListDialogFragment.createBuilder(getActivity(), getActivity().getSupportFragmentManager()).setTitle("通讯录列表如下").setItems(contact).setCancelButtonText("取消")
+                    ListDialogFragment.createBuilder(getActivity(), getActivity().getSupportFragmentManager())
+                            .setTitle("通讯录列表如下")
+                            .setItems(contact)
+                            .setCancelButtonText("取消")
                             .setConfirmButtonText("确定")
                             .setRequestCode(REQUEST_LIST_SINGLE)
                             .setChoiceMode(AbsListView.CHOICE_MODE_SINGLE)
@@ -522,13 +527,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 break;
             case R.id.relative_about://关于我们
                 // downFile(ParameterManager.HOST+"uploads/authentication/image/upgrade.bin");
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
-                    }
-                });//进入固件升级模式
-                layout_firmupgrade.setVisibility(View.VISIBLE);
+//                mWorkQueue.execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+//                    }
+//                });//进入固件升级模式
+//                layout_firmupgrade.setVisibility(View.VISIBLE);
                 break;
             case R.id.relative_firmupgrade: //固件升级
                 Intent i = new Intent(this.getActivity(), ScanActivity.class);
@@ -748,7 +753,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         if (requestCode == REQUEST_LIST_SINGLE || requestCode == REQUEST_LIST_SIMPLE) {
             Log.e("listfragment", value + "");
             String info = (String) value;
-            String[] namePhone = info.split(":");
+//            String[] namePhone = info.split(":");
+            String[] namePhone = info.split("\\n");
             Log.e("namePhone", namePhone[1]);
             ArrayList list = new ArrayList();
             if (namePhone[1] != null) {
@@ -1066,6 +1072,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 // if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
                 if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
                     Log.e("lastSysTime", lastSysTime + "," + ParameterManager.Time + "," + System.currentTimeMillis());
+                   lastSysTime = System.currentTimeMillis();
                     //发送停止心率测试指令
                     mWorkQueue.execute(new Runnable() {
                         @Override
@@ -1146,16 +1153,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     /**
      * 发送心率测试开启
      */
-    int rate_int;
+    int rate_int = 0;
     private Runnable runnable3 = new Runnable() {
         @Override
         public void run() {
             // mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_START);
+            Log.e("wyj","runnable3");
             mWorkQueue.execute(new Runnable() {
                 @Override
                 public void run() {
                     //记录当前时间
                     lastSysTime = System.currentTimeMillis();
+                    Log.e("lastSysTime",lastSysTime+"");
                     Log.e("wyj", "start to rate");
                     CommandManager.sendStartRate(mBleEngine, "FFFFFFFF");
                 }

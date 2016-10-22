@@ -7,37 +7,39 @@ import java.util.LinkedList;
  */
 
 public class WorkQueue {
-    private LinkedList queue = new LinkedList();// 任务队列
-    private boolean state = false;//true 可运行任务,false 不可运行任务
+    private static LinkedList queue = new LinkedList();// 任务队列
+    private static boolean state = false;//true 可运行任务,false 不可运行任务
     private static WorkQueue workQueue;
 
     public static synchronized WorkQueue getInstance() {
-        if (workQueue == null)
+        if (workQueue == null){
+            queue = new LinkedList();
             workQueue = new WorkQueue();
+            new Thread() {
+                @Override
+                public void run() {
+                    Runnable r;
+                    while (true) {
+                        while (queue.isEmpty() || !state) {// 如果任务队列中没有任务，等待
+                        }
+
+                        try {
+                       state = false;
+                            r = (Runnable) queue.removeFirst();// 有任务时，取出任务
+                            System.out.println(Thread.currentThread().getName());
+                            r.run();// 执行任务
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }.start();
+        }
         return workQueue;
     }
 
 
     private WorkQueue() {
-        queue = new LinkedList();
-        new Thread() {
-            @Override
-            public void run() {
-                Runnable r;
-                while (true) {
-                    while (queue.isEmpty() || !state) {// 如果任务队列中没有任务，等待
-                    }
-
-                    try {
-                        state = false;
-                        r = (Runnable) queue.removeFirst();// 有任务时，取出任务
-                        System.out.println(Thread.currentThread().getName());
-                        r.run();// 执行任务
-                    } catch (RuntimeException e) {
-                    }
-                }
-            }
-        }.start();
     }
 
     /**
