@@ -14,11 +14,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.BatteryManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -84,7 +82,7 @@ import dexin.love.band.bean.SleepData;
 import dexin.love.band.bean.SportData;
 import dexin.love.band.bean.UserInfo;
 import dexin.love.band.event.NavFragmentEvent;
-import dexin.love.band.firmwareupgrade.ScanActivity;
+import dexin.love.band.firmwareupgrade.ScannerFragment;
 import dexin.love.band.manager.DecodeManager;
 import dexin.love.band.manager.ParameterManager;
 import dexin.love.band.manager.SPManager;
@@ -243,7 +241,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         mBleEngine = new BleEngine(getActivity());
         mBleEngine.initialize();
         mRegisterReceiver();
-        xinlvhelper = new XinLvSqliteHelper(AppUtils.getBaseContext());
+//        xinlvhelper = new XinLvSqliteHelper(AppUtils.getBaseContext());
+        xinlvhelper = XinLvSqliteHelper.getInstance(AppUtils.getBaseContext());
         xinlvdb = xinlvhelper.getReadableDatabase();
         mVibrator = ((BaseApplication) AppUtils.getBaseContext()).mVibrator;
         notificationManager = ((BaseApplication) AppUtils.getBaseContext()).notificationManager;
@@ -411,12 +410,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         if (helper != null) {
             helper.close();
         }
-        if (xinlvhelper != null) {
-            xinlvhelper.close();
-        }
-        if (xinlvdb.isOpen()) {
-            xinlvdb.close();
-        }
+//        if (xinlvhelper != null) {
+//            xinlvhelper.close();
+//        }
+//        if (xinlvdb.isOpen()) {
+//            xinlvdb.close();
+//        }
         if (tts != null) {
             tts.stop();
             tts.shutdown();
@@ -481,8 +480,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     for (int i = 0; i < contacts.size(); i++) {
                         // contact[i] = contacts.get(i).toString();
                         String[] namePhone = contacts.get(i).toString().split(":");
-                        contact[i]=namePhone[0]+"\n\r"+namePhone[1];
-                        Log.e("contact",contact[i]);
+                        contact[i] = namePhone[0] + "\n\r" + namePhone[1];
+                        Log.e("contact", contact[i]);
                     }
                     ListDialogFragment.createBuilder(getActivity(), getActivity().getSupportFragmentManager())
                             .setTitle("通讯录列表如下")
@@ -527,17 +526,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 break;
             case R.id.relative_about://关于我们
                 // downFile(ParameterManager.HOST+"uploads/authentication/image/upgrade.bin");
-//                mWorkQueue.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
-//                    }
-//                });//进入固件升级模式
-//                layout_firmupgrade.setVisibility(View.VISIBLE);
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+                    }
+                });//进入固件升级模式
+                layout_firmupgrade.setVisibility(View.VISIBLE);
                 break;
             case R.id.relative_firmupgrade: //固件升级
-                Intent i = new Intent(this.getActivity(), ScanActivity.class);
-                startActivity(i);
+//                Intent i = new Intent(this.getActivity(), ScanActivity.class);
+//                startActivity(i);
+                EventBus.getDefault().post(new NavFragmentEvent(new ScannerFragment()));
                 break;
             default:
                 break;
@@ -754,7 +754,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             Log.e("listfragment", value + "");
             String info = (String) value;
 //            String[] namePhone = info.split(":");
-            String[] namePhone = info.split("\\n");
+            String[] namePhone = info.split("\\n\\r");
             Log.e("namePhone", namePhone[1]);
             ArrayList list = new ArrayList();
             if (namePhone[1] != null) {
@@ -970,20 +970,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 //把计步监听的结果上传服务器
                 updataSportData(steps, calories, distance);
                 EventBus.getDefault().post(sportData);
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendSynSleep(mBleEngine, 1);
-                    }
-                });
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendSynSleep(mBleEngine, 0);
-                    }
-                });//发送获取当天睡眠质量数据，0表示当天数据，1表示昨天数据，2表示前天数据
-                //发送心率测试开始
-                myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_ELECTRICITY)) {
                 String value = intent.getExtras().getString(GlobalValues.NAME_ELECTRICITY);
                 String ISELECTRICITE = intent.getExtras().getString(GlobalValues.NAME_ISELECTRICITE);//手环是否处于充电状态
@@ -1014,6 +1000,20 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         CommandManager.sendGetVersionandMac(mBleEngine);
                     }
                 });//发送获取手环信息，比如固件版本，MAC地址
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendSynSleep(mBleEngine, 1);
+                    }
+                });
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendSynSleep(mBleEngine, 0);
+                    }
+                });//发送获取当天睡眠质量数据，0表示当天数据，1表示昨天数据，2表示前天数据
+                //发送心率测试开始
+                myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_A_KEY_ALARM)) {//一键报警广播
                 Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.SOS, params, null, MeFragment.REQUEST_CODE_SOS, MeFragment.this);
@@ -1067,12 +1067,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String rateTime = bundle.getString(GlobalValues.NAME_RATETIME);//该次心率测试的时间
                 int rate = bundle.getInt(GlobalValues.NAME_RATE);
                 int status = bundle.getInt(GlobalValues.NAME_RATE_STATUS);
-                if (rate <= 43)
-                    return;
                 // if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
                 if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
                     Log.e("lastSysTime", lastSysTime + "," + ParameterManager.Time + "," + System.currentTimeMillis());
-                   lastSysTime = System.currentTimeMillis();
+                    lastSysTime = System.currentTimeMillis();
                     //发送停止心率测试指令
                     mWorkQueue.execute(new Runnable() {
                         @Override
@@ -1082,6 +1080,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         }
                     });
                 }
+                if (rate <= 43)
+                    return;
                 //将心率数据发给首页
                 Intent intent_health = new Intent();
                 intent_health.putExtra("tempRate", rate);
@@ -1158,13 +1158,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         @Override
         public void run() {
             // mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_START);
-            Log.e("wyj","runnable3");
+            Log.e("wyj", "runnable3");
             mWorkQueue.execute(new Runnable() {
                 @Override
                 public void run() {
                     //记录当前时间
                     lastSysTime = System.currentTimeMillis();
-                    Log.e("lastSysTime",lastSysTime+"");
+                    Log.e("lastSysTime", lastSysTime + "");
                     Log.e("wyj", "start to rate");
                     CommandManager.sendStartRate(mBleEngine, "FFFFFFFF");
                 }

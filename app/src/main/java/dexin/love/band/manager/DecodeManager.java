@@ -160,10 +160,14 @@ public final class DecodeManager {
         msg.what = messageWhat;
         insertRecInformation(data, jsonObject);
         if (isRequestOK(jsonObject)) {
+            int code = jsonObject.optInt("code", 1);
+            String desc = jsonObject.optString("desc", "");
+            data.putInt("code", code);
+            data.putString("desc", desc);
             HashMap<String, String[]> result = new HashMap<>();
-            JSONArray jsonArray = jsonObject.getJSONObject("json").getJSONArray("gpsMsg_list");
+            JSONArray jsonArray = jsonObject.optJSONObject("json").getJSONArray("gpsMsg_list");
             for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject object = jsonArray.getJSONObject(i);
+                JSONObject object = jsonArray.optJSONObject(i);
                 String lat = object.optString("lat");
                 String lon = object.optString("lon");
                 String locationdescrible = object.optString("locationdescrible");
@@ -191,11 +195,15 @@ public final class DecodeManager {
         msg.what = messageWhat;
         insertRecInformation(data, jsonObject);
         if (isRequestOK(jsonObject)) {
+            int code = jsonObject.optInt("code", 1);
+            String desc = jsonObject.optString("desc", "");
+            data.putInt("code", code);
+            data.putString("desc", desc);
             HashMap<String, List<RateListData>> result = new HashMap<>();
             JSONArray array = jsonObject.optJSONObject("json").optJSONArray("heartMsg");
             for (int i = 0; i < array.length(); i++) {
                 List<RateListData> list = new ArrayList<>();
-                JSONObject object1 = array.getJSONObject(i);
+                JSONObject object1 = array.optJSONObject(i);
                 String heartRateString = object1.optString("heartRate");
                 if (TextUtils.isEmpty(heartRateString))
                     continue;
@@ -302,7 +310,7 @@ public final class DecodeManager {
             if (userMsg_list != null || userMsg_list.length() > 0) {
                 ArrayList<UserInfo> friends = new ArrayList<UserInfo>();
                 for (int i = 0; i < userMsg_list.length(); i++) {
-                    JSONObject friendJsonObject = userMsg_list.getJSONObject(i);
+                    JSONObject friendJsonObject = userMsg_list.optJSONObject(i);
                     String parentPhone = friendJsonObject.optString("parentPhone");
                     int currentHeart = friendJsonObject.optInt("currentHeart");
                     String identity = friendJsonObject.optString("identity");
@@ -413,6 +421,10 @@ public final class DecodeManager {
         msg.what = messageWhat;
         insertRecInformation(data, jsonObject);
         if (isRequestOK(jsonObject)) {
+            int code = jsonObject.optInt("code", 1);
+            String desc = jsonObject.optString("desc", "");
+            data.putInt("code", code);
+            data.putString("desc", desc);
             HashMap<String, String[]> result = new HashMap<>();
             JSONArray jsonArray = jsonObject.optJSONObject("json").optJSONArray("userMsg_list");
             for (int i = 0; i < jsonArray.length(); i++) {

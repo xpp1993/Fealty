@@ -2,8 +2,11 @@ package dexin.love.band.fragment;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -67,7 +70,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     private ProgressDialog m_progressDlg;//更新软件进度条
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
-    private boolean isVersion=true;
+    private boolean isVersion = true;
 
     @Override
     protected void init() {
@@ -87,6 +90,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
 //        });
         adapter = new HeathMonitoringAdapter(getChildFragmentManager(), mJazzy, fragments);
         mJazzy.setAdapter(adapter);
+        mRegisterReceiver();//注册监听取消绑定用户
         //1.登录进来获得我的页面,初始化
         initFragments();
         //2.网络获取数据 1.运动睡眠数据 2.GPS
@@ -116,7 +120,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     public void onResume() {
         super.onResume();
         if (isVersion) {
-            isVersion=false;
+            isVersion = false;
             if (versionCode < userInfo.getVersionCode()) {//更新版本
                 doNewVersionDlgShow();
             } else {//提示当前是最新版本
@@ -179,6 +183,29 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                 .create()
                 .show();
     }
+
+    private void mRegisterReceiver() {
+        IntentFilter mFilter = new IntentFilter();
+        mFilter.addAction(UserDetailInfo.TAG);
+        getActivity().registerReceiver(mReceiver, mFilter);
+    }
+
+    /**
+     * 注册监听解除绑定广播
+     */
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if(action.equals(UserDetailInfo.TAG)){
+                adapter.clearFragment();
+                //再请求一次数据
+                commandForUrl();
+            }
+
+        }
+    };
 
     /**
      * 将文件下载写入内存，再从内存中读取
@@ -251,18 +278,21 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     private Runnable LoadData = new Runnable() {
         @Override
         public void run() {
-
-            // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
-            Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
-            //1.
-            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null, REQUEST_CODE_UPDATA_USERIFO_INTERNET, StatusFragment.this);
-            //2.
-            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_GPS_FROM_URL, params, null, REQUEST_CODE_UPDATA_GPS_INTERNET, StatusFragment.this);
-            //3
-            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_HEART, params, null, REQUEST_CODE_UPDATA_ZHEXIAN_HEART, StatusFragment.this);
+            commandForUrl();
             myHandler.postDelayed(this, 1000 * 60 * 3);
         }
     };
+
+    private void commandForUrl() {
+        // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
+        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
+        //1.
+        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null, REQUEST_CODE_UPDATA_USERIFO_INTERNET, StatusFragment.this);
+        //2.
+        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_GPS_FROM_URL, params, null, REQUEST_CODE_UPDATA_GPS_INTERNET, StatusFragment.this);
+        //3
+        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_HEART, params, null, REQUEST_CODE_UPDATA_ZHEXIAN_HEART, StatusFragment.this);
+    }
 
     @Override
     protected void initListener() {
@@ -415,7 +445,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                         }
 
                     } else {
-                        ToastUtils.showToastInUIThread("服务器数据有异常！");
+                       //ToastUtils.showToastInUIThread(data.getString("desc"));
                     }
                     break;
                 case REQUEST_CODE_UPDATA_USERIFO_INTERNET:
@@ -459,7 +489,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                         }
 
                     } else {
-                        ToastUtils.showToastInUIThread("服务器数据有异常！");
+                       // ToastUtils.showToastInUIThread("服务器数据有异常！");
+                      //  ToastUtils.showToastInUIThread(data.getString("desc"));
                     }
                     break;
                 case REQUEST_CODE_UPDATA_ZHEXIAN_HEART:
@@ -483,7 +514,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                         }
 
                     } else {
-                        ToastUtils.showToastInUIThread("服务器数据有异常！");
+                       // ToastUtils.showToastInUIThread("服务器数据有异常！");
+                      //  ToastUtils.showToastInUIThread(data.getString("desc"));
                     }
                     break;
                 default:

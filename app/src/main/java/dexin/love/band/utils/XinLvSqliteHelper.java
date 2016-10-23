@@ -7,10 +7,21 @@ import android.database.sqlite.SQLiteOpenHelper;
 /**
  * Created by Administrator on 2016/8/28/0028.
  */
-public class XinLvSqliteHelper extends SQLiteOpenHelper{
+public class XinLvSqliteHelper extends SQLiteOpenHelper {
     private static final String DATANAME = "myxinlv.db";
     private static final int VERSION = 1;
     private SQLiteDatabase db;
+    private static XinLvSqliteHelper mInstance = null;
+
+    public synchronized static XinLvSqliteHelper getInstance(Context context) {
+        if (mInstance == null) {
+            mInstance = new XinLvSqliteHelper(context);
+        }
+        return mInstance;
+    }
+
+    ;
+
     /*
      * 参数说明 1：上下文。 2：数据库的名字。 3:是否需要自己创建Cursor的工厂，一般的情况都不自己创建，所以就写null, 4:数据库的版本，
 	 */

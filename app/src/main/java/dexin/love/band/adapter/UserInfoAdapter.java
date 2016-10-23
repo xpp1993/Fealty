@@ -78,4 +78,8 @@ public class UserInfoAdapter extends BaseAdapter {
             list.addAll(data);
             notifyDataSetChanged();
     }
+    public void clear() {
+        list.clear();
+        notifyDataSetChanged();
+    }
 }

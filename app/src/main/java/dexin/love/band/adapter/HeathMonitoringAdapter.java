@@ -22,14 +22,6 @@ import dexin.love.band.widget.JazzyViewPager;
 public class HeathMonitoringAdapter extends FragmentPagerAdapter {
     private List<HealthDataFragement> fragments;
     private JazzyViewPager mJazzy;
-  //  private BackData backData;
-//    public HeathMonitoringAdapter(FragmentManager fm, JazzyViewPager mJazzy, List<HealthDataFragement> fragments,BackData backData) {
-//        super(fm);
-//        this.fragments = fragments;
-//        this.mJazzy = mJazzy;
-//        this.backData=backData;
-//       // notifyDataSetChanged();
-//    }
     public HeathMonitoringAdapter(FragmentManager fm, JazzyViewPager mJazzy, List<HealthDataFragement> fragments) {
         super(fm);
         this.fragments = fragments;
@@ -63,22 +55,6 @@ public class HeathMonitoringAdapter extends FragmentPagerAdapter {
         }
 
     }
-//    public void addFragment(HealthDataFragement fragment){
-//        for(HealthDataFragement healthDataFragement:fragments){
-//            if(healthDataFragement.getArguments().getString("parentPhone").equals(fragment.getArguments().getString("parentPhone"))){
-//              if (backData!=null){
-//                  backData.callYou(healthDataFragement);
-//              }
-//                return ;
-//            }
-//
-//        }
-//        if(TextUtils.equals(fragment.getArguments().getString("parentPhone"), SessionHolder.user.getMobile())){
-//            fragments.add(0,fragment);
-//        }else{
-//            fragments.add(fragment);
-//        }
-//    }
     public HealthDataFragement addFragment(HealthDataFragement fragment){
         for(HealthDataFragement healthDataFragement:fragments){
             if(healthDataFragement.getArguments().getString("parentPhone").equals(fragment.getArguments().getString("parentPhone")))
@@ -93,9 +69,12 @@ public class HeathMonitoringAdapter extends FragmentPagerAdapter {
         }
         return fragment;
     }
-
-//    //2016-8-24 xpp add
-//    public interface BackData {
-//        void callYou(HealthDataFragement healthDataFragement);
-//    }
+    public void clearFragment(){
+        UserInfo userInfo= ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
+        for(HealthDataFragement healthDataFragement:fragments){
+           if (!healthDataFragement.getArguments().getString("parentPhone").equals(userInfo.getMobile())){
+               fragments.clear();
+           }
+        }
+    }
 }
