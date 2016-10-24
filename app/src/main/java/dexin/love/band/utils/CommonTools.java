@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CommonTools {
+public class    CommonTools {
     /**
      * 使用系统当前日期，产生一个临时文件，用户缓存
      *

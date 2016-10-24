@@ -64,14 +64,16 @@ public class MainActivity extends AppCompatActivity {
         x.view().inject(this);
         BaseFragment baseFragment = null;
         String tag = null;
-        if (savedInstanceState == null) {
-            baseFragment = new SplashFagment();
-            tag = baseFragment.getMTag();
-        }
-        if (savedInstanceState != null) {
-            tag = baseFragment.getMTag();
-            baseFragment = (BaseFragment) fm.findFragmentByTag(tag);
-        }
+//        if (savedInstanceState == null) {
+//            baseFragment = new SplashFagment();
+//            tag = baseFragment.getMTag();
+//        }
+//        if (savedInstanceState != null) {
+//            tag = baseFragment.getMTag();
+//            baseFragment = (BaseFragment) fm.findFragmentByTag(tag);
+//        }
+        baseFragment=new SplashFagment();
+        tag = baseFragment.getMTag();
         mFragments.add(tag);
         // fm.beginTransaction().add(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();
         fm.beginTransaction().add(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();

@@ -189,10 +189,10 @@
         <activity
             android:name=".activity.XinlvNorActivity"
             android:theme="@style/activity_popup" />
-        <activity
-            android:name=".firmwareupgrade.ScanActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
+        <!--<activity-->
+            <!--android:name=".firmwareupgrade.ScanActivity"-->
+            <!--android:label="@string/app_name"-->
+            <!--android:screenOrientation="portrait" />-->
         <activity
             android:name=".firmwareupgrade.DeviceActivity"
             android:label="@string/app_name"

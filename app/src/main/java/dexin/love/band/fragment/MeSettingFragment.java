@@ -92,6 +92,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
     private ImageView bar_view_left_line;
     @ViewInject(R.id.bar_tv_title_left)
     private TextView bar_tv_title_left;
+    @ViewInject(R.id.fragment_mine_iv_cuversion)
+    private ImageView imageView_curversion;
     private File tempImageFile;//相机拍摄图片缓存
     private File headImageFile;//剪切图片缓存
     private static final int REQUEST_CODE_PICK_IMAGE = 0x1;
@@ -128,6 +130,7 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
         bar_iv_left.setOnClickListener(this);
         fragment_mine_tv_exit.setOnClickListener(this);
         see_user.setOnClickListener(this);
+        imageView_curversion.setOnClickListener(this);
     }
 
     @Override
@@ -294,8 +297,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                 break;
             case R.id.fragment_mine_tv_exit:
                 int num = getActivity().getSupportFragmentManager().getBackStackEntryCount();
-                String numString = "++++++++++++++++++++++++++++++++++Fragment回退栈数量：" + num;
-                Log.d("Fragment", numString);
+//                String numString = "++++++++++++++++++++++++++++++++++Fragment回退栈数量：" + num;
+//                Log.d("Fragment", numString);
                 for (int i = 0; i < num; i++) {
                     FragmentManager.BackStackEntry backstatck = getActivity().getSupportFragmentManager().getBackStackEntryAt(i);
                     Log.d("Fragment", backstatck.getName());
@@ -306,6 +309,16 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
             case R.id.fragment_mine_rl_about:
                 //查看绑定的用户信息
                 EventBus.getDefault().post(new NavFragmentEvent(new UserDetailInfo()));
+                break;
+            case R.id.fragment_mine_iv_cuversion://查看当前软件版本,弹出对话框
+                String str="当前软件Code:"+CommonTools.getVercode(AppUtils.getBaseContext())+",当前软件名称:"+CommonTools.getVerName(AppUtils.getBaseContext());
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle("软件版本")
+                        .setMessage(str)
+                        .setNegativeButton("确定", null)
+                        .setCancelable(false)
+                        .create()
+                        .show();
                 break;
         }
     }

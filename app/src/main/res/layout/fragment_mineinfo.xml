@@ -234,7 +234,7 @@
                 android:background="#EFEFF4" />
 
             <RelativeLayout
-                android:id="@+id/fragment_mine_rl_feedback"
+                android:id="@+id/fragment_mine_rl_cuversion"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/setting_item_background"
@@ -248,7 +248,7 @@
                     android:text="当前版本" />
 
                 <ImageView
-                    android:id="@+id/fragment_mine_iv_feedback"
+                    android:id="@+id/fragment_mine_iv_cuversion"
                     style="@style/detail_layout_iv_next"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true" />
