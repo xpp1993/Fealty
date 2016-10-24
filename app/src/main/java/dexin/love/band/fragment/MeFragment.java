@@ -526,13 +526,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 break;
             case R.id.relative_about://关于我们
                 // downFile(ParameterManager.HOST+"uploads/authentication/image/upgrade.bin");
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
-                    }
-                });//进入固件升级模式
-                layout_firmupgrade.setVisibility(View.VISIBLE);
+//                mWorkQueue.execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+//                    }
+//                });//进入固件升级模式
+//                layout_firmupgrade.setVisibility(View.VISIBLE);
                 break;
             case R.id.relative_firmupgrade: //固件升级
 //                Intent i = new Intent(this.getActivity(), ScanActivity.class);
@@ -982,38 +982,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 //电量异常，发送通知
                 if (isAdded())
                     setNotifyDian2(Integer.parseInt(value), ISELECTRICITE, getResources().getString(R.string.betty));
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendSynTime(mBleEngine);
-                    }
-                });//发送同步手环时间指令
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendVibration(mBleEngine, 6);
-                    }
-                });//发送手环振动指令
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendGetVersionandMac(mBleEngine);
-                    }
-                });//发送获取手环信息，比如固件版本，MAC地址
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendSynSleep(mBleEngine, 1);
-                    }
-                });
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendSynSleep(mBleEngine, 0);
-                    }
-                });//发送获取当天睡眠质量数据，0表示当天数据，1表示昨天数据，2表示前天数据
-                //发送心率测试开始
-                myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_A_KEY_ALARM)) {//一键报警广播
                 Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.SOS, params, null, MeFragment.REQUEST_CODE_SOS, MeFragment.this);
@@ -1028,6 +996,38 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                             mWorkQueue.notifyState(true);
                         }
                     }, 500);
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandManager.sendSynTime(mBleEngine);
+                        }
+                    });//发送同步手环时间指令
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandManager.sendVibration(mBleEngine, 6);
+                        }
+                    });//发送手环振动指令
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandManager.sendGetVersionandMac(mBleEngine);
+                        }
+                    });//发送获取手环信息，比如固件版本，MAC地址
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandManager.sendSynSleep(mBleEngine, 1);
+                        }
+                    });
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommandManager.sendSynSleep(mBleEngine, 0);
+                        }
+                    });//发送获取当天睡眠质量数据，0表示当天数据，1表示昨天数据，2表示前天数据
+                    //发送心率测试开始
+                    myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);
                 } else {
                     progressDialog.dismiss();
                     if (!isFirm)
@@ -1067,6 +1067,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String rateTime = bundle.getString(GlobalValues.NAME_RATETIME);//该次心率测试的时间
                 int rate = bundle.getInt(GlobalValues.NAME_RATE);
                 int status = bundle.getInt(GlobalValues.NAME_RATE_STATUS);
+                if (rate == 0)
+                    return;
                 // if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
                 if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
                     Log.e("lastSysTime", lastSysTime + "," + ParameterManager.Time + "," + System.currentTimeMillis());
@@ -1080,8 +1082,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         }
                     });
                 }
-                if (rate <= 43)
-                    return;
                 //将心率数据发给首页
                 Intent intent_health = new Intent();
                 intent_health.putExtra("tempRate", rate);

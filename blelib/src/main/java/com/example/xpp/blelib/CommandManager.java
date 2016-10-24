@@ -41,7 +41,7 @@ public class CommandManager {
             int j=DateCompare(timeStr,"21:00:00","HH:mm:ss");
          //   if (j==1){//如果时间早于23:45:00 晚于08:00:00
               //  Log.e(TAG, sdf.format(new Date(time))+","+timeStr+","+k+","+j);1
-                Log.e(TAG, sdf.format(new Date(time))+","+timeStr+","+j);
+              //  Log.e(TAG, sdf.format(new Date(time))+","+timeStr+","+j);
                 for (int i = 10; i < 40; i += 2) {
                     //将十六进制字符转化为二进制字符
                     String BinaryString = Utils.toFullBinaryString(Integer.parseInt(dataString.substring(i, i + 2), 16));
@@ -58,7 +58,7 @@ public class CommandManager {
                         deepSleepTime += 1;
                     }
                }
-                Log.e(TAG, "sleepLight" + lightSleepTime + ",sleepdeep" + deepSleepTime);
+               // Log.e(TAG, "sleepLight" + lightSleepTime + ",sleepdeep" + deepSleepTime);
            // }
             // if (timeStr.equals("11:45:00")) {//发送广播通知前段显示数据
             BroadcastManager.sendBroadcast4SleepQuality(context, GlobalValues.BROADCAST_INTENT_SLEEPQ, lightSleepTime, deepSleepTime);

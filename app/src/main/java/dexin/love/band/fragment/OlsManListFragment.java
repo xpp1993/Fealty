@@ -1,12 +1,18 @@
 package dexin.love.band.fragment;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +36,7 @@ import dexin.love.band.ui.picker.CustomHeaderAndFooterPicker;
 import dexin.love.band.ui.picker.OptionPicker;
 import dexin.love.band.utils.AppUtils;
 import dexin.love.band.utils.CommonTools;
+import dexin.love.band.utils.FormatCheck;
 import dexin.love.band.utils.NetWorkAccessTools;
 import dexin.love.band.utils.ToastUtils;
 
@@ -74,8 +81,12 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         UserInfo userInfo = list_user.get(position);
-        final String oldmobile = userInfo.getMobile();
+        String oldmobile = userInfo.getMobile();
+        showSetIdentityDialog(oldmobile);
 
+    }
+
+    private void selectedIdentity(final String oldmobile) {
         //点击弹出身份选择框
         CustomHeaderAndFooterPicker picker = new CustomHeaderAndFooterPicker(getActivity(), new String[]{
                 "爸爸", "妈妈", "爷爷", "奶奶", "姥爷", "姥姥", "叔叔", "阿姨", "姑姑", "大伯", "婶婶", "姐姐", "哥哥"
@@ -92,12 +103,61 @@ public class OlsManListFragment extends BaseFragment implements AdapterView.OnIt
         picker.setOnOptionPickListener(new OptionPicker.OnOptionPickListener() {
             @Override
             public void onOptionPicked(int position, String option) {
-                Toast.makeText(getActivity(), option, Toast.LENGTH_LONG).show();
+                //Toast.makeText(getActivity(), option, Toast.LENGTH_LONG).show();
                 Map<String, String> params = CommonTools.getParameterMap(new String[]{"old_people_mobile", "mobile", "identity"}, oldmobile, SessionHolder.user.getMobile(), option);
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_BIND_OLD, params, null, REQUEST_CODE_BIND_OTHERS, OlsManListFragment.this);
             }
         });
         picker.show();
+    }
+
+    private void showSetIdentityDialog(final String oldmobile) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("确认身份");
+        final View inflate = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_radiogroup_identity, null);
+        final RadioButton readRadioButton = (RadioButton) inflate.findViewById(R.id.dialog_radiogroup_selected);
+        RadioButton inRadioButton = (RadioButton) inflate.findViewById(R.id.dialog_radiogroup_print);
+        builder.setView(inflate);
+        builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                String newGender = readRadioButton.isChecked() ? "选择身份" : "输入用户身份";
+                if (TextUtils.equals(newGender, "输入用户身份")) {
+                    showSetIdentity(oldmobile);
+                } else if (TextUtils.equals(newGender, "选择身份")) {
+                    selectedIdentity(oldmobile);
+                }
+            }
+        });
+        builder.setNegativeButton("放弃", null);
+        builder.setCancelable(false).create().show();
+    }
+
+    private void showSetIdentity(final String oldmobile) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("输入用户身份");
+        View inflate = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_textview_nickname, null);
+        final EditText editText = (EditText) inflate.findViewById(R.id.dialog_textview_tv);
+        editText.setSingleLine();
+        builder.setView(inflate);
+        builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                String identity = editText.getText().toString().trim();
+                ArrayList list = new ArrayList();
+                if (TextUtils.isEmpty(identity)) {
+                    ToastUtils.showToastInUIThread("输入不能为空");
+                } else if (identity.length() > 3) {
+                    ToastUtils.showToastInUIThread("格式错误,重写填写!");
+                } else {
+                    Map<String, String> params = CommonTools.getParameterMap(new String[]{"old_people_mobile", "mobile", "identity"}, oldmobile, SessionHolder.user.getMobile(), identity);
+                    NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_BIND_OLD, params, null, REQUEST_CODE_BIND_OTHERS, OlsManListFragment.this);
+                }
+            }
+        });
+        builder.setNegativeButton("放弃", null);
+        builder.setCancelable(false).create().show();
     }
 
     @Override

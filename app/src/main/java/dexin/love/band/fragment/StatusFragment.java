@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
@@ -176,6 +177,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                         m_progressDlg.setMessage("请稍后....");
                         //开始下载软件
                         downFile(ParameterManager.HOST + userInfo.getUrl());
+                        Log.e("ssg",ParameterManager.HOST + userInfo.getUrl());
                     }
                 })
                 .setNegativeButton("暂不更新", null)
@@ -220,8 +222,15 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                 try {
                     HttpURLConnection connection = CommonTools.getInputStream(url);
                     if (connection == null) {
-                        m_progressDlg.dismiss();
-                        ToastUtils.showToastInUIThread("网络错误，下载失败");
+//                        m_progressDlg.dismiss();
+//                        ToastUtils.showToastInUIThread("网络错误，下载失败");
+                        myHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                m_progressDlg.dismiss();
+                                Toast.makeText(AppUtils.getBaseContext(),"网络错误，下载失败",Toast.LENGTH_SHORT).show();
+                            }
+                        });
                         return;
                     }
                     InputStream is = connection.getInputStream();

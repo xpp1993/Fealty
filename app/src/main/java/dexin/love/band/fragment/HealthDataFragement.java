@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 
@@ -122,7 +123,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     @Override
     public void onGetBunndle(Bundle arguments) {
         super.onGetBunndle(arguments);
-        UserInfo userInfo= ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
+        UserInfo userInfo = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
 //        if (TextUtils.equals(arguments.getString("parentPhone"), SessionHolder.user.getMobile())) {
         if (TextUtils.equals(arguments.getString("parentPhone"), userInfo.getMobile())) {
             //注册广播接收实时心率
@@ -200,7 +201,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     RATE_STATUS = msg.arg1;
                     break;
                 case REQURST_HANDLER_LIST_RATE://画心率折线图
-                    Log.d("wyj","REQURST_HANDLER_LIST_RATE");
+                    Log.d("wyj", "REQURST_HANDLER_LIST_RATE");
                     list = (List<RateListData>) msg.obj;
                     break;
                 default:
@@ -253,7 +254,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     }
 
     private void initChart(Map<String, Integer> map) {
-        if(null == map ||map.size() == 0)
+        if (null == map || map.size() == 0)
             return;
         mLineChart03View.reset(map);
         mLineChart03View_left.reset(map);
@@ -328,10 +329,10 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         sleepData.putString("total_hour_str", total_hour_str);
         if (TextUtils.isEmpty(total_hour_str)) {
             return;
-        }else if (total_hour_str.equals("0")){
-            total_hour_str="00:00";
+        } else if (total_hour_str.equals("0")) {
+            total_hour_str = "00:00";
         }
-        Log.e("sleep",total_hour_str);
+        Log.e("sleep", total_hour_str);
         Message message = Message.obtain();
         message.what = REQURST_HANDLER_SlEEPDATA;
         message.setData(sleepData);
