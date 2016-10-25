@@ -526,13 +526,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 break;
             case R.id.relative_about://关于我们
                 // downFile(ParameterManager.HOST+"uploads/authentication/image/upgrade.bin");
-//                mWorkQueue.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
-//                    }
-//                });//进入固件升级模式
-//                layout_firmupgrade.setVisibility(View.VISIBLE);
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+                    }
+                });//进入固件升级模式
+                layout_firmupgrade.setVisibility(View.VISIBLE);
                 break;
             case R.id.relative_firmupgrade: //固件升级
 //                Intent i = new Intent(this.getActivity(), ScanActivity.class);
@@ -988,6 +988,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_CONNECT_STATE_CHANGED)) {
                 String state = intent.getExtras().getString(GlobalValues.NAME_CONNECT_STATE);
                 if (TextUtils.equals(state, GlobalValues.VALUE_CONNECT_STATE_YES)) {//成功连接手环
+                    if(dialog!=null)
                     dialog.dismiss();
                     // bluee_iv_left.setState(true);
                     myHandler.postDelayed(new Runnable() {
