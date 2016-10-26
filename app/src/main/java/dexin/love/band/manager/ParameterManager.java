@@ -5,6 +5,7 @@ import android.os.Environment;
 public class ParameterManager {
     public static int nickNameLength = 8;
     public static final int CURRENT_STATUES = 0; // 当前状态不是睡眠状态，当前状态为运动状态
+    public static final String DEVICES_ADDRESS = "device_address"; //sp文件中存储睡眠定位时间间隔的key
     public static final String SHEZHI_SLEEP_GPS = "sleep_gps"; //sp文件中存储睡眠定位时间间隔的key
     public static final String SHEZHI_SPORT_GPS = "sport_gps"; //sp文件中存储运动定位时间间隔的key
     public static final String SHEZHI_JIANCEGPS = "jiance_gps"; //sp文件中存储间测定位时间间隔的key

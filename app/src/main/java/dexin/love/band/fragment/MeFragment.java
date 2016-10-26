@@ -30,10 +30,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -161,8 +163,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private MyLocationListener.CallBack mCallback;
     private MySqliteHelper helper;
     private long currentTime;
-    @ViewInject(R.id.jiancebaojing)
-    private SlideSwitch jiancebaojing;//监测报警信息
     XinLvSqliteHelper xinlvhelper;
     SQLiteDatabase xinlvdb;
     private SharedPreferences preferences;
@@ -180,7 +180,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private NotificationManager notificationManager;//1.获取状态栏通知管理器
     private TextToSpeech tts;
     private UserInfo userInfo;
-    private LinearLayout layout_device_list;
+    //private LinearLayout layout_device_list;
     private AlertDialog dialog;
     private SleepData sleepData;
     private String address;
@@ -190,10 +190,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private boolean isFirm = false;//是否是固件升级状态
     @ViewInject(R.id.relative_firmupgrade)
     private RelativeLayout layout_firmupgrade;
-    //private long sosTime = 0;
+    List<BluetoothDevice> bluetoothDeviceList;
+    private MyBaseAdapter adapter;
+    private ListView listView_device_list;
+    private SharedPreferences.Editor editor;
 
-    //private  String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION};
-//    private  String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION};
     @Override
     protected void init() {
         if (!EventBus.getDefault().isRegistered(this)) {
@@ -203,13 +204,22 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         bar_biaoti.setVisibility(View.VISIBLE);
         bar_biaoti.setText("我");
         /**
+         * 10-26
+         */
+        listView_device_list = new ListView(AppUtils.getBaseContext());
+        bluetoothDeviceList = new ArrayList<>();
+        adapter = new MyBaseAdapter();
+        listView_device_list.setAdapter(adapter);
+        /**
          * xpp add 10-6
          */
         progressDialog = new ProgressDialog(this.getActivity());
-        View devicesView = LayoutInflater.from(AppUtils.getBaseContext()).inflate(R.layout.deviceslayout, null);
-        layout_device_list = (LinearLayout) devicesView.findViewById(R.id.layout_device_list);
+//        View devicesView = LayoutInflater.from(AppUtils.getBaseContext()).inflate(R.layout.deviceslayout, null);
+//        layout_device_list = (LinearLayout) devicesView.findViewById(R.id.layout_device_list);
         //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
         preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
+        //2. 获得编辑器:当将数据存储到SharedPrefences对象中时，需要获得编辑器。如果取出则不需要。
+        editor = preferences.edit();
         userInfo = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
         mCallback = new MyLocationListener.CallBack() {
             @Override
@@ -248,15 +258,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         notificationManager = ((BaseApplication) AppUtils.getBaseContext()).notificationManager;
         tts = new TextToSpeech(AppUtils.getBaseContext(), this);
         sleepData = new SleepData();
-        //判断是否有权限
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (getActivity().checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//               getActivity().requestPermissions(permissions, 17);//请求权限
-//                //判断是否需要 向用户解释，为什么要申请该权限
-//                shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION);
-//                Log.e("xpppermission","Manifest.permission.ACCESS_COARSE_LOCATION");
-//            }
-//        }
     }
 
     /**
@@ -325,9 +326,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
             @Override
             public void close() {
-                //if (mBleEngine != null)
-                // mBleEngine.disconnect();
-                mBleEngine.close();
+                if (mBleEngine != null)
+                    // mBleEngine.disconnect();
+                    mBleEngine.close();
             }
         });
     }
@@ -335,42 +336,80 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     /**
      * 显示蓝牙设备列表
      */
-    private void showDeviceList(List<BluetoothDevice> devices) {
-        layout_device_list.removeAllViews();
-        View itemView = null;
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        for (int i = 0; devices != null && i < devices.size(); i++) {
-            itemView = LayoutInflater.from(AppUtils.getBaseContext()).inflate(R.layout.layout_list_item_device, null);
-
-            RelativeLayout layout_item_device = (RelativeLayout) itemView.findViewById(R.id.layout_list_item_device);
-            TextView txt_item_name = (TextView) itemView.findViewById(R.id.txt_item_name);
-
-            final BluetoothDevice device = devices.get(i);
-            if (device.getName() != null && device.getName().length() > 0 && !device.getName().equals("")) {
-                txt_item_name.setText(device.getName());
-                //address = device.getAddress();
-            }
-            //    Log.e("wyjxpp", device.getName() + "设备地址：" + device.getAddress());
-            else
-                txt_item_name.setText("未知设备");
-            layout_item_device.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mBleEngine.connect(device.getAddress());
-                }
-            });
-            layout_device_list.addView(itemView);
-        }
-        ViewGroup p = (ViewGroup) layout_device_list.getParent();
+    private void showDeviceList(final List<BluetoothDevice> devices) {
+        adapter.clear();
+        adapter.addData(devices);
+        ViewGroup p = (ViewGroup) listView_device_list.getParent();
         if (p != null) {
             p.removeAllViewsInLayout();
         }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("点击连接设备");
-        builder.setView(layout_device_list);
+        builder.setView(listView_device_list);
         builder.setNegativeButton("放弃", null);
         dialog = builder.setCancelable(false).create();
         dialog.show();
+        listView_device_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mBleEngine.connect(devices.get(position).getAddress());
+                editor.putString(ParameterManager.DEVICES_ADDRESS, devices.get(position).getAddress());
+            }
+        });
+    }
+
+    class MyBaseAdapter extends BaseAdapter {
+
+        @Override
+        public int getCount() {
+            return bluetoothDeviceList.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return bluetoothDeviceList.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            if (convertView == null) {
+                LayoutInflater inflater = LayoutInflater.from(AppUtils.getBaseContext());
+                convertView = inflater.inflate(R.layout.layout_list_item_device, null);
+                viewHolder = new ViewHolder();
+                viewHolder.text_deviceName = (TextView) convertView
+                        .findViewById(R.id.txt_item_name);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+            BluetoothDevice device = bluetoothDeviceList.get(position);
+            if (device.getName() != null && device.getName().length() > 0 && !device.getName().equals(""))
+                viewHolder.text_deviceName.setText(device.getName());
+            else
+                viewHolder.text_deviceName.setText("未知设备");
+            return convertView;
+        }
+
+        public void addData(List<BluetoothDevice> data) {
+            bluetoothDeviceList.addAll(data);
+            notifyDataSetChanged();
+        }
+
+        public void clear() {
+            bluetoothDeviceList.clear();
+            notifyDataSetChanged();
+        }
+    }
+
+    class ViewHolder {
+        TextView text_deviceName;
     }
 
     @Override
@@ -410,12 +449,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         if (helper != null) {
             helper.close();
         }
-//        if (xinlvhelper != null) {
-//            xinlvhelper.close();
-//        }
-//        if (xinlvdb.isOpen()) {
-//            xinlvdb.close();
-//        }
         if (tts != null) {
             tts.stop();
             tts.shutdown();
@@ -526,17 +559,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 break;
             case R.id.relative_about://关于我们
                 // downFile(ParameterManager.HOST+"uploads/authentication/image/upgrade.bin");
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
-                    }
-                });//进入固件升级模式
-                layout_firmupgrade.setVisibility(View.VISIBLE);
+//                mWorkQueue.execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+//                    }
+//                });//进入固件升级模式
+//                layout_firmupgrade.setVisibility(View.VISIBLE);
                 break;
             case R.id.relative_firmupgrade: //固件升级
-//                Intent i = new Intent(this.getActivity(), ScanActivity.class);
-//                startActivity(i);
                 EventBus.getDefault().post(new NavFragmentEvent(new ScannerFragment()));
                 break;
             default:
@@ -988,9 +1019,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_CONNECT_STATE_CHANGED)) {
                 String state = intent.getExtras().getString(GlobalValues.NAME_CONNECT_STATE);
                 if (TextUtils.equals(state, GlobalValues.VALUE_CONNECT_STATE_YES)) {//成功连接手环
-                    if(dialog!=null)
-                    dialog.dismiss();
+                    if (dialog != null)
+                        dialog.dismiss();
                     // bluee_iv_left.setState(true);
+                    if (runnable_connect!=null)
+                    myHandler.removeCallbacks(runnable_connect);//不在不断扫描重新连接
                     myHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -1042,6 +1075,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     }
                     if (isAdded())
                         diffNotifyShow(1, getResources().getString(R.string.disconnected), dialogView);
+                      myHandler.postDelayed(runnable_connect,8000);
                 }
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 //获取手机电量
@@ -1112,6 +1146,25 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
                 afterStopRateHandler();
             }
+        }
+    };
+    private Runnable runnable_connect  = new Runnable() {
+        @Override
+        public void run() {
+            if (mBleEngine != null) {//重新扫描连接
+                mBleEngine.scanBleDevice(true, 5000, new BleEngine.ListScanCallback() {
+                    @Override
+                    public void onDeviceFound(List<BluetoothDevice> devices) {
+                        for (BluetoothDevice device : devices) {
+                            if (device.getAddress().equals(preferences.getString(ParameterManager.DEVICES_ADDRESS, ""))) {
+                                mBleEngine.connect(preferences.getString(ParameterManager.DEVICES_ADDRESS, ""));
+                                Log.e("Ble", "重新连接");
+                            }
+                        }
+                    }
+                });
+            }
+            myHandler.postDelayed(this,8000);
         }
     };
 
