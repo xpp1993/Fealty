@@ -70,6 +70,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     TextView tv_gps;
     @ViewInject(R.id.dingwei)
     ImageView im_dingwei;
+    @ViewInject(R.id.berry)
+    TextView tv_berry;
     private MyHandler handler = new MyHandler();
     private final int REQURST_HANDLER_GPSDATA = 0x21;
     private final int REQURST_HANDLER_SlEEPDATA = 0x22;
@@ -77,7 +79,9 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     private final int REQURST_HANDLER_IDENTITY = 0x24;
     private final int REQURST_HANDLER_CURRENT_RATE = 0x25;
     private final int REQURST_HANDLER_LIST_RATE = 0x26;
+    private final int REQURST_HANDLER_CUFFELECTRICITY = 0x27;
     public static final String RATE_CHANGED = "com.lxkj.administrator.fealty.fragment.HealthDataFragment";
+    public static final String BERRY_CHANGED = "HealthDataFragment.berry";
     private HealthRateReceiver mReceiver = null;
     private int RATE_STATUS = 80;//保存心率
     private SharedPreferences preferences;
@@ -95,11 +99,19 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     private String distance = "0";
     private String indentity = "我";
     private List<RateListData> list = new ArrayList<>();
+    private boolean isShow = true;
+    //private PPView.OnClickListener mClickListener;
 
     @Override
     protected void init() {
         Log.d("wyj", "init");
         handler = new MyHandler();
+//        mClickListener = new PPView.OnClickListener() {
+//            @Override
+//            public void onClick() {
+//                isShow=true;
+//            }
+//        };
         // map = new TreeMap<>();
         //设置horizontalScrollvView拉到头和尾的时候没有阴影颜色
         horiView.setOverScrollMode(View.OVER_SCROLL_NEVER);
@@ -158,6 +170,11 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                 bundle.putInt("rate", RATE_STATUS);
                 EventBus.getDefault().post(new NavFragmentEvent(new LocaltionFragment(), bundle));
                 break;
+            case R.id.pp:
+                if (!isShow){
+                    isShow=true;
+                }
+                break;
             default:
                 break;
         }
@@ -166,6 +183,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     double lat = 0.0;
     double lon = 0.0;
     String describle = "";
+    String berry = "0";
 
     private class MyHandler extends Handler {
         @Override
@@ -204,6 +222,9 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                     Log.d("wyj", "REQURST_HANDLER_LIST_RATE");
                     list = (List<RateListData>) msg.obj;
                     break;
+                case REQURST_HANDLER_CUFFELECTRICITY://手环电量的改变
+                    berry = (String) msg.obj;
+                    break;
                 default:
                     break;
             }
@@ -230,11 +251,16 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         mPpView.setFirstText(indentity);
         mPpView.postInvalidate();
 
+        tv_berry.setText("手环电量 " + berry);
         readSP();
         if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常
-            functionTest(RATE_STATUS, R.color.warning);
+            if (isShow) {
+                functionTest(RATE_STATUS, R.color.warning);
+                isShow = false;
+            }
         } else {
-            functionTest(RATE_STATUS, R.color.normal);
+            if (isShow)
+                functionTest(RATE_STATUS, R.color.normal);
         }
         //把实时心率传到定位页面
         Intent intent = new Intent();
@@ -285,6 +311,13 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                 msg.what = REQURST_HANDLER_CURRENT_RATE;//监听到心率改变
                 msg.arg1 = tempRate;
                 handler.sendMessage(msg);
+            } else if (intent.getAction().equals(HealthDataFragement.BERRY_CHANGED)) {//接收到手环电量广播
+                String cuffElectricity = intent.getStringExtra("cuffElectricity");
+                Message msg = Message.obtain();
+                msg.what = REQURST_HANDLER_CUFFELECTRICITY;//监听到手环改变
+                msg.obj = cuffElectricity;
+                handler.sendMessage(msg);
+
             }
         }
     }
@@ -301,6 +334,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         }
         mReceiver = new HealthRateReceiver();
         filter.addAction(HealthDataFragement.RATE_CHANGED);
+        filter.addAction(HealthDataFragement.BERRY_CHANGED);
         getActivity().registerReceiver(mReceiver, filter);
     }
 
@@ -390,6 +424,14 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         handler.sendMessage(message);
     }
 
+    //提供给外界设置折线图中心率的方法,currentHeart
+    public void setBerry(String berry) {
+        Message message = Message.obtain();
+        message.what = REQURST_HANDLER_CUFFELECTRICITY;
+        message.obj = berry;
+        handler.sendMessage(message);
+    }
+
     /**
      * 设置第二行文本的颜色
      */
@@ -397,6 +439,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         mPpView.setSecondTextColor(ContextCompat.getColor(getContext(), color));
         mPpView.setSecondText(currentRate + "");
         mPpView.postInvalidate();
+        mPpView.setOnClickListener(this);
     }
 
 }

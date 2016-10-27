@@ -223,7 +223,26 @@
             android:layout_marginRight="8dp"
             android:textColor="#838383"
             android:textSize="11sp" />
-
+        <View
+            android:id="@+id/shouview6"
+            android:layout_width="1dp"
+            android:layout_height="13dp"
+            android:layout_below="@id/yundongtotal"
+            android:layout_toLeftOf="@id/yundongdetail2"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="7dp"
+            android:background="@color/MainTheme" />
+        <TextView
+            android:id="@+id/berry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/yundongtotal"
+            android:layout_marginTop="8dp"
+            android:layout_toLeftOf="@id/shouview6"
+            android:text="手环电量 0"
+            android:layout_marginRight="8dp"
+            android:textColor="#838383"
+            android:textSize="11sp" />
     </RelativeLayout>
     <View
         android:id="@+id/shouview1"

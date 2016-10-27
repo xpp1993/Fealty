@@ -61,9 +61,11 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     private JazzyViewPager mJazzy;
     private HeathMonitoringAdapter adapter;
     private List<HealthDataFragement> fragments = new ArrayList<HealthDataFragement>();
+    public static final int REQUEST_CODE_USERINFO_BINDED = 0x19;
     private final int REQUEST_CODE_UPDATA_USERIFO_INTERNET = 0x23;
     private final int REQUEST_CODE_UPDATA_GPS_INTERNET = 0x26;
     private final int REQUEST_CODE_UPDATA_ZHEXIAN_HEART = 0x25;
+
     private MyHandler myHandler;
     // private HealthDataFragement healthDataFragement;
     private UserInfo userInfo;
@@ -103,6 +105,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_GPS_FROM_URL, params, null, REQUEST_CODE_UPDATA_GPS_INTERNET, this);
         //3.折线心率
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_HEART, params, null, REQUEST_CODE_UPDATA_ZHEXIAN_HEART, this);
+        //获取手环电量
+        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_BINDED, params, null, REQUEST_CODE_USERINFO_BINDED, this);
         //写个循环每一段时间刷新一次页面
         myHandler.postDelayed(LoadData, 1000 * 60 * 3);
         m_progressDlg = new ProgressDialog(getActivity());
@@ -177,7 +181,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                         m_progressDlg.setMessage("请稍后....");
                         //开始下载软件
                         downFile(ParameterManager.HOST + userInfo.getUrl());
-                        Log.e("ssg",ParameterManager.HOST + userInfo.getUrl());
+                        Log.e("ssg", ParameterManager.HOST + userInfo.getUrl());
                     }
                 })
                 .setNegativeButton("暂不更新", null)
@@ -200,7 +204,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if(action.equals(UserDetailInfo.TAG)){
+            if (action.equals(UserDetailInfo.TAG)) {
                 adapter.clearFragment();
                 //再请求一次数据
                 commandForUrl();
@@ -228,7 +232,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                             @Override
                             public void run() {
                                 m_progressDlg.dismiss();
-                                Toast.makeText(AppUtils.getBaseContext(),"网络错误，下载失败",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AppUtils.getBaseContext(), "网络错误，下载失败", Toast.LENGTH_SHORT).show();
                             }
                         });
                         return;
@@ -301,6 +305,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_GPS_FROM_URL, params, null, REQUEST_CODE_UPDATA_GPS_INTERNET, StatusFragment.this);
         //3
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_HEART, params, null, REQUEST_CODE_UPDATA_ZHEXIAN_HEART, StatusFragment.this);
+        //4
+        NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_BINDED, params, null, REQUEST_CODE_USERINFO_BINDED, StatusFragment.this);
     }
 
     @Override
@@ -410,6 +416,9 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                 case REQUEST_CODE_UPDATA_ZHEXIAN_HEART:
                     DecodeManager.decodeHeartMessage(jsonObject, requestCode, myHandler);
                     break;
+                case REQUEST_CODE_USERINFO_BINDED://获取手环电量
+                    DecodeManager.decodeUserInfoQuery(jsonObject, requestCode, myHandler);
+                    break;
                 default:
                     break;
             }
@@ -454,7 +463,7 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                         }
 
                     } else {
-                       //ToastUtils.showToastInUIThread(data.getString("desc"));
+                        //ToastUtils.showToastInUIThread(data.getString("desc"));
                     }
                     break;
                 case REQUEST_CODE_UPDATA_USERIFO_INTERNET:
@@ -498,8 +507,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                         }
 
                     } else {
-                       // ToastUtils.showToastInUIThread("服务器数据有异常！");
-                      //  ToastUtils.showToastInUIThread(data.getString("desc"));
+                        // ToastUtils.showToastInUIThread("服务器数据有异常！");
+                        //  ToastUtils.showToastInUIThread(data.getString("desc"));
                     }
                     break;
                 case REQUEST_CODE_UPDATA_ZHEXIAN_HEART:
@@ -523,8 +532,26 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                         }
 
                     } else {
-                       // ToastUtils.showToastInUIThread("服务器数据有异常！");
-                      //  ToastUtils.showToastInUIThread(data.getString("desc"));
+                        // ToastUtils.showToastInUIThread("服务器数据有异常！");
+                        //  ToastUtils.showToastInUIThread(data.getString("desc"));
+                    }
+                    break;
+                case REQUEST_CODE_USERINFO_BINDED:
+                    if (data.getInt("code") == 1) {//获得list，放入adapter
+                        ArrayList<UserInfo> list = (ArrayList<UserInfo>) data.getSerializable("userMsg_list");
+                        if (list.size() == 0)
+                            return;
+                        for (UserInfo userInfo : list) {
+                            String parentPhone = userInfo.getMobile();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("parentPhone", parentPhone);
+                            HealthDataFragement healthDataFragement = new HealthDataFragement();
+                            healthDataFragement.setArguments(bundle);
+                            HealthDataFragement fragement = adapter.addFragment(healthDataFragement);
+                            adapter.notifyDataSetChanged();
+                            fragement.setBerry(userInfo.getCuffElectricity());
+                        }
+
                     }
                     break;
                 default:

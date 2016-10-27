@@ -250,7 +250,7 @@
             android:layout_height="1dp"
             android:background="#EFEFF4" />
         <RelativeLayout
-            android:id="@+id/relativelayout6"
+            android:id="@+id/relative_test"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_marginBottom="5dp"
@@ -262,9 +262,9 @@
             <TextView
                 android:id="@+id/info"
                 style="@style/self_info_layout_tv_title"
-                android:text="监测报警信息" />
+                android:text="测试心率" />
             <com.leaking.slideswitch.SlideSwitch
-                android:id="@+id/jiancebaojing"
+                android:id="@+id/test_rate"
                 android:layout_width="54dp"
                 android:layout_height="30dp"
                 slideswitch:isOpen="false"

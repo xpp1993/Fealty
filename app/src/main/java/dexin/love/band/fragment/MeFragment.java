@@ -25,6 +25,7 @@ import android.provider.ContactsContract;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
+import android.transition.Slide;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -95,6 +96,7 @@ import dexin.love.band.utils.ContextUtils;
 import dexin.love.band.utils.FormatCheck;
 import dexin.love.band.utils.MySqliteHelper;
 import dexin.love.band.utils.NetWorkAccessTools;
+import dexin.love.band.utils.ScanService;
 import dexin.love.band.utils.ThreadPoolUtils;
 import dexin.love.band.utils.ToastUtils;
 import dexin.love.band.utils.WorkQueue;
@@ -124,6 +126,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private RelativeLayout binded_action;//绑定用户
     @ViewInject(R.id.relative_location)
     private RelativeLayout relative_location;//我的路线查看
+    @ViewInject(R.id.relative_test)
+    private RelativeLayout relative_test;
     @ViewInject(R.id.me_headpic)
     private CircleImageView circleImageView;
     @ViewInject(R.id.me_username)
@@ -132,6 +136,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private TextView me_phone;
     @ViewInject(R.id.bluee_iv_left)
     private SlideSwitch bluee_iv_left;
+    @ViewInject(R.id.test_rate)
+    private SlideSwitch test_rate;
     public static final int REQUEST_USER_BYMIBILE = 0x01;
     private Handler myHandler = new MyHandler();
     private ProgressDialog progressDialog;
@@ -194,6 +200,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private MyBaseAdapter adapter;
     private ListView listView_device_list;
     private SharedPreferences.Editor editor;
+    private boolean isRating = false;
+    private boolean isOpenTest = false;
 
     @Override
     protected void init() {
@@ -326,9 +334,38 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
             @Override
             public void close() {
+                relative_test.setVisibility(View.GONE);
                 if (mBleEngine != null)
-                    // mBleEngine.disconnect();
                     mBleEngine.close();
+            }
+        });
+        //测试心率
+        test_rate.setSlideListener(new SlideSwitch.SlideListener() {
+            @Override
+            public void open() {
+                if (isRating == false) {
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mBleEngine != null)
+                                CommandManager.sendStartRate(mBleEngine, "FFFFFFFF");
+                        }
+                    });
+                }
+                isOpenTest = true;//打开了心率测试按钮
+            }
+
+            @Override
+            public void close() {
+                if (isRating == true)
+                    mWorkQueue.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mBleEngine != null)
+                                CommandManager.sendStopRate(mBleEngine);
+                        }
+                    });
+                isOpenTest = false;//关闭了心率测试按钮
             }
         });
     }
@@ -389,11 +426,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
-            BluetoothDevice device = bluetoothDeviceList.get(position);
-            if (device.getName() != null && device.getName().length() > 0 && !device.getName().equals(""))
-                viewHolder.text_deviceName.setText(device.getName());
-            else
-                viewHolder.text_deviceName.setText("未知设备");
+            if (bluetoothDeviceList.size() > 0) {
+                BluetoothDevice device = bluetoothDeviceList.get(position);
+                if (device.getName() != null && device.getName().length() > 0 && !device.getName().equals(""))
+                    viewHolder.text_deviceName.setText(device.getName());
+                else
+                    viewHolder.text_deviceName.setText("未知设备");
+            } else {
+                viewHolder.text_deviceName.setText("未扫描到设备");
+            }
             return convertView;
         }
 
@@ -448,6 +489,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.removeCallbacks(runable_startGps);
         if (helper != null) {
             helper.close();
+        }
+        if (xinlvdb != null) {
+            xinlvdb.delete("xinlv", null, null);//退出应用时清除数据库
         }
         if (tts != null) {
             tts.stop();
@@ -1001,6 +1045,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 //把计步监听的结果上传服务器
                 updataSportData(steps, calories, distance);
                 EventBus.getDefault().post(sportData);
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendSynSleep(mBleEngine, 1);
+                    }
+                });
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendSynSleep(mBleEngine, 0);
+                    }
+                });//发送获取当天睡眠质量数据，0表示当天数据，1表示昨天数据，2表示前天数据
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_ELECTRICITY)) {
                 String value = intent.getExtras().getString(GlobalValues.NAME_ELECTRICITY);
                 String ISELECTRICITE = intent.getExtras().getString(GlobalValues.NAME_ISELECTRICITE);//手环是否处于充电状态
@@ -1010,9 +1066,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 Map<String, String> params = new HashMap<>();
                 params.put("cuffElectricity", value);
                 alterSelfData(params);//发送到服务器
-                //电量异常，发送通知
+                Intent intent_berry = new Intent();
+                intent_berry = intent.putExtra("cuffElectricity", value);
+                intent_berry.setAction(HealthDataFragement.BERRY_CHANGED);
                 if (isAdded())
-                    setNotifyDian2(Integer.parseInt(value), ISELECTRICITE, getResources().getString(R.string.betty));
+                    getActivity().sendBroadcast(intent_berry);
+                //电量异常，发送通知
+                setNotifyDian2(Integer.parseInt(value), ISELECTRICITE, getResources().getString(R.string.betty));
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_A_KEY_ALARM)) {//一键报警广播
                 Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.SOS, params, null, MeFragment.REQUEST_CODE_SOS, MeFragment.this);
@@ -1021,9 +1081,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 if (TextUtils.equals(state, GlobalValues.VALUE_CONNECT_STATE_YES)) {//成功连接手环
                     if (dialog != null)
                         dialog.dismiss();
-                    // bluee_iv_left.setState(true);
-                    if (runnable_connect!=null)
-                    myHandler.removeCallbacks(runnable_connect);//不在不断扫描重新连接
+                    relative_test.setVisibility(View.VISIBLE);
                     myHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -1048,26 +1106,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                             CommandManager.sendGetVersionandMac(mBleEngine);
                         }
                     });//发送获取手环信息，比如固件版本，MAC地址
-                    mWorkQueue.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            CommandManager.sendSynSleep(mBleEngine, 1);
-                        }
-                    });
-                    mWorkQueue.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            CommandManager.sendSynSleep(mBleEngine, 0);
-                        }
-                    });//发送获取当天睡眠质量数据，0表示当天数据，1表示昨天数据，2表示前天数据
                     //发送心率测试开始
                     myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);
                 } else {
                     progressDialog.dismiss();
+                    relative_test.setVisibility(View.GONE);
                     if (!isFirm)
                         dialog.dismiss();
                     ToastUtils.showToastInUIThread("与手环失去连接！");
                     bluee_iv_left.setState(false);
+                    autoConnect(preferences.getString(ParameterManager.DEVICES_ADDRESS, ""));
                     readSP();
                     DialogViewC dialogView = null;
                     if (message_dialog == true) {
@@ -1075,7 +1123,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     }
                     if (isAdded())
                         diffNotifyShow(1, getResources().getString(R.string.disconnected), dialogView);
-                      myHandler.postDelayed(runnable_connect,8000);
+                    // myHandler.postDelayed(runnable_connect,8000);
                 }
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 //获取手机电量
@@ -1098,6 +1146,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 updataSleepData(deep_hour, deep_minute, light_hour, light_minute, sleepData.getTotal_hour_str());
                 EventBus.getDefault().post(sleepData);//把数据传到首页面
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_RATE)) {//心率数据
+                isRating = true;
                 Bundle bundle = intent.getExtras();
                 String rateTime = bundle.getString(GlobalValues.NAME_RATETIME);//该次心率测试的时间
                 int rate = bundle.getInt(GlobalValues.NAME_RATE);
@@ -1105,17 +1154,19 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 if (rate == 0)
                     return;
                 // if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
-                if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
-                    Log.e("lastSysTime", lastSysTime + "," + ParameterManager.Time + "," + System.currentTimeMillis());
-                    lastSysTime = System.currentTimeMillis();
-                    //发送停止心率测试指令
-                    mWorkQueue.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            CommandManager.sendStopRate(mBleEngine);
-                            Log.e("wyj", "stop to rate");
-                        }
-                    });
+                if (isOpenTest == false) {
+                    if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
+                        Log.e("lastSysTime", lastSysTime + "," + ParameterManager.Time + "," + System.currentTimeMillis());
+                        lastSysTime = System.currentTimeMillis();
+                        //发送停止心率测试指令
+                        mWorkQueue.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                CommandManager.sendStopRate(mBleEngine);
+                                Log.e("wyj", "stop to rate");
+                            }
+                        });
+                    }
                 }
                 //将心率数据发给首页
                 Intent intent_health = new Intent();
@@ -1143,30 +1194,26 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.FIRMWAREUPGRADE, null, null, MeFragment.REQUEST_CODE_FIRMEUPGRADE, MeFragment.this);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_STOPRATE)) {//心率停止测试
+                isRating = false;
+                // test_rate.setState(false);
                 //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
                 afterStopRateHandler();
             }
         }
     };
-    private Runnable runnable_connect  = new Runnable() {
-        @Override
-        public void run() {
-            if (mBleEngine != null) {//重新扫描连接
-                mBleEngine.scanBleDevice(true, 5000, new BleEngine.ListScanCallback() {
-                    @Override
-                    public void onDeviceFound(List<BluetoothDevice> devices) {
-                        for (BluetoothDevice device : devices) {
-                            if (device.getAddress().equals(preferences.getString(ParameterManager.DEVICES_ADDRESS, ""))) {
-                                mBleEngine.connect(preferences.getString(ParameterManager.DEVICES_ADDRESS, ""));
-                                Log.e("Ble", "重新连接");
-                            }
-                        }
-                    }
-                });
-            }
-            myHandler.postDelayed(this,8000);
+
+    /**
+     * 自动连接操作 调用扫描，如扫描到设备，传递给MyHandler类进行连接设备
+     *
+     * @param Address
+     */
+    private void autoConnect(String Address) {
+        ScanService scan = new ScanService(getActivity(), myHandler);
+        if (scan.init()) {
+            scan.scanLeDevice(true, Address);
         }
-    };
+    }
+
 
     /**
      * 提示更新新版本
