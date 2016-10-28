@@ -34,7 +34,8 @@ public class ParameterManager {
     public static final int TOTAL_ROCK_TIME = 60;//计时器总时长
     //  public static final String DEVICE_ADDRESS = "diveceAddress";//设备地址存储在sp文件中的key
     public static final String Local_HOST = "http://192.168.8.133:8080/";//本地服务器
-    public static final String HOST = "http://120.76.27.233:8080/";//外网服务器
+    //public static final String HOST = "http://120.76.27.233:8080/";//外网服务器
+    public static final String HOST = "http://139.129.217.190:8080/";//外网服务器
     //        public static final String GET_CHECK_CODE = "http://192.168.8.133:8080/cuffapi/user/get_check_code?phone=";
 //    public static final String SIGN_IN_SUBMIT = "http://192.168.8.133:8080/cuffapi/user/sign_in_submit";
 //    public static final String RESET_PASSWORD = "http://192.168.8.133:8080/cuffapi/user/password_submit";
@@ -57,27 +58,27 @@ public class ParameterManager {
     public static final String SOS = "cuffapi/user/send_sms_sos";
     public static final String FIRMWAREUPGRADE = "cuffapi/user/get_fierware_msg";
     public static final String REJECT_BINDED = "cuffapi/user/reject_binded";
-    public static final String GET_CHECK_CODE = "http://120.76.27.233:8080/cuffapi/user/get_check_code?phone=";
-    public static final String SIGN_IN_SUBMIT = "http://120.76.27.233:8080/cuffapi/user/sign_in_submit";
-    public static final String RESET_PASSWORD = "http://120.76.27.233:8080/cuffapi/user/password_submit";
-    public static final String SIGN_UP_COMMIT = "http://120.76.27.233:8080/cuffapi/user/sign_up_submint";
-    public static final String UPLOAD_CONTACTS_LIST = "http://120.76.27.233:8080/cuffapi/user/upload_contact_list";
-    public static final String GET_USER_BYMOBILE = "http://120.76.27.233:8080/cuffapi/user/get_user_by_phone";
-    public static final String UPDATE_USER_MSG = "http://120.76.27.233:8080/cuffapi/user/update_user_msg";
+    public static final String GET_CHECK_CODE = HOST+"cuffapi/user/get_check_code?phone=";
+    public static final String SIGN_IN_SUBMIT = HOST+"cuffapi/user/sign_in_submit";
+    public static final String RESET_PASSWORD = HOST+"cuffapi/user/password_submit";
+    public static final String SIGN_UP_COMMIT = HOST+"cuffapi/user/sign_up_submint";
+    public static final String UPLOAD_CONTACTS_LIST = HOST+"cuffapi/user/upload_contact_list";
+    public static final String GET_USER_BYMOBILE = HOST+"cuffapi/user/get_user_by_phone";
+    public static final String UPDATE_USER_MSG = HOST+"cuffapi/user/update_user_msg";
     public static final int NOTIFICATION_ID = 0X2131;
-    public static final String UPDATE_SLEEP_SPORT = "http://120.76.27.233:8080/cuffapi/sport/insert_user_sport_sleep";
+    public static final String UPDATE_SLEEP_SPORT =HOST+ "cuffapi/sport/insert_user_sport_sleep";
     //性别标杆
     public static final String USER_SEX_CODE_MAN = "1", USER_SEX_CODE_WOMAN = "2";
-    public static final String SELECT_BIND_OLD = "http://120.76.27.233:8080/cuffapi/user/select_bind_old";
-    public static final String INSERT_CURRENTRATE = "http://120.76.27.233:8080/cuffapi/current_heart/insert_user_heart";
-    public static final String SELECT_USER_CURRENT_HEART = "http://120.76.27.233:8080/cuffapi/current_heart/select_user_current_heart";
-    public static final String GPS_UPLOAD_URL = "http://120.76.27.233:8080/cuffapi/gps/operation_user_gps";
-    public static final String GET_GPS_FROM_URL = "http://120.76.27.233:8080/cuffapi/gps/select_user_gps";
-    public static final String UPLOAD_ZHEXIAN = "http://120.76.27.233:8080/cuffapi/heart/insert_user_heart";
-    public static final String SELECT_USER_HEART = "http://120.76.27.233:8080/cuffapi/heart/select_user_heart";
-    public static final String SELECT_USER_BINDED = "http://120.76.27.233:8080/cuffapi/current_heart/select_binded_user_msg";
+    public static final String SELECT_BIND_OLD =HOST+ "cuffapi/user/select_bind_old";
+    public static final String INSERT_CURRENTRATE =HOST+ "cuffapi/current_heart/insert_user_heart";
+    public static final String SELECT_USER_CURRENT_HEART =HOST+ "cuffapi/current_heart/select_user_current_heart";
+    public static final String GPS_UPLOAD_URL =HOST+ "cuffapi/gps/operation_user_gps";
+    public static final String GET_GPS_FROM_URL = HOST+"cuffapi/gps/select_user_gps";
+    public static final String UPLOAD_ZHEXIAN =HOST+ "cuffapi/heart/insert_user_heart";
+    public static final String SELECT_USER_HEART =HOST+ "cuffapi/heart/select_user_heart";
+    public static final String SELECT_USER_BINDED =HOST+ "cuffapi/current_heart/select_binded_user_msg";
     public static final String APPLICATION_NAME = "dexin.love.band.apk";
     public static final String FIRMWARE_NAME = "upgrade.bin";
-    public  static String filesDir = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Suota";
-    public static long  Time = 30000;
+    public static String filesDir = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Suota";
+    public static long Time = 30000;
 }

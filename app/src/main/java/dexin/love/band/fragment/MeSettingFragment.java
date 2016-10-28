@@ -142,20 +142,11 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
      * 初始化个人资料显示
      */
     private void initPersonalDataShow() {
-
-        //   if (TextUtils.isEmpty(SessionHolder.user.getUserpic()) || "".equals(SessionHolder.user.getUserpic())) {
         if (TextUtils.isEmpty(userInfo.getUserpic()) || "".equals(userInfo.getUserpic())) {
             circleImageView.setImageResource(R.mipmap.unknow_head);
         } else {
-            // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
-            //   NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
-            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+            NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage(ParameterManager.HOST + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
         }
-//        tv_nickName.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
-//        tv_phone.setText(SessionHolder.user.getMobile());
-//        tv_simle.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置 " : SessionHolder.user.getNickName());
-//        birthDayTextView.setText(TextUtils.isEmpty(SessionHolder.user.getBirthday()) ? "未设置" : SessionHolder.user.getBirthday());
-//        tv_sex.setText(TextUtils.isEmpty(SessionHolder.user.getGender()) ? "未设置" : TextUtils.equals(SessionHolder.user.getGender(), ParameterManager.USER_SEX_CODE_MAN) ? "男" : "女");
         tv_nickName.setText(TextUtils.isEmpty(userInfo.getNickName()) ? "未设置" : userInfo.getNickName());
         tv_phone.setText(userInfo.getMobile());
         tv_simle.setText(TextUtils.isEmpty(userInfo.getNickName()) ? "未设置 " : userInfo.getNickName());
@@ -188,15 +179,12 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                 Log.v("RegistActivity", "onActivityResult:请求图片从从剪切器返回成功");
                 try {
                     circleImageView.setImageURI(Uri.fromFile(headImageFile));
-                    // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile(), SessionHolder.user.getNickName(), "", SessionHolder.user.getBirthday(), SessionHolder.user.getGender());
-                    // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "nickName", "headFile", "birthday", "sex"}, SessionHolder.user.getMobile()," "," "," "," ");
                     if (headImageFile != null && headImageFile.exists()) {
                         Map<String, String> map = new HashMap<>();
                         byte[] buffer = changeFileToByte(headImageFile);
                         byte[] encode = Base64.encode(buffer, Base64.DEFAULT);
                         String photo = new String(encode);
                         map.put("headFile", photo);
-                        //  NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPDATE_USER_MSG, params, map, REQUEST_CODE_SELF_DATA_ALTER, MeSettingFragment.this);
                         //上传服务器，且写入sdcard
                         alterSelfData(map);//2016-8-26 xpp add
                     }

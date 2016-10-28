@@ -279,9 +279,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
             if (SessionHolder.user == null)
                 //  NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
-                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage(ParameterManager.HOST+ userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
             else
-                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage(ParameterManager.HOST + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
         }
         if (SessionHolder.user != null) {
             me_username.setText(TextUtils.isEmpty(SessionHolder.user.getNickName()) ? "未设置" : SessionHolder.user.getNickName());
@@ -861,7 +861,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         SessionHolder.user.setBirthday(birthday);
                     } else {//请求失败
                         ToastUtils.showToastInUIThread(msg.getData().getString("desc"));
-                        Log.w("service error", msg.getData().getString("desc"));
+                       // Log.w("service error", msg.getData().getString("desc"));
                     }
                     initPersonalDataShow();
                     break;
