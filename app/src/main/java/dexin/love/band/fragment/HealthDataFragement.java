@@ -106,13 +106,6 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     protected void init() {
         Log.d("wyj", "init");
         handler = new MyHandler();
-//        mClickListener = new PPView.OnClickListener() {
-//            @Override
-//            public void onClick() {
-//                isShow=true;
-//            }
-//        };
-        // map = new TreeMap<>();
         //设置horizontalScrollvView拉到头和尾的时候没有阴影颜色
         horiView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。

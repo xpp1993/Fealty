@@ -36,25 +36,6 @@ public class ParameterManager {
     public static final String Local_HOST = "http://192.168.8.133:8080/";//本地服务器
     //public static final String HOST = "http://120.76.27.233:8080/";//外网服务器
     public static final String HOST = "http://139.129.217.190:8080/";//外网服务器
-    //        public static final String GET_CHECK_CODE = "http://192.168.8.133:8080/cuffapi/user/get_check_code?phone=";
-//    public static final String SIGN_IN_SUBMIT = "http://192.168.8.133:8080/cuffapi/user/sign_in_submit";
-//    public static final String RESET_PASSWORD = "http://192.168.8.133:8080/cuffapi/user/password_submit";
-//    public static final String SIGN_UP_COMMIT = "http://192.168.8.133:8080/cuffapi/user/sign_up_submint";
-//    public static final String UPLOAD_CONTACTS_LIST = "http://192.168.8.133:8080/cuffapi/user/upload_contact_list";
-//    public static final String GET_USER_BYMOBILE = "http://192.168.8.133:8080/cuffapi/user/get_user_by_phone";
-//    public static final String UPDATE_USER_MSG = "http://192.168.8.133:8080/cuffapi/user/update_user_msg";
-//    // public static final int NOTIFICATION_ID = 0X2131 ;
-//    public static final String UPDATE_SLEEP_SPORT = "http://192.168.8.133:8080/cuffapi/sport/insert_user_sport_sleep";
-//    //性别标杆
-//    public static final String USER_SEX_CODE_MAN = "1", USER_SEX_CODE_WOMAN = "2";
-//    public static final String SELECT_BIND_OLD = "http://192.168.8.133:8080/cuffapi/user/select_bind_old";
-//    public static final String INSERT_CURRENTRATE = "http://192.168.8.133:8080/cuffapi/current_heart/insert_user_heart";
-//    public static final String SELECT_USER_CURRENT_HEART = "http://192.168.8.133:8080/cuffapi/current_heart/select_user_current_heart";
-//    public static final String GPS_UPLOAD_URL = "http://192.168.8.133:8080/cuffapi/gps/operation_user_gps";
-//    public static final String GET_GPS_FROM_URL = "http://192.168.8.133:8080/cuffapi/gps/select_user_gps";
-//    public static final String UPLOAD_ZHEXIAN = "http://192.168.8.133:8080/cuffapi/heart/insert_user_heart";
-//    public static final String SELECT_USER_HEART="http://192.168.8.133:8080/cuffapi/heart/select_user_heart";
-//    public static final String SELECT_USER_BINDED="http://192.168.8.133:8080/cuffapi/current_heart/select_binded_user_msg";
     public static final String SOS = "cuffapi/user/send_sms_sos";
     public static final String FIRMWAREUPGRADE = "cuffapi/user/get_fierware_msg";
     public static final String REJECT_BINDED = "cuffapi/user/reject_binded";

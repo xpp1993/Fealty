@@ -202,6 +202,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private SharedPreferences.Editor editor;
     private boolean isRating = false;
     private boolean isOpenTest = false;
+    private boolean CONNECTE_STATUS = false;
 
     @Override
     protected void init() {
@@ -279,7 +280,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             // NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://192.168.8.133:8080" + "/" + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
             if (SessionHolder.user == null)
                 //  NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage("http://120.76.27.233:8080" + "/" + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
-                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage(ParameterManager.HOST+ userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
+                NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage(ParameterManager.HOST + userInfo.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
             else
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).toLoadImage(ParameterManager.HOST + SessionHolder.user.getUserpic(), circleImageView, R.mipmap.unknow_head, R.mipmap.unknow_head);
         }
@@ -459,6 +460,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         // JudgeNewDayWhenResume();
         readSP();//读取文件中的值
         startGps();//开始定位
+        if (CONNECTE_STATUS == true) {
+            relative_test.setVisibility(View.VISIBLE);
+        }
     }
 
     // 用EventBus 来导航,订阅者
@@ -861,7 +865,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         SessionHolder.user.setBirthday(birthday);
                     } else {//请求失败
                         ToastUtils.showToastInUIThread(msg.getData().getString("desc"));
-                       // Log.w("service error", msg.getData().getString("desc"));
+                        // Log.w("service error", msg.getData().getString("desc"));
                     }
                     initPersonalDataShow();
                     break;
@@ -996,8 +1000,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             jsonObject.put("rate", rate);
             jsonArray.add(jsonObject);
             rateList.add(rateListData);
-            if (rateList.size() == 7)
+            if (rateList.size() == 7) {
+                Log.e("wyj", "stop to rate");
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendStopRate(mBleEngine);
+                    }
+                });
                 break;
+            }
+
         }
         cursor.close();
         // map.put(SessionHolder.user.getMobile(), rateList);
@@ -1082,6 +1095,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     if (dialog != null)
                         dialog.dismiss();
                     relative_test.setVisibility(View.VISIBLE);
+                    CONNECTE_STATUS = true;
                     myHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -1111,6 +1125,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 } else {
                     progressDialog.dismiss();
                     relative_test.setVisibility(View.GONE);
+                    CONNECTE_STATUS = false;
                     if (!isFirm)
                         dialog.dismiss();
                     ToastUtils.showToastInUIThread("与手环失去连接！");
@@ -1158,14 +1173,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
                         Log.e("lastSysTime", lastSysTime + "," + ParameterManager.Time + "," + System.currentTimeMillis());
                         lastSysTime = System.currentTimeMillis();
-                        //发送停止心率测试指令
-                        mWorkQueue.execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                CommandManager.sendStopRate(mBleEngine);
-                                Log.e("wyj", "stop to rate");
-                            }
-                        });
+                        //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
+                        afterStopRateHandler();
+//                        CommandManager.sendStopRate(mBleEngine);
+//                        Log.e("wyj", "stop to rate");
+//                        //发送停止心率测试指令
+//                        mWorkQueue.execute(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                CommandManager.sendStopRate(mBleEngine);
+//                                Log.e("wyj", "stop to rate");
+//                            }
+//                        });
                     }
                 }
                 //将心率数据发给首页
@@ -1196,8 +1215,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_STOPRATE)) {//心率停止测试
                 isRating = false;
                 // test_rate.setState(false);
-                //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
-                afterStopRateHandler();
+//                //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
+//                afterStopRateHandler();
             }
         }
     };
