@@ -1467,7 +1467,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         @Override
         public void run() {
             long xinlv_id = xinlvdb.delete("xinlv", "_id = ?", new String[]{_id});
-            Log.e("xinlv_id", xinlv_id + "");
         }
     };
 
@@ -1476,7 +1475,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private Runnable runnable_updataGPS = new Runnable() {
         @Override
         public void run() {
-            // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, SessionHolder.user.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
             Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "locationdescrible", "address", "lat", "lon"}, userInfo.getMobile(), locationdescrible, address, String.valueOf(lat), String.valueOf(lon));
             NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GPS_UPLOAD_URL, params, null, GPS_UPLOAD_CODE, MeFragment.this);
             String sport_gps = preferences.getString(ParameterManager.SHEZHI_SPORT_GPS, "15");
