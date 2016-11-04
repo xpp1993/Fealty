@@ -249,31 +249,31 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#EFEFF4" />
-        <RelativeLayout
-            android:id="@+id/relative_test"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="5dp"
-            android:gravity="center_vertical"
-            android:visibility="gone">
-            <TextView
-                android:id="@+id/info"
-                style="@style/self_info_layout_tv_title"
-                android:text="测试心率" />
-            <com.leaking.slideswitch.SlideSwitch
-                android:id="@+id/test_rate"
-                android:layout_width="54dp"
-                android:layout_height="30dp"
-                slideswitch:isOpen="false"
-                slideswitch:shape="circle"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="12dp"
-                slideswitch:themeColor="#5DCDBF" >
-            </com.leaking.slideswitch.SlideSwitch>
-        </RelativeLayout>
+        <!--<RelativeLayout-->
+            <!--android:id="@+id/relative_test"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="30dp"-->
+            <!--android:layout_marginBottom="5dp"-->
+            <!--android:layout_marginLeft="15dp"-->
+            <!--android:layout_marginRight="10dp"-->
+            <!--android:layout_marginTop="5dp"-->
+            <!--android:gravity="center_vertical"-->
+            <!--android:visibility="gone">-->
+            <!--<TextView-->
+                <!--android:id="@+id/info"-->
+                <!--style="@style/self_info_layout_tv_title"-->
+                <!--android:text="测试心率" />-->
+            <!--<com.leaking.slideswitch.SlideSwitch-->
+                <!--android:id="@+id/test_rate"-->
+                <!--android:layout_width="54dp"-->
+                <!--android:layout_height="30dp"-->
+                <!--slideswitch:isOpen="false"-->
+                <!--slideswitch:shape="circle"-->
+                <!--android:layout_alignParentRight="true"-->
+                <!--android:layout_marginRight="12dp"-->
+                <!--slideswitch:themeColor="#5DCDBF" >-->
+            <!--</com.leaking.slideswitch.SlideSwitch>-->
+        <!--</RelativeLayout>-->
     </LinearLayout>
 
     </RelativeLayout>

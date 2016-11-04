@@ -32,7 +32,7 @@ public class ParameterManager {
     // public static final int REQURST_CODE_CONNECT = 0X31A;
     public static final String SESSION_CACHE_SP_NAME = "dexin_session_cache";//sp文件名称
     public static final int TOTAL_ROCK_TIME = 60;//计时器总时长
-    //  public static final String DEVICE_ADDRESS = "diveceAddress";//设备地址存储在sp文件中的key
+     public static final String FIRSTRATE_TIME = "06:28:15";//心率测试获取的第一个心率值得时间
     public static final String Local_HOST = "http://192.168.8.133:8080/";//本地服务器
     //public static final String HOST = "http://120.76.27.233:8080/";//外网服务器
     public static final String HOST = "http://139.129.217.190:8080/";//外网服务器

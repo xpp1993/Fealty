@@ -99,7 +99,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     private String distance = "0";
     private String indentity = "我";
     private List<RateListData> list = new ArrayList<>();
-    private boolean isShow = true;
+   // private boolean isShow = true;
     //private PPView.OnClickListener mClickListener;
 
     @Override
@@ -163,11 +163,11 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
                 bundle.putInt("rate", RATE_STATUS);
                 EventBus.getDefault().post(new NavFragmentEvent(new LocaltionFragment(), bundle));
                 break;
-            case R.id.pp:
-                if (!isShow){
-                    isShow=true;
-                }
-                break;
+//            case R.id.pp:
+//                if (!isShow){
+//                    isShow=true;
+//                }
+//                break;
             default:
                 break;
         }
@@ -247,12 +247,13 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         tv_berry.setText("手环电量 " + berry);
         readSP();
         if (RATE_STATUS < norMin || RATE_STATUS > norMax) {//心率不正常
-            if (isShow) {
-                functionTest(RATE_STATUS, R.color.warning);
-                isShow = false;
-            }
+//            if (isShow) {
+//                functionTest(RATE_STATUS, R.color.warning);
+//                isShow = false;
+//            }
+            functionTest(RATE_STATUS, R.color.warning);
         } else {
-            if (isShow)
+          //  if (isShow)
                 functionTest(RATE_STATUS, R.color.normal);
         }
         //把实时心率传到定位页面
