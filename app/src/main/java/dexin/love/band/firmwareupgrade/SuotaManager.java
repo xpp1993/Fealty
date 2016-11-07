@@ -2,8 +2,12 @@ package dexin.love.band.firmwareupgrade;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+
+import dexin.love.band.ui.picker.AppConfig;
+import dexin.love.band.utils.AppUtils;
 
 /**
  * Created by wouter on 6-11-14.
@@ -11,28 +15,27 @@ import android.view.View;
 public class SuotaManager extends BluetoothManager {
     public static final int TYPE = 1;
 
-	public static final int MEMORY_TYPE_EXTERNAL_I2C = 0x12;
-	public static final int MEMORY_TYPE_EXTERNAL_SPI = 0x13;
+    public static final int MEMORY_TYPE_EXTERNAL_I2C = 0x12;
+    public static final int MEMORY_TYPE_EXTERNAL_SPI = 0x13;
 
     static final String TAG = "SuotaManager";
 
-    public SuotaManager(Context context) {
-        super(context);
-        activity = DeviceActivity.getInstance();
+    public SuotaManager(FragmentActivity activity) {
+        super(activity);
+//        activity = DeviceActivity.getInstance();
+        scannerFragment = ScannerFragment.getInstance();
         type = SuotaManager.TYPE;
     }
 
     public void processStep(Intent intent) {
         int newStep = intent.getIntExtra("step", -1);
         int error = intent.getIntExtra("error", -1);
-		int memDevValue = intent.getIntExtra("memDevValue", -1);
+        int memDevValue = intent.getIntExtra("memDevValue", -1);
         if (error >= 0) {
             onError(error);
+        } else if (memDevValue >= 0) {
+            processMemDevValue(memDevValue);
         }
-
-		else if(memDevValue >= 0) {
-			processMemDevValue(memDevValue);
-		}
         // If a step is set, change the global step to this value
         if (newStep >= 0) {
             this.step = newStep;
@@ -44,9 +47,10 @@ public class SuotaManager extends BluetoothManager {
         Log.d(TAG, "step " + this.step);
         switch (this.step) {
             case 0:
-                activity.initMainScreen();
+                // activity.initMainScreen();
+                scannerFragment.initMainScreen();
                 this.step = -1;
-//                        initFileList();
+                //initFileList();
                 break;
             // Enable notifications
             case 1:
@@ -54,15 +58,19 @@ public class SuotaManager extends BluetoothManager {
                 break;
             // Init mem type
             case 2:
-                activity.progressText.setText("Uploading " + fileName + " to " + device.getName() + ".\n" +
+//                activity.progressText.setText("Uploading " + fileName + " to " + device.getName() + ".\n" +
+//                        "Please wait until the progress is\n" +
+//                        "completed.");
+                scannerFragment.progressText.setText("Uploading " + fileName + " to " + device.getName() + ".\n" +
                         "Please wait until the progress is\n" +
                         "completed.");
                 setSpotaMemDev();
-                Log.e("Tag","Uploading " + fileName + " to " + device.getName() + ".\n" +
+                Log.e("Tag", "Uploading " + fileName + " to " + device.getName() + ".\n" +
                         "Please wait until the progress is\n" +
                         "completed.");
                 //activity.fileListView.setVisibility(View.GONE);
-                activity.progressBar.setVisibility(View.VISIBLE);
+//                activity.progressBar.setVisibility(View.VISIBLE);
+                scannerFragment.progressBar.setVisibility(View.VISIBLE);
                 break;
             // Set mem_type for SPOTA_GPIO_MAP_UUID
             case 3:
@@ -92,34 +100,33 @@ public class SuotaManager extends BluetoothManager {
         }
     }
 
-	@Override
-	protected int getSpotaMemDev() {
-		int memTypeBase = -1;
-		switch (memoryType) {
-			case Statics.MEMORY_TYPE_SPI:
-				memTypeBase = MEMORY_TYPE_EXTERNAL_SPI;
-				break;
-			case Statics.MEMORY_TYPE_I2C:
-				memTypeBase = MEMORY_TYPE_EXTERNAL_I2C;
-				break;
-		}
-		int memType = (memTypeBase << 24) | imageBank;
-		return memType;
-	}
+    @Override
+    protected int getSpotaMemDev() {
+        int memTypeBase = -1;
+        switch (memoryType) {
+            case Statics.MEMORY_TYPE_SPI:
+                memTypeBase = MEMORY_TYPE_EXTERNAL_SPI;
+                break;
+            case Statics.MEMORY_TYPE_I2C:
+                memTypeBase = MEMORY_TYPE_EXTERNAL_I2C;
+                break;
+        }
+        int memType = (memTypeBase << 24) | imageBank;
+        return memType;
+    }
 
-	private void processMemDevValue(int memDevValue) {
-		String stringValue = String.format("%#10x", memDevValue);
-		Log.d(TAG, "processMemDevValue() step: " + step + ", value: " + stringValue);
-		switch (step) {
-			case 2:
-				if(memDevValue == 0x1) {
-					Log.d(TAG,"Set SPOTA_MEM_DEV: 0x1");
-					goToStep(3);
-				}
-				else {
-					onError(0);
-				}
-				break;
-		}
-	}
+    private void processMemDevValue(int memDevValue) {
+        String stringValue = String.format("%#10x", memDevValue);
+        Log.d(TAG, "processMemDevValue() step: " + step + ", value: " + stringValue);
+        switch (step) {
+            case 2:
+                if (memDevValue == 0x1) {
+                    Log.d(TAG, "Set SPOTA_MEM_DEV: 0x1");
+                    goToStep(3);
+                } else {
+                    onError(0);
+                }
+                break;
+        }
+    }
 }

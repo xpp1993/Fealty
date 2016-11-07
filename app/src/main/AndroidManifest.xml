@@ -193,11 +193,11 @@
             <!--android:name=".firmwareupgrade.ScanActivity"-->
             <!--android:label="@string/app_name"-->
             <!--android:screenOrientation="portrait" />-->
-        <activity
-            android:name=".firmwareupgrade.DeviceActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait">
-        </activity>
+        <!--<activity-->
+            <!--android:name=".firmwareupgrade.DeviceActivity"-->
+            <!--android:label="@string/app_name"-->
+            <!--android:screenOrientation="portrait">-->
+        <!--</activity>-->
         <receiver
             android:name=".firmwareupgrade.BluetoothGattReceiver"
             android:enabled="true"

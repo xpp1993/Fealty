@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
 import java.io.IOException;
@@ -15,6 +16,8 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
+
+import dexin.love.band.utils.ThreadPoolUtils;
 
 /**
  * Created by wouter on 6-11-14.
@@ -38,10 +41,12 @@ public abstract class BluetoothManager {
 	int imageBank;
 
 
-	DeviceActivity activity;
+	//DeviceActivity activity;
+	ScannerFragment scannerFragment;
 	File file;
 	String fileName;
-	Context context;
+	//Context context;
+	FragmentActivity activity;
 	BluetoothDevice device;
 	HashMap errors;
 
@@ -59,8 +64,9 @@ public abstract class BluetoothManager {
 
 	public Queue characteristicsQueue;
 
-	public BluetoothManager(Context context) {
-		this.context = context;
+	public BluetoothManager(FragmentActivity activity) {
+		//this.context = context;
+		this.activity=activity;
 		initErrorMap();
 		characteristicsQueue = new ArrayDeque<BluetoothGattCharacteristic>();
 	}
@@ -212,7 +218,8 @@ public abstract class BluetoothManager {
 		final float progress = ((float) (blockCounter + 1) / (float) file.getNumberOfBlocks()) * 100;
 		if (!lastBlockSent) {
 			//progress = ((float) (blockCounter + 1) / (float) file.getNumberOfBlocks()) * 100;
-			activity.runOnUiThread(new Runnable() {
+			//activity.runOnUiThread(new Runnable() {
+			ThreadPoolUtils.runTaskOnUIThread(new Runnable() {
 				@Override
 				public void run() {
 					sendProgressUpdate((int) progress);
@@ -234,7 +241,8 @@ public abstract class BluetoothManager {
 			int chunkNumber = (blockCounter * file.getChunksPerBlockCount()) + i + 1;
 			final String message = "Sending chunk " + chunkNumber + " of " + file.getTotalChunkCount() + " (with " + chunk.length + " bytes)";
             //if (chunkNumber % 100 == 0)
-			activity.runOnUiThread(new Runnable() {
+//			activity.runOnUiThread(new Runnable() {
+			ThreadPoolUtils.runTaskOnUIThread(new Runnable() {
 				@Override
 				public void run() {
 					Log.d(TAG, message);
@@ -284,7 +292,8 @@ public abstract class BluetoothManager {
 		characteristic.setValue(REBOOT_SIGNAL, BluetoothGattCharacteristic.FORMAT_UINT32, 0);
 		BluetoothGattSingleton.getGatt().writeCharacteristic(characteristic);
 		rebootsignalSent = true;
-		activity.enableCloseButton();
+//		activity.enableCloseButton();
+		scannerFragment.enableCloseButton();
 	}
 
 	public void readNextCharacteristic() {
@@ -296,7 +305,8 @@ public abstract class BluetoothManager {
 	}
 
 	private void sendProgressUpdate(int progress) {
-		activity.progressBar.setProgress(progress);
+//		activity.progressBar.setProgress(progress);
+		scannerFragment.progressBar.setProgress(progress);
 	}
 
 	public void disconnect() {
@@ -319,7 +329,7 @@ public abstract class BluetoothManager {
 	protected void onSuccess() {
 		finished = true;
 		Log.d(TAG, "Upload completed");
-		new AlertDialog.Builder(context)
+		new AlertDialog.Builder(activity)
 				.setTitle("Upload completed")
 				.setMessage("Reboot device?")
 				.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -329,7 +339,9 @@ public abstract class BluetoothManager {
 				})
 				.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
-                        activity.switchView(0);
+//                        activity.switchView(0);
+						scannerFragment.switchView(0);
+
 						//disconnect();
 					}
 				})
@@ -340,18 +352,20 @@ public abstract class BluetoothManager {
 		if (!hasError) {
 			String error = (String) errors.get(errorCode);
 			Log.d(TAG, "Error: " + error);
-			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
 			dialogBuilder.setTitle("An error occurred.")
 					.setMessage(error);
 			dialogBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
-                    activity.finish();
+//                    activity.finish();
+					scannerFragment.finish();
 				}
 			});
             dialogBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
-                    activity.finish();
+                   // activity.finish();
+					scannerFragment.finish();
                 }
             });
 			dialogBuilder.setIcon(android.R.drawable.ic_dialog_alert);

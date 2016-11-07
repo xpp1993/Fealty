@@ -100,9 +100,9 @@ public class LineChart03View extends GraphicalView {
         dataSeries2.add((double) 80);
         dataSeries2.add((double) 80);
         dataSeries2.add((double) 80);
-        LineData lineData2 = new LineData("", dataSeries2,Color.rgb(93,205,191));
+        LineData lineData2 = new LineData("", dataSeries2, Color.rgb(93, 205, 191));
         lineData2.setDotStyle(XEnum.DotStyle.DOT);
-        lineData2.getPlotLine().getDotPaint().setColor(Color.rgb(93,205,191));
+        lineData2.getPlotLine().getDotPaint().setColor(Color.rgb(93, 205, 191));
         lineData2.setLabelVisible(true);
         chartData.add(lineData2);
     }
@@ -124,9 +124,9 @@ public class LineChart03View extends GraphicalView {
         //图所占范围大小
         chart.setChartRange(w, h);
     }  
-	
+
 	/*
-	 * 
+     *
 	 1. 右边轴view 遮住右边view视图中最左边点或线的处理办法：
 	xml  FrameLayout 中 LineChart03View_left 要放到后面，放前面会盖住scrollview中的图
 	HLNScrollActivity 中的horiView.setPadding()可以注释掉
@@ -143,11 +143,11 @@ public class LineChart03View extends GraphicalView {
             // chart.setChartRange(60,0, //设置x位置为60
 //            chart.setChartRange(0, 0,
 //                    this.getLayoutParams().width - 10, this.getLayoutParams().height - 10);
-                        chart.setChartRange(0, 0,
+            chart.setChartRange(0, 0,
                     this.getLayoutParams().width - 10, this.getLayoutParams().height - 10);
             //设置绘图区内边距
-          //  chart.setPadding(70, 30, 30, 30);
-            chart.setPadding(70, 28, 30,90);
+            //  chart.setPadding(70, 30, 30, 30);
+            chart.setPadding(70, 28, 30, 90);
             chart.render(canvas);
         } catch (Exception e) {
             Log.e(TAG, e.toString());
@@ -184,25 +184,57 @@ public class LineChart03View extends GraphicalView {
 //            }
 //        }
 //    }
-        public void reset(Map<String, Integer> map) {
+    //2016 11 7 xpp modify
+
+    //        public void reset(Map<String, Integer> map) {
+//        if (map != null) {
+//            Iterator<Integer> valueIterator = map.values().iterator();
+//            Iterator<String> keyIterator = map.keySet().iterator();
+//            int  max = Integer.MIN_VALUE, min = Integer.MAX_VALUE;
+//            LinkedList<Double> dataSeries2 = new LinkedList<Double>();
+//            LineData lineData2 = new LineData("", dataSeries2, Color.rgb(93,205,191));
+//            lineData2.setDotStyle(XEnum.DotStyle.DOT);
+//            lineData2.getPlotLine().getDotPaint().setColor(Color.rgb(93,205,191));
+//            lineData2.setLabelVisible(true);
+//            while (valueIterator.hasNext()) {
+//                int value = valueIterator.next();
+//                max = max > value ? max : value;
+//                min = min < value ? min : value;
+//                dataSeries2.add((double)value);
+//            }
+//            chartData.clear();
+//            chartData.add(lineData2);
+//
+//            //数据轴最大值
+//            chart.getDataAxis().setAxisMax(max + 10);
+//            //数据轴最小值
+//            chart.getDataAxis().setAxisMin(min - 10 > 0 ? (min - 10) : 0);
+//            //数据轴刻度间隔
+//            chart.getDataAxis().setAxisSteps(10);
+//            labels.clear();
+//            while (keyIterator.hasNext()) {
+//                labels.add(keyIterator.next() + "");
+//            }
+//        }
+//    }
+    public void reset(TreeMap<String, Integer> map) {
         if (map != null) {
             Iterator<Integer> valueIterator = map.values().iterator();
             Iterator<String> keyIterator = map.keySet().iterator();
-            int  max = Integer.MIN_VALUE, min = Integer.MAX_VALUE;
+            int max = Integer.MIN_VALUE, min = Integer.MAX_VALUE;
             LinkedList<Double> dataSeries2 = new LinkedList<Double>();
-            LineData lineData2 = new LineData("", dataSeries2, Color.rgb(93,205,191));
+            LineData lineData2 = new LineData("", dataSeries2, Color.rgb(93, 205, 191));
             lineData2.setDotStyle(XEnum.DotStyle.DOT);
-            lineData2.getPlotLine().getDotPaint().setColor(Color.rgb(93,205,191));
+            lineData2.getPlotLine().getDotPaint().setColor(Color.rgb(93, 205, 191));
             lineData2.setLabelVisible(true);
             while (valueIterator.hasNext()) {
                 int value = valueIterator.next();
                 max = max > value ? max : value;
                 min = min < value ? min : value;
-                dataSeries2.add((double)value);
+                dataSeries2.add((double) value);
             }
             chartData.clear();
             chartData.add(lineData2);
-
             //数据轴最大值
             chart.getDataAxis().setAxisMax(max + 10);
             //数据轴最小值

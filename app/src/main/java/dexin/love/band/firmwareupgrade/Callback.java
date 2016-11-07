@@ -100,14 +100,14 @@ public class Callback extends BluetoothGattCallback {
             }
             // Step 4 callback: set the patch length, default 240
             else if (characteristic.getUuid().equals(Statics.SPOTA_PATCH_LEN_UUID)) {
-                step = DeviceActivity.getInstance().bluetoothManager.type == SuotaManager.TYPE ? 5 : 7;
+                step = ScannerFragment.getInstance().bluetoothManager.type == SuotaManager.TYPE ? 5 : 7;
             } else if (characteristic.getUuid().equals(Statics.SPOTA_MEM_DEV_UUID)) {
             }
             else if (characteristic.getUuid().equals(Statics.SPOTA_PATCH_DATA_UUID)
-                    && DeviceActivity.getInstance().bluetoothManager.chunkCounter != -1
+                    && ScannerFragment.getInstance().bluetoothManager.chunkCounter != -1
                     ) {
-                Log.d(TAG, "Next block in chunk " + DeviceActivity.getInstance().bluetoothManager.chunkCounter);
-                DeviceActivity.getInstance().bluetoothManager.sendBlock();
+                Log.d(TAG, "Next block in chunk " + ScannerFragment.getInstance().bluetoothManager.chunkCounter);
+                ScannerFragment.getInstance().bluetoothManager.sendBlock();
             }
 
             if (step > 0) {
@@ -153,7 +153,7 @@ public class Callback extends BluetoothGattCallback {
         }
         // Successfully sent a block, send the next one
         else if (stringValue.trim().equals("0x2")) {
-            step = DeviceActivity.getInstance().bluetoothManager.type == SuotaManager.TYPE ? 5 : 8;
+            step = ScannerFragment.getInstance().bluetoothManager.type == SuotaManager.TYPE ? 5 : 8;
         } else if (stringValue.trim().equals("0x3") || stringValue.trim().equals("0x1")) {
             memDevValue = value;
         } else {
