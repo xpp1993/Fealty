@@ -316,14 +316,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     });
                 }
             }
+
             @Override
             public void close() {
-               // relative_test.setVisibility(View.GONE);
+                // relative_test.setVisibility(View.GONE);
                 if (mBleEngine != null)
                     mBleEngine.close();
             }
         });
     }
+
     /**
      * 显示蓝牙设备列表
      */
@@ -953,17 +955,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             jsonObject.put("rate", rate);
             jsonArray.add(jsonObject);
             rateList.add(rateListData);
-            if (cursor.isLast()){
-                Log.e("wyj", "stop to rate");
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendStopRate(mBleEngine);
-                    }
-                });
-            }
         }
         cursor.close();
+        Log.e("wyj", "stop to rate");
+        mWorkQueue.execute(new Runnable() {
+            @Override
+            public void run() {
+                CommandManager.sendStopRate(mBleEngine);
+            }
+        });
         // map.put(SessionHolder.user.getMobile(), rateList);
         map.put(userInfo.getMobile(), rateList);
         object.put("heartRate", jsonArray);
@@ -1118,12 +1118,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String rateTime = bundle.getString(GlobalValues.NAME_RATETIME);//该次心率测试的时间
                 int rate = bundle.getInt(GlobalValues.NAME_RATE);
                 int status = bundle.getInt(GlobalValues.NAME_RATE_STATUS);
-                Log.e("20161104", rateTime + "," + rate + "," + status);
                 if (rateTime.equals(ParameterManager.FIRSTRATE_TIME) || rate == 0)
                     return;
                 rateTotal += rate;
                 rateNum++;
-                Log.e("20161104", rateTotal + "," + rateNum);
                 if (isOpenTest == false) {
                     if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
                         Log.e("lastSysTime", lastSysTime + "," + ParameterManager.Time + "," + System.currentTimeMillis());
@@ -1259,6 +1257,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     /**
      * 手机电量低警报
+     *
      * @param electricity 手机电量
      * @param status      手机充电状态
      * @param notice      警报方式
