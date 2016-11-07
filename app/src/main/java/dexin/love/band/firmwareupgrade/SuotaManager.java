@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 
+import dexin.love.band.base.BaseFragment;
 import dexin.love.band.ui.picker.AppConfig;
 import dexin.love.band.utils.AppUtils;
 
@@ -20,10 +21,10 @@ public class SuotaManager extends BluetoothManager {
 
     static final String TAG = "SuotaManager";
 
-    public SuotaManager(FragmentActivity activity) {
+    public SuotaManager(FragmentActivity activity, ScannerFragment fragment) {
         super(activity);
 //        activity = DeviceActivity.getInstance();
-        scannerFragment = ScannerFragment.getInstance();
+        scannerFragment = fragment;
         type = SuotaManager.TYPE;
     }
 

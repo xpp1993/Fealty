@@ -89,7 +89,7 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
     // private SharedPreferences preferences;
     int memoryType;
     // private SharedPreferences.Editor editor;
-    public BluetoothManager bluetoothManager = new SuotaManager(getActivity());
+    public BluetoothManager bluetoothManager = new SuotaManager(getActivity(),this);
     static ScannerFragment instance;
     //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
     SharedPreferences preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
@@ -172,6 +172,7 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
             @Override
             public void onReceive(Context context, Intent intent) {
                 super.onReceive(context, intent);
+                Bundle bundle = new Bundle();
                 bluetoothManager.processStep(intent);
             }
         };

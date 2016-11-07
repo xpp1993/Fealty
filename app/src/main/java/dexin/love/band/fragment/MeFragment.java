@@ -311,7 +311,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         @Override
                         public void onDeviceFound(List<BluetoothDevice> devices) {
                             progressDialog.dismiss();
+                            if(devices.size() != 0)
                             showDeviceList(devices);
+                            else
+                                ToastUtils.showToastInUIThread("未扫描到设备！");
                         }
                     });
                 }
