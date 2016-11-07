@@ -318,7 +318,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             }
             @Override
             public void close() {
-               // relative_test.setVisibility(View.GONE);
+                // relative_test.setVisibility(View.GONE);
                 if (mBleEngine != null)
                     mBleEngine.close();
             }
@@ -954,13 +954,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             jsonArray.add(jsonObject);
             rateList.add(rateListData);
             if (cursor.isLast()){
-                Log.e("wyj", "stop to rate");
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendStopRate(mBleEngine);
-                    }
-                });
+        Log.e("wyj", "stop to rate");
+        mWorkQueue.execute(new Runnable() {
+            @Override
+            public void run() {
+                CommandManager.sendStopRate(mBleEngine);
+            }
+        });
             }
         }
         cursor.close();
