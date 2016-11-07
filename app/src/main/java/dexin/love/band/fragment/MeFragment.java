@@ -22,11 +22,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.transition.Slide;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -320,8 +318,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             @Override
             public void close() {
                 // relative_test.setVisibility(View.GONE);
-                if (mBleEngine != null)
+                if (mBleEngine != null) {
+                    mBleEngine.disconnect();
                     mBleEngine.close();
+                }
             }
         });
     }
@@ -346,7 +346,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mBleEngine.connect(devices.get(position).getAddress());
-                editor.putString(ParameterManager.DEVICES_ADDRESS, devices.get(position).getAddress());
+                String[] deviceaddress = devices.get(position).getAddress().split(":");
+                StringBuffer sb = new StringBuffer(256);
+                sb.append(deviceaddress[0]);
+                sb.append(deviceaddress[1]);
+                sb.append(deviceaddress[2]);
+                sb.append(deviceaddress[3]);
+                sb.append(deviceaddress[4]);
+                sb.append(deviceaddress[5]);
+                Log.e("20161107",sb.toString());
+                editor.putString(ParameterManager.DEVICES_ADDRESS, sb.toString());
             }
         });
     }
@@ -554,12 +563,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 EventBus.getDefault().post(new NavFragmentEvent(new Fragment_Shezhi()));
                 break;
             case R.id.relative_about://关于我们
-//                mWorkQueue.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
-//                    }
-//                });//进入固件升级模式
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+                    }
+                });//进入固件升级模式
 //                layout_firmupgrade.setVisibility(View.VISIBLE);
                 break;
             case R.id.relative_firmupgrade: //固件升级
@@ -635,6 +644,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             }
 
         }.start();
+    }
+
+    // 1. 扫描处于固件升级模式的手环
+
+    public void scanBandforuggrade() {
+
     }
 
     LocationService locService;
