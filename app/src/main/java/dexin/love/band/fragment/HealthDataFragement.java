@@ -99,7 +99,7 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
     private String distance = "0";
     private String indentity = "我";
     private List<RateListData> list = new ArrayList<>();
-   // private boolean isShow = true;
+    // private boolean isShow = true;
     //private PPView.OnClickListener mClickListener;
 
     @Override
@@ -253,8 +253,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
 //            }
             functionTest(RATE_STATUS, R.color.warning);
         } else {
-          //  if (isShow)
-                functionTest(RATE_STATUS, R.color.normal);
+            //  if (isShow)
+            functionTest(RATE_STATUS, R.color.normal);
         }
         //把实时心率传到定位页面
         Intent intent = new Intent();
@@ -262,7 +262,8 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         intent.setAction(LocaltionFragment.RATE_CHANGED);
         getActivity().sendBroadcast(intent);
 
-        Map<String, Integer> map = new HashMap<>();
+       // Map<String, Integer> map = new HashMap<>();
+       TreeMap<String, Integer> map = new TreeMap<>();
         for (int i = 0; i < list.size(); i++) {
             RateListData listData = list.get(i);
             try {
@@ -273,7 +274,15 @@ public class HealthDataFragement extends BaseFragment implements View.OnClickLis
         initChart(map);
     }
 
-    private void initChart(Map<String, Integer> map) {
+    //    private void initChart(Map<String, Integer> map) {
+//        if (null == map || map.size() == 0)
+//            return;
+//        mLineChart03View.reset(map);
+//        mLineChart03View_left.reset(map);
+//        mLineChart03View.postInvalidate();
+//        mLineChart03View_left.postInvalidate();
+//    }
+    private void initChart(TreeMap<String, Integer> map) {
         if (null == map || map.size() == 0)
             return;
         mLineChart03View.reset(map);
