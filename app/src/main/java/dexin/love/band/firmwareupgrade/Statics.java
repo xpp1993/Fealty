@@ -38,7 +38,7 @@ public class Statics {
     public static final String DEFAULT_I2C_DEVICE_ADDRESS = "0x50";
     public static final int DEFAULT_SCL_GPIO_VALUE = 2;
     public static final int DEFAULT_SDA_GPIO_VALUE = 3;
-
+    public static final int DEFAULT_BLOCK_SIZE_ID = 240;
     public static final int MEMORY_TYPE_SUOTA_INDEX = 100;
 
     public static int gpioStringToInt(String spioValue) {

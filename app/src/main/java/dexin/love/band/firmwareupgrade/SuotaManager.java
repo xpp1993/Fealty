@@ -1,15 +1,8 @@
 package dexin.love.band.firmwareupgrade;
-
-import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-
-import dexin.love.band.base.BaseFragment;
-import dexin.love.band.ui.picker.AppConfig;
-import dexin.love.band.utils.AppUtils;
-
 /**
  * Created by wouter on 6-11-14.
  */
@@ -23,7 +16,6 @@ public class SuotaManager extends BluetoothManager {
 
     public SuotaManager(FragmentActivity activity, ScannerFragment fragment) {
         super(activity);
-//        activity = DeviceActivity.getInstance();
         scannerFragment = fragment;
         type = SuotaManager.TYPE;
     }
@@ -59,9 +51,6 @@ public class SuotaManager extends BluetoothManager {
                 break;
             // Init mem type
             case 2:
-//                activity.progressText.setText("Uploading " + fileName + " to " + device.getName() + ".\n" +
-//                        "Please wait until the progress is\n" +
-//                        "completed.");
                 scannerFragment.progressText.setText("Uploading " + fileName + " to " + device.getName() + ".\n" +
                         "Please wait until the progress is\n" +
                         "completed.");
@@ -69,8 +58,6 @@ public class SuotaManager extends BluetoothManager {
                 Log.e("Tag", "Uploading " + fileName + " to " + device.getName() + ".\n" +
                         "Please wait until the progress is\n" +
                         "completed.");
-                //activity.fileListView.setVisibility(View.GONE);
-//                activity.progressBar.setVisibility(View.VISIBLE);
                 scannerFragment.progressBar.setVisibility(View.VISIBLE);
                 break;
             // Set mem_type for SPOTA_GPIO_MAP_UUID

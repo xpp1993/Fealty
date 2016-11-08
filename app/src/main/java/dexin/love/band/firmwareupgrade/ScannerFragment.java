@@ -15,12 +15,11 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
+
 import org.xutils.view.annotation.ContentView;
 
 import java.io.IOException;
@@ -40,8 +39,7 @@ import dexin.love.band.utils.ThreadPoolUtils;
  * Created by Administrator on 2016/10/23.
  */
 @ContentView(R.layout.device_container)
-public class ScannerFragment extends BaseFragment implements View.OnClickListener {
-    //public class ScannerFragment extends BaseFragment implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+public class ScannerFragment extends BaseFragment {
     private final static String TAG = ScannerFragment.class.getSimpleName();
     private boolean isScanning = false;
     private BluetoothAdapter mBluetoothAdapter;
@@ -52,13 +50,9 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
 
     ProgressDialog dialog;
     ViewFlipper deviceContainer;
-    View deviceMain, deviceParameterSettings, progressLayout;
+    View progressLayout;
     public ProgressBar progressBar;
     public TextView progressText;
-    RadioButton memoryTypeSPI;
-    LinearLayout imageBankContainer, blockSizeContainer;
-    View parameterSpiView;
-    TextView blockSize, imageBankSpinner;
     int memoryType;
     public BluetoothManager bluetoothManager = new SuotaManager(getActivity(), this);
     //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
@@ -104,10 +98,7 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
         dialog.show();
         inflater = LayoutInflater.from(getActivity());
         deviceContainer = (ViewFlipper) getActivity().findViewById(R.id.deviceLayoutContainer);
-        deviceMain = inflater.inflate(R.layout.device_main, deviceContainer, true);
-        deviceParameterSettings = inflater.inflate(R.layout.device_parameter_settings, deviceContainer, true);
         progressLayout = inflater.inflate(R.layout.progress, deviceContainer, true);
-        switchView(0);
         progressText = (TextView) progressLayout.findViewById(R.id.progress_text);
         progressBar = (ProgressBar) progressLayout.findViewById(R.id.progress_bar);
         progressBar.setProgress(0);
@@ -254,33 +245,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void initParameterSettings() {
-        memoryTypeSPI = (RadioButton) deviceParameterSettings.findViewById(R.id.memoryTypeSPI);
-        memoryTypeSPI.setOnClickListener(this);
-        imageBankContainer = (LinearLayout) deviceParameterSettings.findViewById(R.id.imageBankContainer);
-        blockSizeContainer = (LinearLayout) deviceParameterSettings.findViewById(R.id.blockSizeContainer);
-        blockSize = (TextView) deviceParameterSettings.findViewById(R.id.blockSize);
-        String previousText = null;
-        if (bluetoothManager.type == SuotaManager.TYPE) {
-            imageBankContainer.setVisibility(View.VISIBLE);
-            blockSizeContainer.setVisibility(View.VISIBLE);
-            previousText = previousSettings.get(String.valueOf(R.id.blockSize));
-            if (previousText == null || previousText.equals("")) {
-                previousText = Statics.DEFAULT_BLOCK_SIZE_VALUE;
-            }
-            blockSize.setText(previousText);
-        }
-
-        // Different views for memory types
-        parameterSpiView = deviceParameterSettings.findViewById(R.id.pSpiContainer);
-
-        // SUOTA image bank
-        imageBankSpinner = (TextView) deviceParameterSettings.findViewById(R.id.imageBank);
-        previousText = previousSettings.get(String.valueOf(R.id.imageBank));
-        if (previousText == null || previousText.equals("")) {
-            previousText = "0";
-        }
-        imageBankSpinner.setText(previousText);
-        // Spinners for SPI
         String[] gpioValues = getResources().getStringArray(R.array.gpio_values);
 
         String stringValue = gpioValues[Statics.DEFAULT_MISO_VALUE];
@@ -290,43 +254,36 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
         Log.d("gpioValues", "MISO: " + stringValue);
 
         stringValue = gpioValues[Statics.DEFAULT_MOSI_VALUE];
-        value=Statics.gpioStringToInt(stringValue);
+        value = Statics.gpioStringToInt(stringValue);
         Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_MOSI_VALUE, stringValue);
         bluetoothManager.setMOSI_GPIO(value);
         Log.d("gpioValues", "MOSI: " + stringValue);
 
         stringValue = gpioValues[Statics.DEFAULT_CS_VALUE];
-        value=Statics.gpioStringToInt(stringValue);
+        value = Statics.gpioStringToInt(stringValue);
         Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_CS_VALUE, stringValue);
         bluetoothManager.setCS_GPIO(value);
         Log.d("gpioValues", "CS: " + stringValue);
 
         stringValue = gpioValues[Statics.DEFAULT_SCK_VALUE];
-        value=Statics.gpioStringToInt(stringValue);
+        value = Statics.gpioStringToInt(stringValue);
         Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_SCK_VALUE, stringValue);
         bluetoothManager.setSCK_GPIO(value);
         Log.d("gpioValues", "SCK: " + stringValue);
 
-        int previousMemoryType;
-        previousMemoryType = Integer.parseInt(Statics.getPreviousInput(AppUtils.getBaseContext(), Statics.MEMORY_TYPE_SUOTA_INDEX));
-        if (previousMemoryType > 0) {
-            setMemoryType(previousMemoryType);
-        } else {
-            // Set default memory type to SPI
-            setMemoryType(Statics.MEMORY_TYPE_SPI);
-        }
+        setMemoryType(Statics.MEMORY_TYPE_SPI);
     }
 
     private void startUpdate() {
         Intent intent = new Intent();
 
         if (bluetoothManager.type == SuotaManager.TYPE) {
-            Statics.setPreviousInput(AppUtils.getBaseContext(), R.id.blockSize, blockSize.getText().toString());
+            Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_BLOCK_SIZE_ID, Statics.DEFAULT_BLOCK_SIZE_VALUE);
         }
         // Set default block size to 1 for SPOTA, this will not be used in this case
         int fileBlockSize = 1;
         if (bluetoothManager.type == SuotaManager.TYPE) {
-            fileBlockSize = Integer.parseInt(blockSize.getText().toString());
+            fileBlockSize = Integer.parseInt(Statics.DEFAULT_BLOCK_SIZE_VALUE);
         }
         bluetoothManager.getFile().setFileBlockSize(fileBlockSize);
 
@@ -343,24 +300,13 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void setMemoryType(int memoryType) {
-        this.clearMemoryTypeChecked();
         this.memoryType = memoryType;
         bluetoothManager.setMemoryType(memoryType);
-        parameterSpiView.setVisibility(View.GONE);
-
         Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.MEMORY_TYPE_SUOTA_INDEX, String.valueOf(memoryType));
-        if (memoryType == Statics.MEMORY_TYPE_SPI) {
-            parameterSpiView.setVisibility(View.VISIBLE);
-            memoryTypeSPI.setChecked(true);
-        }
     }
 
     public void switchView(int viewIndex) {
         this.deviceContainer.setDisplayedChild(viewIndex);
-    }
-
-    private void clearMemoryTypeChecked() {
-        memoryTypeSPI.setChecked(false);
     }
 
     private void connectionStateChanged(int connectionState) {
@@ -372,15 +318,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
                 if (!bluetoothManager.getError())
                     finish();
             }
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.memoryTypeSPI:
-                setMemoryType(Statics.MEMORY_TYPE_SPI);
-                break;
         }
     }
 }
