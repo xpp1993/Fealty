@@ -292,8 +292,6 @@ public abstract class BluetoothManager {
 		characteristic.setValue(REBOOT_SIGNAL, BluetoothGattCharacteristic.FORMAT_UINT32, 0);
 		BluetoothGattSingleton.getGatt().writeCharacteristic(characteristic);
 		rebootsignalSent = true;
-//		activity.enableCloseButton();
-		scannerFragment.enableCloseButton();
 	}
 
 	public void readNextCharacteristic() {

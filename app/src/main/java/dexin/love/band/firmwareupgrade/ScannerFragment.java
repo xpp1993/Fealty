@@ -17,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -64,7 +63,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
     View parameterSpiView;
     Spinner misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner;
     TextView blockSize, imageBankSpinner;
-    Button sendToDeviceButton, closeButton;
     int memoryType;
     public BluetoothManager bluetoothManager = new SuotaManager(getActivity(), this);
     //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
@@ -114,7 +112,7 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
         deviceMain = inflater.inflate(R.layout.device_main, deviceContainer, true);
         deviceParameterSettings = inflater.inflate(R.layout.device_parameter_settings, deviceContainer, true);
         progressLayout = inflater.inflate(R.layout.progress, deviceContainer, true);
-        //switchView(0);
+        switchView(0);
         progressText = (TextView) progressLayout.findViewById(R.id.progress_text);
         progressBar = (ProgressBar) progressLayout.findViewById(R.id.progress_bar);
         progressBar.setProgress(0);
@@ -247,12 +245,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void initFileList() {
-       handler.post(new Runnable() {
-           @Override
-           public void run() {
-              dialog.dismiss();
-           }
-       });
         String filename = ParameterManager.FIRMWARE_NAME;
         bluetoothManager.setFileName(filename);
         Log.d(TAG, "Clicked: " + filename);
@@ -260,6 +252,7 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
             bluetoothManager.setFile(File.getByFileName(filename));
             initParameterSettings();
             switchView(2);
+            startUpdate();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -269,8 +262,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
         int gpioValuesId = R.array.gpio_values;
         memoryTypeSPI = (RadioButton) deviceParameterSettings.findViewById(R.id.memoryTypeSPI);
         memoryTypeSPI.setOnClickListener(this);
-        closeButton = (Button) deviceParameterSettings.findViewById(R.id.buttonClose);
-        closeButton.setOnClickListener(this);
         imageBankContainer = (LinearLayout) deviceParameterSettings.findViewById(R.id.imageBankContainer);
         blockSizeContainer = (LinearLayout) deviceParameterSettings.findViewById(R.id.blockSizeContainer);
         blockSize = (TextView) deviceParameterSettings.findViewById(R.id.blockSize);
@@ -334,15 +325,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
         sckGpioSpinner.setOnItemSelectedListener(this);
         position = gpioAdapter.getPosition(previousSettings.get(String.valueOf(R.id.sckGpioSpinner)));
         sckGpioSpinner.setSelection(position);
-
-        sendToDeviceButton = (Button) deviceParameterSettings.findViewById(R.id.sendToDeviceButton);
-        sendToDeviceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startUpdate();
-            }
-        });
-
         int previousMemoryType;
         previousMemoryType = Integer.parseInt(Statics.getPreviousInput(AppUtils.getBaseContext(), Statics.MEMORY_TYPE_SUOTA_INDEX));
         if (previousMemoryType > 0) {
@@ -370,6 +352,12 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
         intent.putExtra("step", 1);
         getActivity().sendBroadcast(intent);
         switchView(3);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                dialog.dismiss();
+            }
+        });
     }
 
     private void setMemoryType(int memoryType) {
@@ -392,11 +380,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
     private void clearMemoryTypeChecked() {
         memoryTypeSPI.setChecked(false);
     }
-
-    public void enableCloseButton() {
-        closeButton.setVisibility(View.VISIBLE);
-    }
-
     private void connectionStateChanged(int connectionState) {
         if (connectionState == BluetoothProfile.STATE_DISCONNECTED) {
             Toast.makeText(AppUtils.getBaseContext(), this.bluetoothManager.getDevice().getName() + " disconnected.", Toast.LENGTH_LONG).show();
@@ -414,9 +397,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
         switch (v.getId()) {
             case R.id.memoryTypeSPI:
                 setMemoryType(Statics.MEMORY_TYPE_SPI);
-                break;
-            case R.id.buttonClose:
-                finish();
                 break;
         }
     }
