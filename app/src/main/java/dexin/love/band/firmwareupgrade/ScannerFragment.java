@@ -89,10 +89,10 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
     // private SharedPreferences preferences;
     int memoryType;
     // private SharedPreferences.Editor editor;
-    public BluetoothManager bluetoothManager = new SuotaManager(getActivity(),this);
+    public BluetoothManager bluetoothManager = new SuotaManager(getActivity(), this);
     static ScannerFragment instance;
     //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
-    SharedPreferences preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
+    SharedPreferences preferences;
     //        //2. 获得编辑器:当将数据存储到SharedPrefences对象中时，需要获得编辑器。如果取出则不需要。
 //        editor = preferences.edit();
     Map<String, String> previousSettings;
@@ -114,8 +114,8 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
                     for (UUID uuid : uuids) {
                         // if (uuid.equals(Statics.SPOTA_SERVICE_UUID) && device.getName().equals(ParameterManager.DEVICES_ADDRESS)) {
                         if (uuid.equals(Statics.SPOTA_SERVICE_UUID)) {
-//                            Log.e(TAG, device.getName() + "," + preferences.getString(ParameterManager.DEVICES_ADDRESS, ""));
-//                            if (device.getName().equals(preferences.getString(ParameterManager.DEVICES_ADDRESS, "")))
+                            Log.e(TAG, device.getName() + "," + preferences.getString(ParameterManager.DEVICES_ADDRESS, ""));
+                            //    if (device.getName().equals(preferences.getString(ParameterManager.DEVICES_ADDRESS, "")))
                             bluetoothManager.setDevice(device);
                             progressDialog.dismiss();
                             initdata();
@@ -163,11 +163,13 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
+        preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
         this.initialize();
         if (!Statics.fileDirectoriesCreated(AppUtils.getBaseContext()) || true) {
             File.createFileDirectories(AppUtils.getBaseContext());
             Statics.setFileDirectoriesCreated(AppUtils.getBaseContext());
         }
+
         ScannerFragment.this.bluetoothGattReceiver = new BluetoothGattReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

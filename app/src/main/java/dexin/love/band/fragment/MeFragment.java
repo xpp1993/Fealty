@@ -555,13 +555,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 EventBus.getDefault().post(new NavFragmentEvent(new Fragment_Shezhi()));
                 break;
             case R.id.relative_about://关于我们
-//                mWorkQueue.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
-//                    }
-//                });//进入固件升级模式
-//                layout_firmupgrade.setVisibility(View.VISIBLE);
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+                    }
+                });//进入固件升级模式
+                layout_firmupgrade.setVisibility(View.VISIBLE);
                 break;
             case R.id.relative_firmupgrade: //固件升级
                 EventBus.getDefault().post(new NavFragmentEvent(new ScannerFragment()));
