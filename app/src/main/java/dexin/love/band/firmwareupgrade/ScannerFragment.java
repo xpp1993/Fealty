@@ -15,16 +15,12 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
-
 import org.xutils.view.annotation.ContentView;
 
 import java.io.IOException;
@@ -44,7 +40,8 @@ import dexin.love.band.utils.ThreadPoolUtils;
  * Created by Administrator on 2016/10/23.
  */
 @ContentView(R.layout.device_container)
-public class ScannerFragment extends BaseFragment implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+public class ScannerFragment extends BaseFragment implements View.OnClickListener {
+    //public class ScannerFragment extends BaseFragment implements View.OnClickListener, AdapterView.OnItemSelectedListener {
     private final static String TAG = ScannerFragment.class.getSimpleName();
     private boolean isScanning = false;
     private BluetoothAdapter mBluetoothAdapter;
@@ -61,7 +58,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
     RadioButton memoryTypeSPI;
     LinearLayout imageBankContainer, blockSizeContainer;
     View parameterSpiView;
-    Spinner misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner;
     TextView blockSize, imageBankSpinner;
     int memoryType;
     public BluetoothManager bluetoothManager = new SuotaManager(getActivity(), this);
@@ -104,7 +100,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
 
         dialog = new ProgressDialog(getActivity());
         dialog.setMessage("正在升级固件，请稍后....");
-        //dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
         inflater = LayoutInflater.from(getActivity());
@@ -259,7 +254,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void initParameterSettings() {
-        int gpioValuesId = R.array.gpio_values;
         memoryTypeSPI = (RadioButton) deviceParameterSettings.findViewById(R.id.memoryTypeSPI);
         memoryTypeSPI.setOnClickListener(this);
         imageBankContainer = (LinearLayout) deviceParameterSettings.findViewById(R.id.imageBankContainer);
@@ -287,44 +281,32 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
         }
         imageBankSpinner.setText(previousText);
         // Spinners for SPI
-        int position;
-        misoGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.misoGpioSpinner);
-        mosiGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.mosiGpioSpinner);
-        csGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.csGpioSpinner);
-        sckGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.sckGpioSpinner);
-        ArrayAdapter<CharSequence> gpioAdapter = ArrayAdapter.createFromResource(AppUtils.getBaseContext(),
-                gpioValuesId, android.R.layout.simple_spinner_item);
-        misoGpioSpinner.setAdapter(gpioAdapter);
-        misoGpioSpinner.setOnItemSelectedListener(this);
-        position = gpioAdapter.getPosition(previousSettings.get(String.valueOf(R.id.misoGpioSpinner)));
-        if (position <= 0) {
-            position = Statics.DEFAULT_MISO_VALUE;
-        }
-        Log.d("position", "MISO: " + position);
-        misoGpioSpinner.setSelection(position);
+        String[] gpioValues = getResources().getStringArray(R.array.gpio_values);
 
-        mosiGpioSpinner.setAdapter(gpioAdapter);
-        mosiGpioSpinner.setOnItemSelectedListener(this);
-        position = gpioAdapter.getPosition(previousSettings.get(String.valueOf(R.id.mosiGpioSpinner)));
-        if (position <= 0) {
-            position = Statics.DEFAULT_MOSI_VALUE;
-        }
-        Log.d("position", "MOSI: " + position);
-        mosiGpioSpinner.setSelection(position);
+        String stringValue = gpioValues[Statics.DEFAULT_MISO_VALUE];
+        int value = Statics.gpioStringToInt(stringValue);
+        Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_MISO_VALUE, stringValue);
+        bluetoothManager.setMISO_GPIO(value);
+        Log.d("gpioValues", "MISO: " + stringValue);
 
-        csGpioSpinner.setAdapter(gpioAdapter);
-        csGpioSpinner.setOnItemSelectedListener(this);
-        position = gpioAdapter.getPosition(previousSettings.get(String.valueOf(R.id.csGpioSpinner)));
-        if (position <= 0) {
-            position = Statics.DEFAULT_CS_VALUE;
-        }
-        Log.d("position", "CS: " + position);
-        csGpioSpinner.setSelection(position);
+        stringValue = gpioValues[Statics.DEFAULT_MOSI_VALUE];
+        value=Statics.gpioStringToInt(stringValue);
+        Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_MOSI_VALUE, stringValue);
+        bluetoothManager.setMOSI_GPIO(value);
+        Log.d("gpioValues", "MOSI: " + stringValue);
 
-        sckGpioSpinner.setAdapter(gpioAdapter);
-        sckGpioSpinner.setOnItemSelectedListener(this);
-        position = gpioAdapter.getPosition(previousSettings.get(String.valueOf(R.id.sckGpioSpinner)));
-        sckGpioSpinner.setSelection(position);
+        stringValue = gpioValues[Statics.DEFAULT_CS_VALUE];
+        value=Statics.gpioStringToInt(stringValue);
+        Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_CS_VALUE, stringValue);
+        bluetoothManager.setCS_GPIO(value);
+        Log.d("gpioValues", "CS: " + stringValue);
+
+        stringValue = gpioValues[Statics.DEFAULT_SCK_VALUE];
+        value=Statics.gpioStringToInt(stringValue);
+        Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_SCK_VALUE, stringValue);
+        bluetoothManager.setSCK_GPIO(value);
+        Log.d("gpioValues", "SCK: " + stringValue);
+
         int previousMemoryType;
         previousMemoryType = Integer.parseInt(Statics.getPreviousInput(AppUtils.getBaseContext(), Statics.MEMORY_TYPE_SUOTA_INDEX));
         if (previousMemoryType > 0) {
@@ -380,6 +362,7 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
     private void clearMemoryTypeChecked() {
         memoryTypeSPI.setChecked(false);
     }
+
     private void connectionStateChanged(int connectionState) {
         if (connectionState == BluetoothProfile.STATE_DISCONNECTED) {
             Toast.makeText(AppUtils.getBaseContext(), this.bluetoothManager.getDevice().getName() + " disconnected.", Toast.LENGTH_LONG).show();
@@ -399,31 +382,5 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
                 setMemoryType(Statics.MEMORY_TYPE_SPI);
                 break;
         }
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String stringValue = parent.getSelectedItem().toString();
-        int value = Statics.gpioStringToInt(stringValue);
-        Statics.setPreviousInput(AppUtils.getBaseContext(), parent.getId(), stringValue);
-        switch (parent.getId()) {
-            // SPI
-            case R.id.misoGpioSpinner:
-                bluetoothManager.setMISO_GPIO(value);
-                break;
-            case R.id.mosiGpioSpinner:
-                bluetoothManager.setMOSI_GPIO(value);
-                break;
-            case R.id.csGpioSpinner:
-                bluetoothManager.setCS_GPIO(value);
-                break;
-            case R.id.sckGpioSpinner:
-                bluetoothManager.setSCK_GPIO(value);
-                break;
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
     }
 }
