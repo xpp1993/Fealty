@@ -311,14 +311,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         @Override
                         public void onDeviceFound(List<BluetoothDevice> devices) {
                             progressDialog.dismiss();
-                            if(devices.size() != 0)
-                            showDeviceList(devices);
+                            if (devices.size() != 0)
+                                showDeviceList(devices);
                             else
                                 ToastUtils.showToastInUIThread("未扫描到设备！");
                         }
                     });
                 }
             }
+
             @Override
             public void close() {
                 // relative_test.setVisibility(View.GONE);
@@ -327,6 +328,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             }
         });
     }
+
     /**
      * 显示蓝牙设备列表
      */
@@ -347,7 +349,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mBleEngine.connect(devices.get(position).getAddress());
-                editor.putString(ParameterManager.DEVICES_ADDRESS, devices.get(position).getAddress());
+                String[] addressStr = devices.get(position).getAddress().split(":");
+                String address = addressStr[0] + addressStr[1] + addressStr[2] + addressStr[3] + addressStr[4] + addressStr[5];
+                editor.putString(ParameterManager.DEVICES_ADDRESS, address);
+                editor.commit();
             }
         });
     }
@@ -956,14 +961,14 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             jsonObject.put("rate", rate);
             jsonArray.add(jsonObject);
             rateList.add(rateListData);
-            if (cursor.isLast()){
-        Log.e("wyj", "stop to rate");
-        mWorkQueue.execute(new Runnable() {
-            @Override
-            public void run() {
-                CommandManager.sendStopRate(mBleEngine);
-            }
-        });
+            if (cursor.isLast()) {
+                Log.e("wyj", "stop to rate");
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendStopRate(mBleEngine);
+                    }
+                });
             }
         }
         cursor.close();
@@ -1262,6 +1267,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     /**
      * 手机电量低警报
+     *
      * @param electricity 手机电量
      * @param status      手机充电状态
      * @param notice      警报方式

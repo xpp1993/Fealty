@@ -1,6 +1,5 @@
 package dexin.love.band.firmwareupgrade;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -16,15 +15,10 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.Spinner;
@@ -33,12 +27,8 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import org.xutils.view.annotation.ContentView;
-import org.xutils.view.annotation.ViewInject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -55,7 +45,7 @@ import dexin.love.band.utils.ThreadPoolUtils;
  * Created by Administrator on 2016/10/23.
  */
 @ContentView(R.layout.device_container)
-public class ScannerFragment extends BaseFragment implements AdapterView.OnItemClickListener, View.OnClickListener, AdapterView.OnItemSelectedListener {
+public class ScannerFragment extends BaseFragment implements View.OnClickListener, AdapterView.OnItemSelectedListener {
     private final static String TAG = ScannerFragment.class.getSimpleName();
     private boolean isScanning = false;
     private BluetoothAdapter mBluetoothAdapter;
@@ -64,44 +54,24 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
     //1107
     DeviceConnectTask connectTask;
     BroadcastReceiver bluetoothGattReceiver, progressUpdateReceiver, connectionStateReceiver;
-    Map filesMap;
-    ArrayList filesList = new ArrayList<Integer>();
     LayoutInflater inflater;
-    public ListView fileListView;
-    ArrayAdapter<String> mArrayAdapter;
 
     ProgressDialog dialog;
-    // static DeviceActivity instance;
-    // Container which holds all the views
     ViewFlipper deviceContainer;
-    // All layout views used in this activity
-    View deviceFileListView, deviceMain, deviceParameterSettings, progressLayout;
-    // Progress layout attributes
+    View deviceMain, deviceParameterSettings, progressLayout;
     public ProgressBar progressBar;
     public TextView progressText;
-    Button updateDevice;
     RadioButton memoryTypeSPI;
     LinearLayout imageBankContainer, blockSizeContainer;
     View parameterSpiView;
     Spinner misoGpioSpinner, mosiGpioSpinner, csGpioSpinner, sckGpioSpinner;
     TextView blockSize, imageBankSpinner;
     Button sendToDeviceButton, closeButton;
-    // private SharedPreferences preferences;
     int memoryType;
-    // private SharedPreferences.Editor editor;
     public BluetoothManager bluetoothManager = new SuotaManager(getActivity(), this);
-    static ScannerFragment instance;
     //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
     SharedPreferences preferences;
-    //        //2. 获得编辑器:当将数据存储到SharedPrefences对象中时，需要获得编辑器。如果取出则不需要。
-//        editor = preferences.edit();
     Map<String, String> previousSettings;
-
-    public static ScannerFragment getInstance() {
-        return ScannerFragment.instance;
-    }
-
-    // 1107
     private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(final BluetoothDevice device, int rssi,
@@ -112,25 +82,24 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
                 public void run() {
                     List<UUID> uuids = Uuid.parseFromAdvertisementData(scanRecord);
                     for (UUID uuid : uuids) {
-                        // if (uuid.equals(Statics.SPOTA_SERVICE_UUID) && device.getName().equals(ParameterManager.DEVICES_ADDRESS)) {
                         if (uuid.equals(Statics.SPOTA_SERVICE_UUID)) {
                             Log.e(TAG, device.getName() + "," + preferences.getString(ParameterManager.DEVICES_ADDRESS, ""));
-                            //    if (device.getName().equals(preferences.getString(ParameterManager.DEVICES_ADDRESS, "")))
-                            bluetoothManager.setDevice(device);
-                            progressDialog.dismiss();
-                            initdata();
-
+                            if (device.getName().equals(preferences.getString(ParameterManager.DEVICES_ADDRESS, ""))) {
+                                bluetoothManager.setDevice(device);
+                                progressDialog.dismiss();
+                                initdata();
+                            } else {
+                                Toast.makeText(AppUtils.getBaseContext(), "未扫描到设备！", Toast.LENGTH_LONG).show();
+                            }
                         }
                     }
                 }
-
-
             });
         }
     };
 
     private void initdata() {
-        connectTask = new DeviceConnectTask(AppUtils.getBaseContext(), bluetoothManager.getDevice()) {
+        connectTask = new DeviceConnectTask(AppUtils.getBaseContext(), ScannerFragment.this, bluetoothManager.getDevice()) {
             @Override
             protected void onProgressUpdate(BluetoothGatt... gatt) {
                 BluetoothGattSingleton.setGatt(gatt[0]);
@@ -143,27 +112,25 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
         //dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
-
-        inflater = LayoutInflater.from(AppUtils.getBaseContext());
+        inflater = LayoutInflater.from(getActivity());
         deviceContainer = (ViewFlipper) getActivity().findViewById(R.id.deviceLayoutContainer);
         deviceMain = inflater.inflate(R.layout.device_main, deviceContainer, true);
-        deviceFileListView = inflater.inflate(R.layout.device_file_list, deviceContainer, true);
         deviceParameterSettings = inflater.inflate(R.layout.device_parameter_settings, deviceContainer, true);
         progressLayout = inflater.inflate(R.layout.progress, deviceContainer, true);
-        switchView(0);
+        //switchView(0);
         progressText = (TextView) progressLayout.findViewById(R.id.progress_text);
         progressBar = (ProgressBar) progressLayout.findViewById(R.id.progress_bar);
         progressBar.setProgress(0);
         progressBar.setMax(100);
     }
 
-    //= (Map<String, String>) Statics.getAllPreviousInput(getActivity())
     @Override
     protected void init() {
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
         preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
+        previousSettings = (Map<String, String>) Statics.getAllPreviousInput(AppUtils.getBaseContext());
         this.initialize();
         if (!Statics.fileDirectoriesCreated(AppUtils.getBaseContext()) || true) {
             File.createFileDirectories(AppUtils.getBaseContext());
@@ -174,11 +141,9 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
             @Override
             public void onReceive(Context context, Intent intent) {
                 super.onReceive(context, intent);
-                Bundle bundle = new Bundle();
                 bluetoothManager.processStep(intent);
             }
         };
-
         ScannerFragment.this.progressUpdateReceiver = new BluetoothGattReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -193,7 +158,6 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
             public void onReceive(Context context, Intent intent) {
                 super.onReceive(context, intent);
                 int connectionState = intent.getIntExtra("state", 0);
-//                DeviceActivity.this.connectionStateChanged(connectionState);
                 connectionStateChanged(connectionState);
             }
         };
@@ -224,10 +188,7 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
     @Override
     public void onDestroy() {
         EventBus.getDefault().unregister(this);
-        // Disable discovery on close
         mBluetoothAdapter.cancelDiscovery();
-//        Log.d(TAG, "ondestroy");
-//        bluetoothManager.disconnect();
         try {
             getActivity().unregisterReceiver(this.bluetoothGattReceiver);
             getActivity().unregisterReceiver(this.progressUpdateReceiver);
@@ -256,7 +217,6 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
 
     private void startDeviceScan() {
         isScanning = true;
-        // scannedDevices.clear();
         Log.d(TAG, "Start scanning");
         mBluetoothAdapter.startLeScan(mLeScanCallback);
         handler.postDelayed(new Runnable() {
@@ -278,38 +238,32 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
     }
 
 
-    public void onBackPressed() {
-        if (this.deviceContainer.getDisplayedChild() == 3) {
-            if (bluetoothManager.isFinished())
-                switchView(0);
-            else {
-                bluetoothManager.disconnect();
-                finish();
-            }
-        } else if (this.deviceContainer.getDisplayedChild() >= 1) {
-            switchView(this.deviceContainer.getDisplayedChild() - 1);
-        } else {
-            bluetoothManager.disconnect();
-            super.getActivity().onBackPressed();
-        }
-    }
+//    public void onBackPressed() {
+//        if (this.deviceContainer.getDisplayedChild() == 3) {
+//            if (bluetoothManager.isFinished())
+//                switchView(0);
+//            else {
+//                bluetoothManager.disconnect();
+//                finish();
+//            }
+//        } else if (this.deviceContainer.getDisplayedChild() >= 1) {
+//            switchView(this.deviceContainer.getDisplayedChild() - 1);
+//        } else {
+//            bluetoothManager.disconnect();
+//            super.getActivity().onBackPressed();
+//        }
+//    }
 
     public void initMainScreen() {
         Log.d(TAG, "initMainScreen");
-        updateDevice = (Button) deviceMain.findViewById(R.id.updateButton);
-        updateDevice.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BluetoothDevice device = bluetoothManager.getDevice();
-                bluetoothManager.setDevice(device);
-                initFileList();
-                switchView(1);
-            }
-        });
+        BluetoothDevice device = bluetoothManager.getDevice();
+        bluetoothManager = new SuotaManager(getActivity(), ScannerFragment.this);
+        bluetoothManager.setDevice(device);
+        initFileList();
+        switchView(1);
         if (this.dialog.isShowing()) {
             this.dialog.dismiss();
         }
-
     }
 
     @Override
@@ -318,19 +272,15 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
     }
 
     private void initFileList() {
-        fileListView = (ListView) deviceFileListView.findViewById(R.id.file_list);
-
-        mArrayAdapter = new ArrayAdapter<String>(AppUtils.getBaseContext(), android.R.layout.simple_list_item_1);
-
-        filesMap = File.list();
-        Iterator it = filesMap.entrySet().iterator();
-        fileListView.setAdapter(mArrayAdapter);
-        fileListView.setOnItemClickListener(this);
-        while (it.hasNext()) {
-            Map.Entry filesMap = (Map.Entry) it.next();
-            Log.d("File", filesMap.getKey().toString());
-            filesList.add(filesMap.getKey());
-            mArrayAdapter.add((String) filesMap.getValue());
+        String filename = ParameterManager.FIRMWARE_NAME;
+        bluetoothManager.setFileName(filename);
+        Log.d(TAG, "Clicked: " + filename);
+        try {
+            bluetoothManager.setFile(File.getByFileName(filename));
+            initParameterSettings();
+            switchView(2);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -476,23 +426,6 @@ public class ScannerFragment extends BaseFragment implements AdapterView.OnItemC
                 if (!bluetoothManager.getError())
                     finish();
             }
-        }
-    }
-
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position,
-                            long id) {
-        // Get the resourceID necessary for retrieving the file
-        String filename = filesList.get(position).toString();
-        bluetoothManager.setFileName(filename);
-        Log.d(TAG, "Clicked: " + filename);
-        try {
-            bluetoothManager.setFile(File.getByFileName(filename));
-            initParameterSettings();
-            switchView(2);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
