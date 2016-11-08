@@ -566,7 +566,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         CommandManager.sendStartFirmWareUpgrade(mBleEngine);
                     }
                 });//进入固件升级模式
-                layout_firmupgrade.setVisibility(View.VISIBLE);
+//                layout_firmupgrade.setVisibility(View.VISIBLE);
                 break;
             case R.id.relative_firmupgrade: //固件升级
                 EventBus.getDefault().post(new NavFragmentEvent(new ScannerFragment()));
@@ -632,7 +632,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            layout_firmupgrade.setVisibility(View.VISIBLE);
+                           // layout_firmupgrade.setVisibility(View.VISIBLE);
                         }
                     });
                 } catch (IOException e) {

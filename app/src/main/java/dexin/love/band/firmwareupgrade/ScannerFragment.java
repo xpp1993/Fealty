@@ -50,8 +50,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
     private boolean isScanning = false;
     private BluetoothAdapter mBluetoothAdapter;
     private Handler handler;
-    private ProgressDialog progressDialog;//更新软件进度条
-    //1107
     DeviceConnectTask connectTask;
     BroadcastReceiver bluetoothGattReceiver, progressUpdateReceiver, connectionStateReceiver;
     LayoutInflater inflater;
@@ -86,7 +84,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
                             Log.e(TAG, device.getName() + "," + preferences.getString(ParameterManager.DEVICES_ADDRESS, ""));
                             if (device.getName().equals(preferences.getString(ParameterManager.DEVICES_ADDRESS, ""))) {
                                 bluetoothManager.setDevice(device);
-                                progressDialog.dismiss();
                                 initdata();
                             } else {
                                 Toast.makeText(AppUtils.getBaseContext(), "未扫描到设备！", Toast.LENGTH_LONG).show();
@@ -108,7 +105,7 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
         connectTask.execute();
 
         dialog = new ProgressDialog(getActivity());
-        dialog.setMessage("Connecting, please wait...");
+        dialog.setMessage("正在升级固件，请稍后....");
         //dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
@@ -209,8 +206,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
             // Device does not support Bluetooth
             Log.e(TAG, "Bluetooth not supported.");
         }
-        progressDialog = new ProgressDialog(this.getActivity());
-        progressDialog.show();
         handler = new Handler();
         this.startDeviceScan();
     }
@@ -237,23 +232,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
 
     }
 
-
-//    public void onBackPressed() {
-//        if (this.deviceContainer.getDisplayedChild() == 3) {
-//            if (bluetoothManager.isFinished())
-//                switchView(0);
-//            else {
-//                bluetoothManager.disconnect();
-//                finish();
-//            }
-//        } else if (this.deviceContainer.getDisplayedChild() >= 1) {
-//            switchView(this.deviceContainer.getDisplayedChild() - 1);
-//        } else {
-//            bluetoothManager.disconnect();
-//            super.getActivity().onBackPressed();
-//        }
-//    }
-
     public void initMainScreen() {
         Log.d(TAG, "initMainScreen");
         BluetoothDevice device = bluetoothManager.getDevice();
@@ -261,9 +239,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
         bluetoothManager.setDevice(device);
         initFileList();
         switchView(1);
-        if (this.dialog.isShowing()) {
-            this.dialog.dismiss();
-        }
     }
 
     @Override
@@ -272,6 +247,12 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void initFileList() {
+       handler.post(new Runnable() {
+           @Override
+           public void run() {
+              dialog.dismiss();
+           }
+       });
         String filename = ParameterManager.FIRMWARE_NAME;
         bluetoothManager.setFileName(filename);
         Log.d(TAG, "Clicked: " + filename);
@@ -320,7 +301,6 @@ public class ScannerFragment extends BaseFragment implements View.OnClickListene
         mosiGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.mosiGpioSpinner);
         csGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.csGpioSpinner);
         sckGpioSpinner = (Spinner) deviceParameterSettings.findViewById(R.id.sckGpioSpinner);
-
         ArrayAdapter<CharSequence> gpioAdapter = ArrayAdapter.createFromResource(AppUtils.getBaseContext(),
                 gpioValuesId, android.R.layout.simple_spinner_item);
         misoGpioSpinner.setAdapter(gpioAdapter);
