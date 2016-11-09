@@ -3,6 +3,9 @@ import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+
+import dexin.love.band.fragment.MeFragment;
+
 /**
  * Created by wouter on 6-11-14.
  */
@@ -14,7 +17,7 @@ public class SuotaManager extends BluetoothManager {
 
     static final String TAG = "SuotaManager";
 
-    public SuotaManager(FragmentActivity activity, ScannerFragment fragment) {
+    public SuotaManager(FragmentActivity activity, MeFragment fragment) {
         super(activity);
         scannerFragment = fragment;
         type = SuotaManager.TYPE;
@@ -51,14 +54,14 @@ public class SuotaManager extends BluetoothManager {
                 break;
             // Init mem type
             case 2:
-                scannerFragment.progressText.setText("Uploading " + fileName + " to " + device.getName() + ".\n" +
-                        "Please wait until the progress is\n" +
-                        "completed.");
+//                scannerFragment.progressText.setText("Uploading " + fileName + " to " + device.getName() + ".\n" +
+//                        "Please wait until the progress is\n" +
+//                        "completed.");
                 setSpotaMemDev();
                 Log.e("Tag", "Uploading " + fileName + " to " + device.getName() + ".\n" +
                         "Please wait until the progress is\n" +
                         "completed.");
-                scannerFragment.progressBar.setVisibility(View.VISIBLE);
+//                scannerFragment.progressBar.setVisibility(View.VISIBLE);
                 break;
             // Set mem_type for SPOTA_GPIO_MAP_UUID
             case 3:
@@ -82,6 +85,7 @@ public class SuotaManager extends BluetoothManager {
                         sendEndSignal();
                     } else {
                         onSuccess();
+
                     }
                 }
                 break;

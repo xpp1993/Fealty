@@ -11,6 +11,8 @@ import android.util.Log;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
+import dexin.love.band.fragment.MeFragment;
+
 public class DeviceConnectTask extends AsyncTask<Void, BluetoothGatt, Boolean> {
     public static final String TAG = "DeviceGattTask";
     public Context context;
@@ -19,7 +21,7 @@ public class DeviceConnectTask extends AsyncTask<Void, BluetoothGatt, Boolean> {
 
     private final BluetoothAdapter mBluetoothAdapter;
     private final Callback callback;
-    public DeviceConnectTask(Context context, ScannerFragment scannerFragment, BluetoothDevice device) {
+    public DeviceConnectTask(Context context, MeFragment scannerFragment, BluetoothDevice device) {
         Log.d(TAG, "init");
         this.context = context;
         callback = new Callback(DeviceConnectTask.this, scannerFragment);

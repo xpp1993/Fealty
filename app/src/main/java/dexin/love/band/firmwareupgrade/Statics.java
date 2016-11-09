@@ -12,7 +12,7 @@ public class Statics {
     public static final int fileChunkSize = 20;
     public static final int MEMORY_TYPE_SPI = 3;
     public static final int MEMORY_TYPE_I2C = 4;
-
+    //public static final UUID SERVICE_UUID = UUID.fromString("000056ff-0000-1000-8000-00805f9b34fb");
     public static final UUID SPOTA_SERVICE_UUID = UUID.fromString("0000fef5-0000-1000-8000-00805f9b34fb");
     public static final UUID SPOTA_MEM_DEV_UUID = UUID.fromString("8082caa8-41a6-4021-91c6-56f9b954cc34");
     public static final UUID SPOTA_GPIO_MAP_UUID = UUID.fromString("724249f0-5eC3-4b5f-8804-42345af08651");

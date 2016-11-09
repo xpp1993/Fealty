@@ -189,15 +189,6 @@
         <activity
             android:name=".activity.XinlvNorActivity"
             android:theme="@style/activity_popup" />
-        <!--<activity-->
-            <!--android:name=".firmwareupgrade.ScanActivity"-->
-            <!--android:label="@string/app_name"-->
-            <!--android:screenOrientation="portrait" />-->
-        <!--<activity-->
-            <!--android:name=".firmwareupgrade.DeviceActivity"-->
-            <!--android:label="@string/app_name"-->
-            <!--android:screenOrientation="portrait">-->
-        <!--</activity>-->
         <receiver
             android:name=".firmwareupgrade.BluetoothGattReceiver"
             android:enabled="true"
@@ -206,9 +197,7 @@
                 <action android:name="android.intent.action.BLUETOOTH_GATT_UPDATE" />
             </intent-filter>
         </receiver>
-        <!--<service-->
-        <!--android:name="com.yc.peddemo.sdk.BluetoothLeService"-->
-        <!--android:enabled="true" />-->
+
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"

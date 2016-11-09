@@ -10,17 +10,19 @@ import android.util.Log;
 
 import java.math.BigInteger;
 
+import dexin.love.band.fragment.MeFragment;
+
 /**
  * Created by wouter on 9-10-14.
  */
 public class Callback extends BluetoothGattCallback {
     public static String TAG = "Callback";
     DeviceConnectTask task;
-    ScannerFragment scannerFragment;
+    MeFragment scannerFragment;
 
-    public Callback(DeviceConnectTask task,ScannerFragment scannerFragment) {
+    public Callback(DeviceConnectTask task, MeFragment scannerFragment) {
         this.task = task;
-        this.scannerFragment=scannerFragment;
+        this.scannerFragment = scannerFragment;
     }
 
     @Override
@@ -33,6 +35,7 @@ public class Callback extends BluetoothGattCallback {
 
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             Log.i(TAG, "le device disconnected");
+            scannerFragment.autoConnect();//断开连接后扫描手环自动连接
         }
         Intent intent = new Intent();
         intent.setAction(Statics.CONNECTION_STATE_UPDATE);
@@ -102,15 +105,15 @@ public class Callback extends BluetoothGattCallback {
             }
             // Step 4 callback: set the patch length, default 240
             else if (characteristic.getUuid().equals(Statics.SPOTA_PATCH_LEN_UUID)) {
-                Log.e(TAG,scannerFragment.toString());
-                Log.e(TAG,scannerFragment.bluetoothManager.toString());
+                Log.e(TAG, scannerFragment.toString());
+                Log.e(TAG, scannerFragment.bluetoothManager.toString());
                 step = scannerFragment.bluetoothManager.type == SuotaManager.TYPE ? 5 : 7;
             } else if (characteristic.getUuid().equals(Statics.SPOTA_MEM_DEV_UUID)) {
             } else if (characteristic.getUuid().equals(Statics.SPOTA_PATCH_DATA_UUID)
                     && scannerFragment.bluetoothManager.chunkCounter != -1
                     ) {
                 Log.d(TAG, "Next block in chunk " + scannerFragment.bluetoothManager.chunkCounter);
-               scannerFragment.bluetoothManager.sendBlock();
+                scannerFragment.bluetoothManager.sendBlock();
             }
 
             if (step > 0) {
@@ -170,6 +173,5 @@ public class Callback extends BluetoothGattCallback {
             intent.putExtra("memDevValue", memDevValue);
             task.context.sendBroadcast(intent);
         }
-
     }
 }

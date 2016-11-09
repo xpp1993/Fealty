@@ -5,7 +5,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -22,11 +25,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.transition.Slide;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,6 +71,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import de.greenrobot.event.EventBus;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -86,7 +88,13 @@ import dexin.love.band.bean.SleepData;
 import dexin.love.band.bean.SportData;
 import dexin.love.band.bean.UserInfo;
 import dexin.love.band.event.NavFragmentEvent;
-import dexin.love.band.firmwareupgrade.ScannerFragment;
+import dexin.love.band.firmwareupgrade.BluetoothGattReceiver;
+import dexin.love.band.firmwareupgrade.BluetoothGattSingleton;
+import dexin.love.band.firmwareupgrade.BluetoothManager;
+import dexin.love.band.firmwareupgrade.DeviceConnectTask;
+import dexin.love.band.firmwareupgrade.Statics;
+import dexin.love.band.firmwareupgrade.SuotaManager;
+import dexin.love.band.firmwareupgrade.Uuid;
 import dexin.love.band.manager.DecodeManager;
 import dexin.love.band.manager.ParameterManager;
 import dexin.love.band.manager.SPManager;
@@ -168,7 +176,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private long currentTime;
     XinLvSqliteHelper xinlvhelper;
     SQLiteDatabase xinlvdb;
-    private SharedPreferences preferences;
+    public SharedPreferences preferences;
     int sportMinRate;
     int sportMaxRate;
     int norMin;
@@ -188,8 +196,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private String address;
     public long lastSysTime = 0;
     private String version = null;//固件版本号
-    private ProgressDialog m_progressDlg;//更新软件进度条
-    private boolean isFirm = false;//是否是固件升级状态
+    public ProgressDialog m_progressDlg;//更新软件进度条
+    public boolean isFirm = false;//是否是固件升级状态
     @ViewInject(R.id.relative_firmupgrade)
     private RelativeLayout layout_firmupgrade;
     List<BluetoothDevice> bluetoothDeviceList;
@@ -434,6 +442,14 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         getActivity().unregisterReceiver(mReceiver);
         locService.unregisterListener(mListener); //注销掉监听
         locService.stop(); //停止定位服务
+//        mBluetoothAdapter.cancelDiscovery();
+        try {
+            getActivity().unregisterReceiver(this.bluetoothGattReceiver);
+            getActivity().unregisterReceiver(this.progressUpdateReceiver);
+            getActivity().unregisterReceiver(this.connectionStateReceiver);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
         if (runnable3 != null)
             myHandler.removeCallbacks(runnable3);
         if (runnable_updataGPS != null)
@@ -568,9 +584,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 });//进入固件升级模式
 //                layout_firmupgrade.setVisibility(View.VISIBLE);
                 break;
-            case R.id.relative_firmupgrade: //固件升级
-                EventBus.getDefault().post(new NavFragmentEvent(new ScannerFragment()));
-                break;
+//            case R.id.relative_firmupgrade: //固件升级
+//                EventBus.getDefault().post(new NavFragmentEvent(new ScannerFragment()));
+//                break;
             default:
                 break;
         }
@@ -628,11 +644,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                                 }
                             });
                             try {
-                                Thread.sleep(500);
+                                Thread.sleep(2000);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                           // layout_firmupgrade.setVisibility(View.VISIBLE);
+                            //扫描升级模式的手环
+                            startDeviceScan();
                         }
                     });
                 } catch (IOException e) {
@@ -643,6 +660,173 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }.start();
     }
 
+    /**
+     * 2016 11 09 xpp firmupgrade
+     **/
+    private final static String TAG = "firmupgrade modify by xpp ";
+    private boolean isScanning = false;
+    private BluetoothAdapter mBluetoothAdapter;
+    public BluetoothManager bluetoothManager;
+    DeviceConnectTask connectTask;
+    BroadcastReceiver bluetoothGattReceiver, progressUpdateReceiver, connectionStateReceiver;
+    int memoryType;
+    private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
+        @Override
+        public void onLeScan(final BluetoothDevice device, int rssi,
+                             final byte[] scanRecord) {
+
+            ThreadPoolUtils.runTaskOnUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    List<UUID> uuids = Uuid.parseFromAdvertisementData(scanRecord);
+                    for (UUID uuid : uuids) {
+                        if (uuid.equals(Statics.SPOTA_SERVICE_UUID)) {
+                            Log.e(TAG, device.getName() + "," + preferences.getString(ParameterManager.DEVICES_ADDRESS, ""));
+                            if (device.getName().equals(preferences.getString(ParameterManager.DEVICES_ADDRESS, ""))) {
+                                bluetoothManager.setDevice(device);
+                                //连接升级模式的手环
+                                connectForName();
+                            } else {
+                                Toast.makeText(AppUtils.getBaseContext(), "未扫描到设备！", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    };
+
+    private void connectForName() {
+        connectTask = new DeviceConnectTask(AppUtils.getBaseContext(), MeFragment.this, bluetoothManager.getDevice()) {
+            @Override
+            protected void onProgressUpdate(BluetoothGatt... gatt) {
+                BluetoothGattSingleton.setGatt(gatt[0]);
+            }
+        };
+        connectTask.execute();
+        m_progressDlg.setMessage("正在升级固件，请稍后...");
+        m_progressDlg.setMax(100);
+        m_progressDlg.setProgress(0);
+    }
+
+    public void startDeviceScan() {
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
+            // Device does not support Bluetooth
+            Log.e(TAG, "Bluetooth not supported.");
+        }
+        isScanning = true;
+        Log.d(TAG, "Start scanning");
+        mBluetoothAdapter.startLeScan(mLeScanCallback);
+        myHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                stopDeviceScan();
+            }
+        }, 7000);
+
+    }
+
+    private void stopDeviceScan() {
+        if (isScanning) {
+            isScanning = false;
+            Log.d(TAG, "Stop scanning");
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        }
+
+    }
+
+    private void connectionStateChanged(int connectionState) {
+        if (connectionState == BluetoothProfile.STATE_DISCONNECTED) {
+//            Toast.makeText(AppUtils.getBaseContext(), this.bluetoothManager.getDevice().getName() + " disconnected.", Toast.LENGTH_LONG).show();
+            if (BluetoothGattSingleton.getGatt() != null)
+                BluetoothGattSingleton.getGatt().close();
+            if (!bluetoothManager.isFinished()) {
+                if (!bluetoothManager.getError())
+                    m_progressDlg.dismiss();
+            }
+        }
+    }
+
+    public void initMainScreen() {
+        Log.d(TAG, "initMainScreen");
+        BluetoothDevice device = bluetoothManager.getDevice();
+        bluetoothManager = new SuotaManager(getActivity(), MeFragment.this);
+        bluetoothManager.setDevice(device);
+        initFileList();
+        m_progressDlg.show();
+    }
+
+    private void initFileList() {
+        String filename = ParameterManager.FIRMWARE_NAME;
+        bluetoothManager.setFileName(filename);
+        Log.d(TAG, "Clicked: " + filename);
+        try {
+            bluetoothManager.setFile(dexin.love.band.firmwareupgrade.File.getByFileName(filename));
+            initParameterSettings();
+            startUpdate();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initParameterSettings() {
+        String[] gpioValues = getResources().getStringArray(R.array.gpio_values);
+
+        String stringValue = gpioValues[Statics.DEFAULT_MISO_VALUE];
+        int value = Statics.gpioStringToInt(stringValue);
+        Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_MISO_VALUE, stringValue);
+        bluetoothManager.setMISO_GPIO(value);
+        Log.d("gpioValues", "MISO: " + stringValue);
+
+        stringValue = gpioValues[Statics.DEFAULT_MOSI_VALUE];
+        value = Statics.gpioStringToInt(stringValue);
+        Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_MOSI_VALUE, stringValue);
+        bluetoothManager.setMOSI_GPIO(value);
+        Log.d("gpioValues", "MOSI: " + stringValue);
+
+        stringValue = gpioValues[Statics.DEFAULT_CS_VALUE];
+        value = Statics.gpioStringToInt(stringValue);
+        Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_CS_VALUE, stringValue);
+        bluetoothManager.setCS_GPIO(value);
+        Log.d("gpioValues", "CS: " + stringValue);
+
+        stringValue = gpioValues[Statics.DEFAULT_SCK_VALUE];
+        value = Statics.gpioStringToInt(stringValue);
+        Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_SCK_VALUE, stringValue);
+        bluetoothManager.setSCK_GPIO(value);
+        Log.d("gpioValues", "SCK: " + stringValue);
+
+        setMemoryType(Statics.MEMORY_TYPE_SPI);
+    }
+
+    private void setMemoryType(int memoryType) {
+        this.memoryType = memoryType;
+        bluetoothManager.setMemoryType(memoryType);
+        Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.MEMORY_TYPE_SUOTA_INDEX, String.valueOf(memoryType));
+    }
+
+    private void startUpdate() {
+        Intent intent = new Intent();
+
+        if (bluetoothManager.type == SuotaManager.TYPE) {
+            Statics.setPreviousInput(AppUtils.getBaseContext(), Statics.DEFAULT_BLOCK_SIZE_ID, Statics.DEFAULT_BLOCK_SIZE_VALUE);
+        }
+        // Set default block size to 1 for SPOTA, this will not be used in this case
+        int fileBlockSize = 1;
+        if (bluetoothManager.type == SuotaManager.TYPE) {
+            fileBlockSize = Integer.parseInt(Statics.DEFAULT_BLOCK_SIZE_VALUE);
+        }
+        bluetoothManager.getFile().setFileBlockSize(fileBlockSize);
+
+        intent.setAction(Statics.BLUETOOTH_GATT_UPDATE);
+        intent.putExtra("step", 1);
+        getActivity().sendBroadcast(intent);
+    }
+
+    /**
+     * 2016 11 09 xpp firmupgrade
+     **/
     LocationService locService;
     LocationClientOption mOption;
     MyLocationListener mListener;
@@ -889,7 +1073,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         // 设置ProgressDialog 的进度条是否不明确 false 就是不设置为不明确
                         m_progressDlg.setIndeterminate(false);
                         m_progressDlg.setCancelable(false);
+                        bluetoothManager = new SuotaManager(getActivity(), MeFragment.this);
+                        //注册广播为固件升级
+                        registReceiverforFirm();
                         doNewVersionDlgShow(msg.getData().getString("versions"), msg.getData().getString("url"));
+                        isFirm = true;
                     }
 
                     break;
@@ -918,6 +1106,46 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 default:
                     break;
             }
+        }
+
+        private void registReceiverforFirm() {
+            MeFragment.this.bluetoothGattReceiver = new BluetoothGattReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    super.onReceive(context, intent);
+                    bluetoothManager.processStep(intent);
+                }
+            };
+            MeFragment.this.progressUpdateReceiver = new BluetoothGattReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    super.onReceive(context, intent);
+                    int progress = intent.getIntExtra("progess", 0);
+//                                progressBar.setProgress(progress);
+                    m_progressDlg.setProgress(progress);
+                }
+            };
+
+            MeFragment.this.connectionStateReceiver = new BluetoothGattReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    super.onReceive(context, intent);
+                    int connectionState = intent.getIntExtra("state", 0);
+                    connectionStateChanged(connectionState);
+                }
+            };
+
+            getActivity().registerReceiver(
+                    MeFragment.this.bluetoothGattReceiver,
+                    new IntentFilter(Statics.BLUETOOTH_GATT_UPDATE));
+
+            getActivity().registerReceiver(
+                    MeFragment.this.progressUpdateReceiver,
+                    new IntentFilter(Statics.PROGRESS_UPDATE));
+
+            getActivity().registerReceiver(
+                    MeFragment.this.connectionStateReceiver,
+                    new IntentFilter(Statics.CONNECTION_STATE_UPDATE));
         }
     }
 
@@ -1085,20 +1313,25 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 } else {
                     progressDialog.dismiss();
                     //relative_test.setVisibility(View.GONE);
-                    CONNECTE_STATUS = false;
-                    if (!isFirm)
-                        dialog.dismiss();
-                    ToastUtils.showToastInUIThread("与手环失去连接！");
-                    bluee_iv_left.setState(false);
-                    autoConnect(preferences.getString(ParameterManager.DEVICES_ADDRESS, ""));
-                    readSP();
-                    DialogViewC dialogView = null;
-                    if (message_dialog == true) {
-                        dialogView = new DialogViewC(AppUtils.getBaseContext());
+                    if (mBleEngine != null) {
+                        mBleEngine.disconnect();
+                        mBleEngine.close();
                     }
-                    if (isAdded())
-                        diffNotifyShow(1, getResources().getString(R.string.disconnected), dialogView);
-                    // myHandler.postDelayed(runnable_connect,8000);
+                    CONNECTE_STATUS = false;
+                    ToastUtils.showToastInUIThread("与手环失去连接！");
+                    if (!isFirm) {//如果不是升级模式
+                        dialog.dismiss();
+                        bluee_iv_left.setState(false);
+                        autoConnect();
+                        readSP();
+                        DialogViewC dialogView = null;
+                        if (message_dialog == true) {
+                            dialogView = new DialogViewC(AppUtils.getBaseContext());
+                        }
+                        if (isAdded())
+                            diffNotifyShow(1, getResources().getString(R.string.disconnected), dialogView);
+                        // myHandler.postDelayed(runnable_connect,8000);
+                    }
                 }
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 //获取手机电量
@@ -1174,14 +1407,37 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     /**
      * 自动连接操作 调用扫描，如扫描到设备，传递给MyHandler类进行连接设备
-     *
-     * @param Address
      */
-    private void autoConnect(String Address) {
-        ScanService scan = new ScanService(getActivity(), myHandler);
-        if (scan.init()) {
-            scan.scanLeDevice(true, Address);
-        }
+    public void autoConnect() {
+//        ScanService scan = new ScanService(getActivity(), myHandler);
+//        if (scan.init()) {
+//            scan.scanLeDevice(true, Address);
+//        }
+       myHandler.post(new Runnable() {
+           @Override
+           public void run() {
+               if (mBleEngine.enableBle()) {
+                   progressDialog.show();
+                   progressDialog.setMessage("正在重新连接手环...");
+                   mBleEngine.scanBleDevice(true, 5000, new BleEngine.ListScanCallback() {
+                       @Override
+                       public void onDeviceFound(List<BluetoothDevice> devices) {
+                           progressDialog.dismiss();
+                           if (devices.size() != 0) {
+                               for (int i = 0; i < devices.size(); i++) {
+                                   if (devices.get(i).getAddress().equals(preferences.getString(ParameterManager.DEVICES_ADDRESS, ""))) {
+                                       mBleEngine.connect(devices.get(i).getAddress());
+                                   }
+                               }
+                           }
+                           else
+                               ToastUtils.showToastInUIThread("未扫描到设备！");
+                       }
+                   });
+               }
+           }
+       });
+
     }
 
 
@@ -1206,8 +1462,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        m_progressDlg.setTitle("正在下载固件升级包");
-                        m_progressDlg.setMessage("请稍后....");
+//                        m_progressDlg.setTitle("正在下载固件升级包");
+                        m_progressDlg.setMessage("正在下载固件升级包,请稍后....");
                         //下载升级包在创建的文件中
                         downFile(ParameterManager.HOST + url);
                     }

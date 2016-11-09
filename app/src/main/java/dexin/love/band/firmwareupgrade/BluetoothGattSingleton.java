@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
  */
 public class BluetoothGattSingleton {
     private static BluetoothGatt gatt = null;
-    private static BluetoothGattCharacteristic spotaMemInfoCharacteristic = null;
 
     public static BluetoothGatt getGatt() {
         return gatt;
