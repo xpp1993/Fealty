@@ -582,12 +582,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 EventBus.getDefault().post(new NavFragmentEvent(new Fragment_Shezhi()));
                 break;
             case R.id.relative_about://关于我们
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
-                    }
-                });//进入固件升级模式
+//                mWorkQueue.execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+//                    }
+//                });//进入固件升级模式
+                CommandManager.sendGetElectricity(mBleEngine);
                 break;
             default:
                 break;
@@ -1041,18 +1042,20 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     }
                     break;
                 case REQUEST_CODE_SOS:
+                    DialogViewKeyAlarm dialogView = null;
+                    if (message_dialog == true) {
+                        dialogView = new DialogViewKeyAlarm(AppUtils.getBaseContext());
+                    }
                     if (msg.getData().getInt("code") == 1) {
-                        DialogViewKeyAlarm dialogView = null;
-                        if (message_dialog == true) {
-                            dialogView = new DialogViewKeyAlarm(AppUtils.getBaseContext());
-                        }
                         if (isAdded())
                             diffNotifyShow(2, getResources().getString(R.string.akeyalarm), dialogView);
                     } else if (msg.getData().getInt("code") == 2) {
                         String desc = msg.getData().getString("desc");
-                        speakOut(desc);
+                        if (isAdded())
+                            diffNotifyShow(2, desc, dialogView);
                     } else {
-                        speakOut(getResources().getString(R.string.akeyalarmNo));
+                        if (isAdded())
+                            diffNotifyShow(2, getResources().getString(R.string.akeyalarmNo), dialogView);
                     }
                     break;
                 case REQUEST_CODE_FIRMEUPGRADE://获得固件升级包版本号，和升级包

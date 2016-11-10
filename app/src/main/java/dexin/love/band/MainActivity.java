@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
             if (currFragment != null) {
                 if (currFragment.finish()) {
                     mFragments.pollLast();
-                   // fm.popBackStack();//finish
+                   // fm.popBackStack();//
                     fm.popBackStackImmediate();
 //                    //由于当前的Fragment，被弹出去，需要当前的Fragment已经变化角色，需要重新隐藏
                     currFragment = (BaseFragment) getCurrentFrament();

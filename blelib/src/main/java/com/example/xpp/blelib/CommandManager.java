@@ -6,37 +6,48 @@ import android.util.Log;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class CommandManager {
     private static final String TAG = CommandManager.class.getSimpleName();
     static int lightSleepTime = 0;//浅睡时间
     static int deepSleepTime = 0;//深度睡眠时间
 
-    public static void decode(Context context, byte[] data) {
+    public static void decode(final Context context, byte[] data) {
         String dataString = Utils.bytesToHexString(data);
+        Timer timer = new Timer();
         if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_ELECTRICITY)) {//获取手环电量
             String electricity = String.valueOf(Integer.parseInt(dataString.substring(2, 4), 16));
             String isElectricize = dataString.substring(4, 6);//是否充电，00为没有充电，01为充电
             BroadcastManager.sendBroadcast4Electricity(context, GlobalValues.BROADCAST_INTENT_ELECTRICITY, electricity, isElectricize);
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_CURRENTMOTION)) {//获取手环运动数据
-            String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
+            final String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd  HH:mm:ss");
             Long time = (Long.parseLong(datetime, 16) - 8 * 3600) * 1000;
             String timeStr = sdf.format(new Date(time));//当前手环时间
             Log.e("BleEngine获取手环当前运动数据", timeStr);
-            String steps = dataString.substring(16, 18) + dataString.substring(14, 16) + dataString.substring(12, 14) + dataString.substring(10, 12);
-            String distance = dataString.substring(24, 26) + dataString.substring(22, 24) + dataString.substring(20, 22) + dataString.substring(18, 20);
-            String calo = dataString.substring(32, 34) + dataString.substring(30, 32) + dataString.substring(28, 30) + dataString.substring(26, 28);
-            String sleep = "00" + dataString.substring(38, 40) + dataString.substring(36, 38) + dataString.substring(34, 36);
-            BroadcastManager.sendBroadcast4CURRENTMOTION(
-                    context, GlobalValues.BROADCAST_INTENT_CURRENTMOTION,
-                    String.valueOf(Integer.parseInt(datetime, 16)),
-                    String.valueOf(Integer.parseInt(steps, 16)),
-                    Integer.parseInt(distance, 16),
-                    Integer.parseInt(calo, 16),
-                    Integer.parseInt(sleep, 16));
+            final String steps = dataString.substring(16, 18) + dataString.substring(14, 16) + dataString.substring(12, 14) + dataString.substring(10, 12);
+            final String distance = dataString.substring(24, 26) + dataString.substring(22, 24) + dataString.substring(20, 22) + dataString.substring(18, 20);
+            final String calo = dataString.substring(32, 34) + dataString.substring(30, 32) + dataString.substring(28, 30) + dataString.substring(26, 28);
+            final String sleep = "00" + dataString.substring(38, 40) + dataString.substring(36, 38) + dataString.substring(34, 36);
+
+            //发送广播通知前段显示数据
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    BroadcastManager.sendBroadcast4CURRENTMOTION(
+                            context, GlobalValues.BROADCAST_INTENT_CURRENTMOTION,
+                            String.valueOf(Integer.parseInt(datetime, 16)),
+                            String.valueOf(Integer.parseInt(steps, 16)),
+                            Integer.parseInt(distance, 16),
+                            Integer.parseInt(calo, 16),
+                            Integer.parseInt(sleep, 16));
+                }
+            };
+            timer.schedule(task, 2000);
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEP_BACK)) {//返回睡眠质量数据
-           // Log.e("xpp", "同步睡眠数据完成:" + dataString.toString());
+            // Log.e("xpp", "同步睡眠数据完成:" + dataString.toString());
             String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
 //            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd  HH:mm:ss");
@@ -47,7 +58,7 @@ public class CommandManager {
                 //将十六进制字符转化为二进制字符
                 String BinaryString = Utils.toFullBinaryString(Integer.parseInt(dataString.substring(i, i + 2), 16));
                 int sleepData = Integer.parseInt(BinaryString.substring(24, 26), 2);//睡眠质量数据
-               // Log.e(TAG, sleepData + "");
+                // Log.e(TAG, sleepData + "");
                 // 睡眠质量数据如果为 0 表明没有记录或没有睡眠，有记录时的取值范围为（ 1-3）。 3 为最好的睡眠质量， 1 为最差的睡眠质
                 if (sleepData == 0)
                     return;
@@ -59,11 +70,14 @@ public class CommandManager {
                     deepSleepTime += 1;
                 }
             }
-            // Log.e(TAG, "sleepLight" + lightSleepTime + ",sleepdeep" + deepSleepTime);
-            // }
-            // if (timeStr.equals("11:45:00")) {//发送广播通知前段显示数据
-            BroadcastManager.sendBroadcast4SleepQuality(context, GlobalValues.BROADCAST_INTENT_SLEEPQ, lightSleepTime, deepSleepTime);
-            // }
+            //发送广播通知前段显示数据
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    BroadcastManager.sendBroadcast4SleepQuality(context, GlobalValues.BROADCAST_INTENT_SLEEPQ, lightSleepTime, deepSleepTime);
+                }
+            };
+            timer.schedule(task, 2000);
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEPNO)) {
             Log.e(TAG, "没有睡眠数据！");
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTART)) {//心率测试回复数据
@@ -126,7 +140,6 @@ public class CommandManager {
         }
         return ret;
     }
-
     /**
      * 获得十六进制时间字符串,发个手环做同步时间用
      *
