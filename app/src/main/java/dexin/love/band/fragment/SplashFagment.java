@@ -45,7 +45,7 @@ public class SplashFagment extends BaseFragment {
                 public void run() {
                     MainTabsFragemnt mainTabsFragemnt = new MainTabsFragemnt();
                     EventBus.getDefault().post(new NavFragmentEvent(mainTabsFragemnt));
-                    finish();//2016-9-20
+//                    finish();//2016-9-20
                 }
             }, 2000);
         } else {
@@ -70,7 +70,7 @@ public class SplashFagment extends BaseFragment {
         // MainActivity mainActivity= (MainActivity) getActivity();
         //   mainActivity.startFragment(loginFragment, null);
         EventBus.getDefault().post(new NavFragmentEvent(loginFragment));
-        finish();//2016-9-20
+//        finish();//2016-9-20
     }
 
     @Override

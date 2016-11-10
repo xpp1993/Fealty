@@ -341,7 +341,6 @@ public abstract class BluetoothManager {
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         sendRebootSignal();
-                        scannerFragment.isFirm=false;
                     }
                 })
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {

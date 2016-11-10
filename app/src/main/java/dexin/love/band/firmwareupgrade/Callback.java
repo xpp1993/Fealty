@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 
 import java.math.BigInteger;
@@ -19,10 +20,12 @@ public class Callback extends BluetoothGattCallback {
     public static String TAG = "Callback";
     DeviceConnectTask task;
     MeFragment scannerFragment;
+    Handler handler;
 
     public Callback(DeviceConnectTask task, MeFragment scannerFragment) {
         this.task = task;
         this.scannerFragment = scannerFragment;
+        handler = new Handler();
     }
 
     @Override
@@ -32,10 +35,16 @@ public class Callback extends BluetoothGattCallback {
         if (newState == BluetoothProfile.STATE_CONNECTED) {
             Log.i(TAG, "le device connected");
             gatt.discoverServices();
-
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             Log.i(TAG, "le device disconnected");
-            scannerFragment.autoConnect();//断开连接后扫描手环自动连接
+            //scannerFragment.autoConnect();//断开连接后扫描手环自动连接
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    scannerFragment.bluee_iv_left.setState(true);
+                    scannerFragment.isFirm=false;
+                }
+            });
         }
         Intent intent = new Intent();
         intent.setAction(Statics.CONNECTION_STATE_UPDATE);

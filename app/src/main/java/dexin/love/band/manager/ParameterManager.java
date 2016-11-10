@@ -25,7 +25,8 @@ public class ParameterManager {
     public static final String BAOJIN_yuyin = "baojin_yuyin"; //保存在sp文件中消息提醒中语音提醒是否打开的key值
     public static final String BAOJIN_dialog = "baojin_tanc"; //保存在sp文件中消息提醒中弹窗提醒是否打开的key值
     public static final String LOGIN_TIME = "login_time"; //保存在sp文件中消息提醒中弹窗提醒是否打开的key值
-    public static final String USERINFO = "userinfo"; //保存在sp文件中消息提醒中弹窗提醒是否打开的key值
+//    public static final String USERINFO = "userinfo"; //保存在sp文件中消息提醒中弹窗提醒是否打开的key值
+       public static final String BAND_ADRRESS= "band_address";
     public static final int REQURST_CODE_SLEEP = 0X18A;
     public static final int REQURST_CODE_SPORT = 0X19A;
     public static final int REQURST_CODE_NORMAL = 0X29A;

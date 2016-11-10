@@ -105,7 +105,6 @@ import dexin.love.band.utils.ContextUtils;
 import dexin.love.band.utils.FormatCheck;
 import dexin.love.band.utils.MySqliteHelper;
 import dexin.love.band.utils.NetWorkAccessTools;
-import dexin.love.band.utils.ScanService;
 import dexin.love.band.utils.ThreadPoolUtils;
 import dexin.love.band.utils.ToastUtils;
 import dexin.love.band.utils.WorkQueue;
@@ -142,7 +141,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     @ViewInject(R.id.me_phone)
     private TextView me_phone;
     @ViewInject(R.id.bluee_iv_left)
-    private SlideSwitch bluee_iv_left;
+    public SlideSwitch bluee_iv_left;
     public static final int REQUEST_USER_BYMIBILE = 0x01;
     private Handler myHandler = new MyHandler();
     private ProgressDialog progressDialog;
@@ -197,18 +196,18 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public long lastSysTime = 0;
     private String version = null;//固件版本号
     public ProgressDialog m_progressDlg;//更新软件进度条
-    public boolean isFirm = false;//是否是固件升级状态
     @ViewInject(R.id.relative_firmupgrade)
     private RelativeLayout layout_firmupgrade;
     List<BluetoothDevice> bluetoothDeviceList;
     private MyBaseAdapter adapter;
     private ListView listView_device_list;
     private SharedPreferences.Editor editor;
-    private boolean isRating = false;
+    //    private boolean isRating = false;
     private boolean isOpenTest = false;
-    private boolean CONNECTE_STATUS = false;
+    private boolean CONNECTE_STATUS = true;
     private int rateTotal = 0;//心率值的总数
     private int rateNum = 0;//心率的个数
+    public boolean isFirm = false;//是否处于升级模式
 
     @Override
     protected void init() {
@@ -319,9 +318,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         @Override
                         public void onDeviceFound(List<BluetoothDevice> devices) {
                             progressDialog.dismiss();
-                            if (devices.size() != 0)
-                                showDeviceList(devices);
-                            else
+                            if (devices.size() != 0) {
+                                if (CONNECTE_STATUS == true)
+                                    showDeviceList(devices);
+                                else if (CONNECTE_STATUS == false) {
+                                    for (int i = 0; i < devices.size(); i++) {
+                                        if (devices.get(i).getAddress().equals(preferences.getString(ParameterManager.BAND_ADRRESS, "")))
+                                            mBleEngine.connect(devices.get(i).getAddress());
+                                    }
+                                }
+                            } else
                                 ToastUtils.showToastInUIThread("未扫描到设备！");
                         }
                     });
@@ -330,9 +336,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
             @Override
             public void close() {
-                // relative_test.setVisibility(View.GONE);
-                if (mBleEngine != null)
+                if (mBleEngine != null) {
                     mBleEngine.close();
+                }
             }
         });
     }
@@ -360,6 +366,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 String[] addressStr = devices.get(position).getAddress().split(":");
                 String address = addressStr[0] + addressStr[1] + addressStr[2] + addressStr[3] + addressStr[4] + addressStr[5];
                 editor.putString(ParameterManager.DEVICES_ADDRESS, address);
+                editor.putString(ParameterManager.BAND_ADRRESS, devices.get(position).getAddress());
                 editor.commit();
             }
         });
@@ -442,7 +449,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         getActivity().unregisterReceiver(mReceiver);
         locService.unregisterListener(mListener); //注销掉监听
         locService.stop(); //停止定位服务
-//        mBluetoothAdapter.cancelDiscovery();
         try {
             getActivity().unregisterReceiver(this.bluetoothGattReceiver);
             getActivity().unregisterReceiver(this.progressUpdateReceiver);
@@ -582,11 +588,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         CommandManager.sendStartFirmWareUpgrade(mBleEngine);
                     }
                 });//进入固件升级模式
-//                layout_firmupgrade.setVisibility(View.VISIBLE);
                 break;
-//            case R.id.relative_firmupgrade: //固件升级
-//                EventBus.getDefault().post(new NavFragmentEvent(new ScannerFragment()));
-//                break;
             default:
                 break;
         }
@@ -738,7 +740,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     private void connectionStateChanged(int connectionState) {
         if (connectionState == BluetoothProfile.STATE_DISCONNECTED) {
-//            Toast.makeText(AppUtils.getBaseContext(), this.bluetoothManager.getDevice().getName() + " disconnected.", Toast.LENGTH_LONG).show();
             if (BluetoothGattSingleton.getGatt() != null)
                 BluetoothGattSingleton.getGatt().close();
             if (!bluetoothManager.isFinished()) {
@@ -934,6 +935,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public void onRequestFail(int requestCode, int errorNo) {
         if (requestCode == REQUEST_CODE_SOS) {//发送一键求助失败
             speakOut(getResources().getString(R.string.akeyalarmNoNet));
+            ToastUtils.showToastInUIThread(getResources().getString(R.string.akeyalarmNoNet));
         }
     }
 
@@ -969,7 +971,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         if (requestCode == REQUEST_LIST_SINGLE || requestCode == REQUEST_LIST_SIMPLE) {
             Log.e("listfragment", value + "");
             String info = (String) value;
-//            String[] namePhone = info.split(":");
             String[] namePhone = info.split("\\n\\r");
             Log.e("namePhone", namePhone[1]);
             ArrayList list = new ArrayList();
@@ -1002,7 +1003,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         SessionHolder.user.setBirthday(birthday);
                     } else {//请求失败
                         ToastUtils.showToastInUIThread(msg.getData().getString("desc"));
-                        // Log.w("service error", msg.getData().getString("desc"));
                     }
                     initPersonalDataShow();
                     break;
@@ -1024,7 +1024,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         }
                     }
                     //上传到服务器
-                    // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "currentHeart"}, SessionHolder.user.getMobile(), rate_time, rate + "");
                     Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile", "uploadTime", "currentHeart"}, userInfo.getMobile(), rate_time, rate + "");
                     NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.INSERT_CURRENTRATE, params, null, REQUEST_CODE_CURRENTRATE, MeFragment.this);
                     //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
@@ -1043,11 +1042,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     break;
                 case REQUEST_CODE_SOS:
                     if (msg.getData().getInt("code") == 1) {
-                        /**
-                         * 手机反馈你的语音信息已发出（抱紧方式可自定义）
-                         * 子女收到短信提醒
-                         */
-                        // sosTime = System.currentTimeMillis();
                         DialogViewKeyAlarm dialogView = null;
                         if (message_dialog == true) {
                             dialogView = new DialogViewKeyAlarm(AppUtils.getBaseContext());
@@ -1056,7 +1050,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                             diffNotifyShow(2, getResources().getString(R.string.akeyalarm), dialogView);
                     } else if (msg.getData().getInt("code") == 2) {
                         String desc = msg.getData().getString("desc");
-                        Log.d("xppwy", desc);
                         speakOut(desc);
                     } else {
                         speakOut(getResources().getString(R.string.akeyalarmNo));
@@ -1077,7 +1070,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         //注册广播为固件升级
                         registReceiverforFirm();
                         doNewVersionDlgShow(msg.getData().getString("versions"), msg.getData().getString("url"));
-                        isFirm = true;
                     }
 
                     break;
@@ -1089,7 +1081,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 case REQUEST_CODE_RATE:
                     if (msg.getData().getInt("code") == 1) {
                         Log.e("upLoad:", msg.getData().getString("desc"));
-                        //  ToastUtils.showToastInUIThread("心率数据已上传到服务器！");
                     }
                     break;
                 case REQUEST_CODE_CURRENTRATE://上传实时心率
@@ -1121,7 +1112,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 public void onReceive(Context context, Intent intent) {
                     super.onReceive(context, intent);
                     int progress = intent.getIntExtra("progess", 0);
-//                                progressBar.setProgress(progress);
                     m_progressDlg.setProgress(progress);
                 }
             };
@@ -1189,21 +1179,17 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             jsonObject.put("rate", rate);
             jsonArray.add(jsonObject);
             rateList.add(rateListData);
-            if (cursor.isLast()) {
-                Log.e("wyj", "stop to rate");
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendStopRate(mBleEngine);
-                    }
-                });
-            }
         }
         cursor.close();
-        // map.put(SessionHolder.user.getMobile(), rateList);
+        Log.e("wyj", "stop to rate");
+        mWorkQueue.execute(new Runnable() {
+            @Override
+            public void run() {
+                CommandManager.sendStopRate(mBleEngine);
+            }
+        });
         map.put(userInfo.getMobile(), rateList);
         object.put("heartRate", jsonArray);
-        //object.put("mobile", SessionHolder.user.getMobile());
         object.put("mobile", userInfo.getMobile());
         String jsonString = object.toJSONString();
         if (rateList.size() == 0) {
@@ -1213,7 +1199,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         EventBus.getDefault().post(map);
         //把心率json数据上传到服务器,上传到服务器之后，清空数据库
         Log.e("json", jsonString);
-        // Map<String, String> params = CommonTools.getParameterMap(new String[]{"heartRate", "mobile"}, jsonString, SessionHolder.user.getMobile());
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"heartRate", "mobile"}, jsonString, userInfo.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_ZHEXIAN, params, null, REQUEST_CODE_RATE, MeFragment.this);
         if (rateList.size() == 7) {
@@ -1282,7 +1267,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 if (TextUtils.equals(state, GlobalValues.VALUE_CONNECT_STATE_YES)) {//成功连接手环
                     if (dialog != null)
                         dialog.dismiss();
-                    //relative_test.setVisibility(View.VISIBLE);
                     CONNECTE_STATUS = true;
                     myHandler.postDelayed(new Runnable() {
                         @Override
@@ -1312,17 +1296,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);
                 } else {
                     progressDialog.dismiss();
-                    //relative_test.setVisibility(View.GONE);
+                    ToastUtils.showToastInUIThread("与手环失去连接！");
+                    bluee_iv_left.setState(false);
+                    dialog.dismiss();
                     if (mBleEngine != null) {
-                        mBleEngine.disconnect();
                         mBleEngine.close();
                     }
                     CONNECTE_STATUS = false;
-                    ToastUtils.showToastInUIThread("与手环失去连接！");
-                    if (!isFirm) {//如果不是升级模式
-                        dialog.dismiss();
-                        bluee_iv_left.setState(false);
-                        autoConnect();
+                    if (isFirm == false) {
+                        bluee_iv_left.setState(true);//自动扫描，扫描
                         readSP();
                         DialogViewC dialogView = null;
                         if (message_dialog == true) {
@@ -1330,7 +1312,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         }
                         if (isAdded())
                             diffNotifyShow(1, getResources().getString(R.string.disconnected), dialogView);
-                        // myHandler.postDelayed(runnable_connect,8000);
                     }
                 }
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
@@ -1354,7 +1335,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 updataSleepData(deep_hour, deep_minute, light_hour, light_minute, sleepData.getTotal_hour_str());
                 EventBus.getDefault().post(sleepData);//把数据传到首页面
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_RATE)) {//心率数据
-                isRating = true;
+//                isRating = true;
                 Bundle bundle = intent.getExtras();
                 String rateTime = bundle.getString(GlobalValues.NAME_RATETIME);//该次心率测试的时间
                 int rate = bundle.getInt(GlobalValues.NAME_RATE);
@@ -1395,51 +1376,14 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 Log.e("xppwyj", "固件版本：" + version + ",固件地址:" + Mac + ",穿戴状态" + status);
                 //比较服务器的固件版本号，如果不一样则固件升级
                 //1.下载升级包
-                // Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.FIRMWAREUPGRADE, null, null, MeFragment.REQUEST_CODE_FIRMEUPGRADE, MeFragment.this);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_STOPRATE)) {//心率停止测试
-                isRating = false;
+//                isRating = false;
                 rateTotal = 0;
                 rateNum = 0;
             }
         }
     };
-
-    /**
-     * 自动连接操作 调用扫描，如扫描到设备，传递给MyHandler类进行连接设备
-     */
-    public void autoConnect() {
-//        ScanService scan = new ScanService(getActivity(), myHandler);
-//        if (scan.init()) {
-//            scan.scanLeDevice(true, Address);
-//        }
-       myHandler.post(new Runnable() {
-           @Override
-           public void run() {
-               if (mBleEngine.enableBle()) {
-                   progressDialog.show();
-                   progressDialog.setMessage("正在重新连接手环...");
-                   mBleEngine.scanBleDevice(true, 5000, new BleEngine.ListScanCallback() {
-                       @Override
-                       public void onDeviceFound(List<BluetoothDevice> devices) {
-                           progressDialog.dismiss();
-                           if (devices.size() != 0) {
-                               for (int i = 0; i < devices.size(); i++) {
-                                   if (devices.get(i).getAddress().equals(preferences.getString(ParameterManager.DEVICES_ADDRESS, ""))) {
-                                       mBleEngine.connect(devices.get(i).getAddress());
-                                   }
-                               }
-                           }
-                           else
-                               ToastUtils.showToastInUIThread("未扫描到设备！");
-                       }
-                   });
-               }
-           }
-       });
-
-    }
-
 
     /**
      * 提示更新新版本
@@ -1462,10 +1406,15 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-//                        m_progressDlg.setTitle("正在下载固件升级包");
                         m_progressDlg.setMessage("正在下载固件升级包,请稍后....");
                         //下载升级包在创建的文件中
                         downFile(ParameterManager.HOST + url);
+                        myHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                isFirm = true;
+                            }
+                        });
                     }
                 })
                 .setNegativeButton("暂不下载", null)
@@ -1481,14 +1430,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private Runnable runnable3 = new Runnable() {
         @Override
         public void run() {
-            // mWriteCommand.sendRateTestCommand(GlobalVariable.RATE_TEST_START);
-            Log.e("wyj", "runnable3");
             mWorkQueue.execute(new Runnable() {
                 @Override
                 public void run() {
                     //记录当前时间
                     lastSysTime = System.currentTimeMillis();
-                    Log.e("lastSysTime", lastSysTime + "");
                     Log.e("wyj", "start to rate");
                     CommandManager.sendStartRate(mBleEngine, "FFFFFFFF");
                 }
@@ -1542,7 +1488,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
     private void showDialogWarn(BaseView dialogView, Button button) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        //   Looper.prepare();
         final AlertDialog dialog = builder.setView(dialogView).create();
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1550,7 +1495,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 dialog.dismiss();
             }
         });
-        //    Looper.loop();
         dialog.show();
     }
 
