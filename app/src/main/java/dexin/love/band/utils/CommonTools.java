@@ -5,17 +5,29 @@ import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
-public class    CommonTools {
+import dexin.love.band.manager.ParameterManager;
+
+public class CommonTools {
+    private static final String TAG = CommonTools.class.getSimpleName();
+
     /**
      * 使用系统当前日期，产生一个临时文件，用户缓存
      *
@@ -67,8 +79,10 @@ public class    CommonTools {
         }
         return vercode;
     }
+
     /**
      * 获取软件版本名称
+     *
      * @param context
      * @return
      */
@@ -85,6 +99,7 @@ public class    CommonTools {
 
     /**
      * 联网下载文件用
+     *
      * @param path
      * @return
      */
@@ -99,7 +114,7 @@ public class    CommonTools {
             connection.connect();
             int code = connection.getResponseCode();
             if (code == 200) {
-                Log.e("xpp",connection.getContentLength()+"");
+                Log.e("xpp", connection.getContentLength() + "");
                 return connection;
             }
         } catch (MalformedURLException e) {
@@ -112,14 +127,95 @@ public class    CommonTools {
         return null;
 
     }
-    public static int getAndroidSDKVersion() {
-        int version = 0;
-        try {
-            version = Integer.valueOf(android.os.Build.VERSION.SDK);
-        } catch (NumberFormatException e) {
-           Log.d("getAndroidSDKVersion",e.toString());
-        }
-        return version;
-    }
+//    public static int getAndroidSDKVersion() {
+//        int version = 0;
+//        try {
+//            version = Integer.valueOf(android.os.Build.VERSION.SDK);
+//        } catch (NumberFormatException e) {
+//           Log.d("getAndroidSDKVersion",e.toString());
+//        }
+//        return version;
+//    }
 
+    /**
+     * POST请求获取数据
+     */
+    public static FileOutputStream postDownTTS(String requestUrl, Map<String, Object> requestParamsMap) {
+        PrintWriter printWriter = null;
+//        BufferedReader bufferedReader = null;
+//        // BufferedReader bufferedReader = null;
+//        StringBuffer responseResult = new StringBuffer();
+        FileOutputStream fileOutputStream = null;
+        StringBuffer params = new StringBuffer();
+        HttpURLConnection httpURLConnection = null;
+        InputStream inputStream = null;
+        // 组织请求参数
+        Iterator it = requestParamsMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry element = (Map.Entry) it.next();
+            params.append(element.getKey());
+            params.append("=");
+            params.append(element.getValue());
+            params.append("&");
+        }
+        if (params.length() > 0) {
+            params.deleteCharAt(params.length() - 1);
+        }
+        URL realUrl = null;
+        try {
+            realUrl = new URL(requestUrl);
+            // 打开和URL之间的连接
+            httpURLConnection = (HttpURLConnection) realUrl.openConnection();
+            // 发送POST请求必须设置如下两行
+            httpURLConnection.setDoOutput(true);
+            httpURLConnection.setDoInput(true);
+            //设置请求属性
+            httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            httpURLConnection.setRequestProperty("Connection", "Keep-Alive");// 维持长连接
+            httpURLConnection.setRequestProperty("Charset", "UTF-8");
+            // 获取URLConnection对象对应的输出流
+            printWriter = new PrintWriter(httpURLConnection.getOutputStream());
+            // 发送请求参数
+            printWriter.write(params.toString());
+            // flush输出流的缓冲
+            printWriter.flush();
+            // 根据ResponseCode判断连接是否成功
+            int responseCode = httpURLConnection.getResponseCode();
+            if (responseCode != 200) {
+                Log.e(TAG, " Error===" + responseCode);
+            } else {
+                Log.e(TAG, "Post Success!");
+            }
+            // 定义BufferedReader输入流来读取URL的ResponseData
+//            bufferedReader = new BufferedReader(new InputStreamReader(
+//                    httpURLConnection.getInputStream()));
+//            String line;
+//            while ((line = bufferedReader.readLine()) != null) {
+//                responseResult.append("/n").append(line);
+//            }
+            inputStream = httpURLConnection.getInputStream();
+            fileOutputStream = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "tts.mp3"));
+        } catch (Exception e) {
+            Log.e(TAG, "send post request error!" + e);
+        } finally {
+            httpURLConnection.disconnect();
+            try {
+                if (printWriter != null) {
+                    printWriter.close();
+                }
+                if (fileOutputStream != null) {
+                    fileOutputStream.close();
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+//                if (bufferedReader != null) {
+//                    bufferedReader.close();
+//                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return fileOutputStream;
+    }
 }

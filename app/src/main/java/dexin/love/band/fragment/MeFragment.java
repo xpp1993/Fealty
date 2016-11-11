@@ -155,6 +155,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     public static final int REQUEST_CODE_RATE = 0x26;//把测试的心率数据上传到服务器
     public static final int REQUEST_CODE_SOS = 0x31;//把测试的心率数据上传到服务器
     public static final int REQUEST_CODE_FIRMEUPGRADE = 0x51;//把测试的心率数据上传到服务器
+    //    public static final int REQUEST_TTS = 0x91;
     public static final int GPS_UPLOAD_CODE = 0x11;
     @ViewInject(R.id.relative_location)
     private RelativeLayout see_myGPSINFO;
@@ -588,7 +589,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 //                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
 //                    }
 //                });//进入固件升级模式
-                CommandManager.sendGetElectricity(mBleEngine);
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendGetElectricity(mBleEngine);
+                    }
+                });
                 break;
             default:
                 break;
@@ -927,6 +933,9 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     ToastUtils.showToastInUIThread("服务器异常！");
                 }
                 break;
+//            case REQUEST_TTS:
+//
+//                break;
             default:
                 break;
         }
@@ -935,7 +944,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
         if (requestCode == REQUEST_CODE_SOS) {//发送一键求助失败
-            speakOut(getResources().getString(R.string.akeyalarmNoNet));
+            DialogViewKeyAlarm dialogView = null;
+            if (message_dialog == true) {
+                dialogView = new DialogViewKeyAlarm(AppUtils.getBaseContext());
+            }
+            if (isAdded())
+                dialogView.setText(getResources().getString(R.string.akeyalarmNoNet));
+            diffNotifyShow(0x9, getResources().getString(R.string.akeyalarmNoNet), dialogView);
             ToastUtils.showToastInUIThread(getResources().getString(R.string.akeyalarmNoNet));
         }
     }
@@ -1048,14 +1063,20 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     }
                     if (msg.getData().getInt("code") == 1) {
                         if (isAdded())
-                            diffNotifyShow(2, getResources().getString(R.string.akeyalarm), dialogView);
+                            diffNotifyShow(0x9, getResources().getString(R.string.akeyalarm), dialogView);
                     } else if (msg.getData().getInt("code") == 2) {
                         String desc = msg.getData().getString("desc");
                         if (isAdded())
-                            diffNotifyShow(2, desc, dialogView);
+                            if (dialogView != null) {
+                                dialogView.setText(desc);
+                            }
+                        diffNotifyShow(0x9, desc, dialogView);
                     } else {
                         if (isAdded())
-                            diffNotifyShow(2, getResources().getString(R.string.akeyalarmNo), dialogView);
+                            if (dialogView != null) {
+                                dialogView.setText(getResources().getString(R.string.akeyalarmNo));
+                            }
+                        diffNotifyShow(0x9, getResources().getString(R.string.akeyalarmNo), dialogView);
                     }
                     break;
                 case REQUEST_CODE_FIRMEUPGRADE://获得固件升级包版本号，和升级包
@@ -1074,7 +1095,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         registReceiverforFirm();
                         doNewVersionDlgShow(msg.getData().getString("versions"), msg.getData().getString("url"));
                     }
-
                     break;
                 case REQUEST_CODE_SPORTDATA_SLEEPDATA:
                     if (msg.getData().getInt("code") == 1) {
@@ -1184,10 +1204,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             rateList.add(rateListData);
         }
         cursor.close();
-        Log.e("wyj", "stop to rate");
         mWorkQueue.execute(new Runnable() {
             @Override
             public void run() {
+                Log.e("wyj", "stop to rate");
                 CommandManager.sendStopRate(mBleEngine);
             }
         });
@@ -1602,11 +1622,19 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
         } else if (message_yuyin == true) {//如果打开语音提醒
             speakOut(context);
-            try {
-                Thread.sleep(1800);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            final Map<String, Object> requestParamsMap = new HashMap<String, Object>();
+            requestParamsMap.put("lan", "zh");
+            requestParamsMap.put("ie", "UTF-8");
+            requestParamsMap.put("spd", 2);
+            requestParamsMap.put("text", context);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                 FileOutputStream fileOutputStream=   CommonTools.postDownTTS(ParameterManager.TTS, requestParamsMap);
+                    Log.d("20161107", tts.toString());
+                }
+            }).start();
+
         }
     }
 

@@ -24,7 +24,7 @@
                 android:background="@color/MainTheme" />
 
             <TextView
-                android:id="@+id/bettrywarn"
+                android:id="@+id/bettrywarnso"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
