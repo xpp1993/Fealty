@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -97,6 +98,7 @@ import dexin.love.band.firmwareupgrade.SuotaManager;
 import dexin.love.band.firmwareupgrade.Uuid;
 import dexin.love.band.manager.DecodeManager;
 import dexin.love.band.manager.ParameterManager;
+import dexin.love.band.manager.PlayerService;
 import dexin.love.band.manager.SPManager;
 import dexin.love.band.manager.SessionHolder;
 import dexin.love.band.utils.AppUtils;
@@ -1228,7 +1230,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         Log.e("json", jsonString);
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"heartRate", "mobile"}, jsonString, userInfo.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_ZHEXIAN, params, null, REQUEST_CODE_RATE, MeFragment.this);
-        if (rateList.size() == 7) {
+        if (rateList.size()==8||rateList.size() > 8) {
             myHandler.postDelayed(delatesqlite, 1000);//清数据
         }
     }
@@ -1602,6 +1604,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             diffNotifyShow(0, getResources().getString(R.string.xinlvabnormal), dialogView);
     }
 
+    PlayerService playerService;
+
     /**
      * 不同的报警方式，震动，声音，弹框，语音
      *
@@ -1627,18 +1631,14 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 
         }
         if (message_yuyin == true) {//如果打开语音提醒
-            speakOut(context);
-//            final Map<String, Object> requestParamsMap = new HashMap<String, Object>();
-//            requestParamsMap.put("lan", "zh");
-//            requestParamsMap.put("ie", "UTF-8");
-//            requestParamsMap.put("spd", 2);
-//            requestParamsMap.put("text", context);
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                 FileOutputStream fileOutputStream=   CommonTools.postDownTTS(ParameterManager.TTS, requestParamsMap);
-//                }
-//            }).start();
+//            speakOut(context);
+            Map<String, Object> requestParamsMap = new HashMap();
+            requestParamsMap.put("lan", "zh");
+            requestParamsMap.put("ie", "UTF-8");
+            requestParamsMap.put("spd", 3);
+            requestParamsMap.put("text", context);
+            playerService = new PlayerService(AppUtils.getBaseContext(), requestParamsMap);
+            playerService.execute();
         }
     }
 

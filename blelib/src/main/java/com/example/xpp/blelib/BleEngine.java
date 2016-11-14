@@ -83,11 +83,11 @@ public class BleEngine {
                     + " -> " + Utils.bytesToHexString(characteristic.getValue())
             );
             CommandManager.decode(mContext, characteristic.getValue());
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }// 在接收数据之后线程Sleep()一段时间，可以提高数据接收的可靠性。
+//            try {
+//                Thread.sleep(50);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }// 在接收数据之后线程Sleep()一段时间，可以提高数据接收的可靠性。
         }
 
         @Override

@@ -130,7 +130,8 @@ public class CommonTools {
     /**
      * POST请求获取数据
      */
-    public static FileOutputStream postDownTTS(String requestUrl, Map<String, Object> requestParamsMap) {
+    public static void postDownTTS(String requestUrl, Map<String, Object> requestParamsMap,File file) {
+       // http://tts.baidu.com/text2audio?lan=zh&ie=UTF-8&spd=2&text=你要转换的文字
         PrintWriter printWriter = null;
         FileOutputStream fileOutputStream = null;
         StringBuffer params = new StringBuffer();
@@ -174,7 +175,7 @@ public class CommonTools {
                 Log.e(TAG, "Post Success!");
                 inputStream = httpURLConnection.getInputStream();
                 if (inputStream != null) {
-                    fileOutputStream = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "tts.audio"));
+                    fileOutputStream = new FileOutputStream(file);
                     byte[] buf = new byte[1024];
                     int ch = -1;
                     while ((ch = inputStream.read(buf)) != -1) {
@@ -191,16 +192,15 @@ public class CommonTools {
                 if (printWriter != null) {
                     printWriter.close();
                 }
-                if (fileOutputStream != null) {
-                    fileOutputStream.close();
-                }
                 if (inputStream != null) {
                     inputStream.close();
+                }
+                if (fileOutputStream != null) {
+                    fileOutputStream.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        return fileOutputStream;
     }
 }
