@@ -21,7 +21,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.BatteryManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -484,6 +483,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         if (delatesqlite != null) {
             myHandler.removeCallbacks(delatesqlite);
         }
+        playerService.cancel(true);
     }
 
     private void showSetPhoneNumberDialog() {
@@ -1179,6 +1179,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private String _id = "1";
 
     private void afterStopRateHandler() {
+        rateTotal = 0;
+        rateNum = 0;
         //讲写入数据库的心率读取出来，执行上传收集到的心率测试数据，上传成功后清空
         com.alibaba.fastjson.JSONObject object = new com.alibaba.fastjson.JSONObject();
         JSONArray jsonArray = new JSONArray();
@@ -1407,8 +1409,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 //1.下载升级包
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.FIRMWAREUPGRADE, null, null, MeFragment.REQUEST_CODE_FIRMEUPGRADE, MeFragment.this);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_STOPRATE)) {//心率停止测试
-                rateTotal = 0;
-                rateNum = 0;
+//                rateTotal = 0;
+//                rateNum = 0;
             }
         }
     };

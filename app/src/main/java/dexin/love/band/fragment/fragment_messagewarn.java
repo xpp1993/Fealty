@@ -62,6 +62,7 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
             public void open() {//如果声音提醒是打开的。把状态写入sp 文件(写一个静态类表示各个开关状态)
                 editor.putBoolean(ParameterManager.MESSAGE_SOUND, true);
                 editor.commit();
+                shark.setState(false);
             }
             @Override
             public void close() {
@@ -74,6 +75,7 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
             public void open() {
                 editor.putBoolean(ParameterManager.MESSAGE_zhend,true);
                 editor.commit();
+                voice.setState(false);
             }
 
             @Override
@@ -88,7 +90,6 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
                 editor.putBoolean(ParameterManager.MESSAGE_dialog,true);
                 editor.commit();
             }
-
             @Override
             public void close() {
                 editor.putBoolean(ParameterManager.MESSAGE_dialog,false);

@@ -1,4 +1,5 @@
 package com.example.xpp.blelib;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -11,9 +12,11 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
@@ -30,6 +33,7 @@ public class BleEngine {
     private BluetoothGattCharacteristic mBluetoothGattCharacteristicListenable;
     private Handler mHandler = new Handler();
     private BluetoothDevice device;
+
     public interface ListScanCallback {
         void onDeviceFound(final List<BluetoothDevice> devices);
     }
@@ -79,8 +83,8 @@ public class BleEngine {
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
             Log.e(TAG, "onCharacteristicChanged " + gatt.getDevice().getName()
-                    + " " + characteristic.getUuid().toString()
-                    + " -> " + Utils.bytesToHexString(characteristic.getValue())
+                            + " " + characteristic.getUuid().toString()
+                            + " -> " + Utils.bytesToHexString(characteristic.getValue())
             );
             CommandManager.decode(mContext, characteristic.getValue());
 //            try {
@@ -214,8 +218,11 @@ public class BleEngine {
     }
 
     public boolean writeCharacteristic(byte[] data) {
-        if (mBluetoothGattCharacteristicWriteable == null || mBluetoothGatt == null)
+        if (mBluetoothGattCharacteristicWriteable == null || mBluetoothGatt == null) {
+            Log.e(TAG, "false");
             return false;
+        }
+        Log.e(TAG, "writeCharacteristic");
         mBluetoothGattCharacteristicWriteable.setValue(data);
         return mBluetoothGatt.writeCharacteristic(mBluetoothGattCharacteristicWriteable);
     }
