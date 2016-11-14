@@ -589,12 +589,13 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
 //                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
 //                    }
 //                });//进入固件升级模式
-                mWorkQueue.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        CommandManager.sendGetElectricity(mBleEngine);
-                    }
-                });
+//                mWorkQueue.execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        CommandManager.sendGetElectricity(mBleEngine);
+//                    }
+//                });
+                CommandManager.sendGetElectricity(mBleEngine);
                 break;
             default:
                 break;
@@ -1204,13 +1205,16 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             rateList.add(rateListData);
         }
         cursor.close();
-        mWorkQueue.execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.e("wyj", "stop to rate");
-                CommandManager.sendStopRate(mBleEngine);
-            }
-        });
+        boolean isRate = preferences.getBoolean(ParameterManager.TEST_RATE, false);//心率测试是否常开
+        if (isRate == false) {
+            mWorkQueue.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Log.e("wyj", "stop to rate");
+                    CommandManager.sendStopRate(mBleEngine);
+                }
+            });
+        }
         map.put(userInfo.getMobile(), rateList);
         object.put("heartRate", jsonArray);
         object.put("mobile", userInfo.getMobile());
@@ -1401,7 +1405,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 //1.下载升级包
                 NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.HOST + ParameterManager.FIRMWAREUPGRADE, null, null, MeFragment.REQUEST_CODE_FIRMEUPGRADE, MeFragment.this);
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_STOPRATE)) {//心率停止测试
-//                isRating = false;
                 rateTotal = 0;
                 rateNum = 0;
             }
@@ -1609,9 +1612,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private void diffNotifyShow(int noId, String context, final BaseView dialogView) {
         if (message_shark == true) {//如果打开震动
             setNotification(noId, Notification.DEFAULT_VIBRATE, context);
-        } else if (message_sound == true) {//如果打开声音
+        }
+        if (message_sound == true) {//如果打开声音
             setNotification(noId, Notification.DEFAULT_SOUND, context);
-        } else if (message_dialog == true) {//如果打开弹窗提醒
+        }
+        if (message_dialog == true) {//如果打开弹窗提醒
             final Button button = dialogView.getButton();
             ThreadPoolUtils.runTaskOnUIThread(new Runnable() {
                 @Override
@@ -1620,21 +1625,20 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 }
             });
 
-        } else if (message_yuyin == true) {//如果打开语音提醒
+        }
+        if (message_yuyin == true) {//如果打开语音提醒
             speakOut(context);
-            final Map<String, Object> requestParamsMap = new HashMap<String, Object>();
-            requestParamsMap.put("lan", "zh");
-            requestParamsMap.put("ie", "UTF-8");
-            requestParamsMap.put("spd", 2);
-            requestParamsMap.put("text", context);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                 FileOutputStream fileOutputStream=   CommonTools.postDownTTS(ParameterManager.TTS, requestParamsMap);
-                    Log.d("20161107", tts.toString());
-                }
-            }).start();
-
+//            final Map<String, Object> requestParamsMap = new HashMap<String, Object>();
+//            requestParamsMap.put("lan", "zh");
+//            requestParamsMap.put("ie", "UTF-8");
+//            requestParamsMap.put("spd", 2);
+//            requestParamsMap.put("text", context);
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                 FileOutputStream fileOutputStream=   CommonTools.postDownTTS(ParameterManager.TTS, requestParamsMap);
+//                }
+//            }).start();
         }
     }
 

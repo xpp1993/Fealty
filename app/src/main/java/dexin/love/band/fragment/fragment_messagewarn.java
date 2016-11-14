@@ -62,16 +62,11 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
             public void open() {//如果声音提醒是打开的。把状态写入sp 文件(写一个静态类表示各个开关状态)
                 editor.putBoolean(ParameterManager.MESSAGE_SOUND, true);
                 editor.commit();
-             //   Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
-                shark.setState(false);
-                dialog.setState(false);
-                yuyin.setState(false);
             }
             @Override
             public void close() {
                 editor.putBoolean(ParameterManager.MESSAGE_SOUND,false);
                 editor.commit();
-              //  Toast.makeText(getActivity(),"取消设置",Toast.LENGTH_SHORT).show();
             }
         });
         shark.setSlideListener(new SlideSwitch.SlideListener() {
@@ -79,35 +74,25 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
             public void open() {
                 editor.putBoolean(ParameterManager.MESSAGE_zhend,true);
                 editor.commit();
-            //    Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
-                voice.setState(false);
-                dialog.setState(false);
-                yuyin.setState(false);
             }
 
             @Override
             public void close() {
                 editor.putBoolean(ParameterManager.MESSAGE_zhend,false);
                 editor.commit();
-             //   Toast.makeText(getActivity(),"取消设置",Toast.LENGTH_SHORT).show();
             }
         });
         dialog.setSlideListener(new SlideSwitch.SlideListener() {
             @Override
             public void open() {
                 editor.putBoolean(ParameterManager.MESSAGE_dialog,true);
-           //     Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
                 editor.commit();
-                voice.setState(false);
-                yuyin.setState(false);
-                shark.setState(false);
             }
 
             @Override
             public void close() {
                 editor.putBoolean(ParameterManager.MESSAGE_dialog,false);
                 editor.commit();
-               // Toast.makeText(getActivity(),"取消设置",Toast.LENGTH_SHORT).show();
             }
         });
        yuyin.setSlideListener(new SlideSwitch.SlideListener() {
@@ -115,17 +100,12 @@ public class fragment_messagewarn extends BaseFragment implements View.OnClickLi
            public void open() {
                editor.putBoolean(ParameterManager.MESSAGE_yuyin, true);
                editor.commit();
-              // Toast.makeText(getActivity(),"设置成功",Toast.LENGTH_SHORT).show();
-               voice.setState(false);
-               dialog.setState(false);
-               shark.setState(false);
            }
 
            @Override
            public void close() {
                editor.putBoolean(ParameterManager.MESSAGE_yuyin,false);
                editor.commit();
-               //Toast.makeText(getActivity(),"取消设置",Toast.LENGTH_SHORT).show();
            }
        });
     }

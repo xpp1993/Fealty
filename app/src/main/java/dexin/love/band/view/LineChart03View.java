@@ -93,13 +93,13 @@ public class LineChart03View extends GraphicalView {
 
     private void chartDataSet() {
         LinkedList<Double> dataSeries2 = new LinkedList<Double>();
-        dataSeries2.add((double) 80);
-        dataSeries2.add((double) 80);
-        dataSeries2.add((double) 80);
-        dataSeries2.add((double) 80);
-        dataSeries2.add((double) 80);
-        dataSeries2.add((double) 80);
-        dataSeries2.add((double) 80);
+//        dataSeries2.add((double) 80);
+//        dataSeries2.add((double) 80);
+//        dataSeries2.add((double) 80);
+//        dataSeries2.add((double) 80);
+//        dataSeries2.add((double) 80);
+//        dataSeries2.add((double) 80);
+//        dataSeries2.add((double) 80);
         LineData lineData2 = new LineData("", dataSeries2, Color.rgb(93, 205, 191));
         lineData2.setDotStyle(XEnum.DotStyle.DOT);
         lineData2.getPlotLine().getDotPaint().setColor(Color.rgb(93, 205, 191));
@@ -109,13 +109,13 @@ public class LineChart03View extends GraphicalView {
 
     private void chartLabels() {
         labels.clear();
-        labels.add("9");
-        labels.add("10");
-        labels.add("11");
-        labels.add("12");
-        labels.add("13");
-        labels.add("14");
-        labels.add("15");
+//        labels.add("9");
+//        labels.add("10");
+//        labels.add("11");
+//        labels.add("12");
+//        labels.add("13");
+//        labels.add("14");
+//        labels.add("15");
     }
 
     @Override

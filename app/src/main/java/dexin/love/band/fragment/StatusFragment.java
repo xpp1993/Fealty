@@ -84,20 +84,12 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
         }
         mJazzy.setTransitionEffect(JazzyViewPager.TransitionEffect.ZoomIn);
         mJazzy.setPageMargin(30);
-
-//        adapter = new HeathMonitoringAdapter(getChildFragmentManager(), mJazzy, fragments, new HeathMonitoringAdapter.BackData() {
-//            @Override
-//            public void callYou(HealthDataFragement healthDataFragement) {
-//                StatusFragment.this.healthDataFragement = healthDataFragement;
-//            }
-//        });
         adapter = new HeathMonitoringAdapter(getChildFragmentManager(), mJazzy, fragments);
         mJazzy.setAdapter(adapter);
         mRegisterReceiver();//注册监听取消绑定用户
         //1.登录进来获得我的页面,初始化
         initFragments();
         //2.网络获取数据 1.运动睡眠数据 2.GPS
-//        Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
         //1.
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_CURRENT_HEART, params, null, REQUEST_CODE_UPDATA_USERIFO_INTERNET, this);
@@ -226,8 +218,6 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                 try {
                     HttpURLConnection connection = CommonTools.getInputStream(url);
                     if (connection == null) {
-//                        m_progressDlg.dismiss();
-//                        ToastUtils.showToastInUIThread("网络错误，下载失败");
                         myHandler.post(new Runnable() {
                             @Override
                             public void run() {

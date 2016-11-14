@@ -84,13 +84,13 @@ public class LineChart03View_left extends GraphicalView {
 
     private void chartLabels() {
         labels.clear();
-        labels.add("9");
-        labels.add("10");
-        labels.add("11");
-        labels.add("12");
-        labels.add("13");
-        labels.add("14");
-        labels.add("15");
+//        labels.add("9");
+//        labels.add("10");
+//        labels.add("11");
+//        labels.add("12");
+//        labels.add("13");
+//        labels.add("14");
+//        labels.add("15");
     }
 
 

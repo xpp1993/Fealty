@@ -127,24 +127,11 @@ public class CommonTools {
         return null;
 
     }
-//    public static int getAndroidSDKVersion() {
-//        int version = 0;
-//        try {
-//            version = Integer.valueOf(android.os.Build.VERSION.SDK);
-//        } catch (NumberFormatException e) {
-//           Log.d("getAndroidSDKVersion",e.toString());
-//        }
-//        return version;
-//    }
-
     /**
      * POST请求获取数据
      */
     public static FileOutputStream postDownTTS(String requestUrl, Map<String, Object> requestParamsMap) {
         PrintWriter printWriter = null;
-//        BufferedReader bufferedReader = null;
-//        // BufferedReader bufferedReader = null;
-//        StringBuffer responseResult = new StringBuffer();
         FileOutputStream fileOutputStream = null;
         StringBuffer params = new StringBuffer();
         HttpURLConnection httpURLConnection = null;
@@ -183,18 +170,19 @@ public class CommonTools {
             int responseCode = httpURLConnection.getResponseCode();
             if (responseCode != 200) {
                 Log.e(TAG, " Error===" + responseCode);
-            } else {
+            } else if (responseCode==200){
                 Log.e(TAG, "Post Success!");
+                inputStream = httpURLConnection.getInputStream();
+                if (inputStream != null) {
+                    fileOutputStream = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "tts.audio"));
+                    byte[] buf = new byte[1024];
+                    int ch = -1;
+                    while ((ch = inputStream.read(buf)) != -1) {
+                        fileOutputStream.write(buf, 0, ch);
+                        fileOutputStream.flush();
+                    }
+                }
             }
-            // 定义BufferedReader输入流来读取URL的ResponseData
-//            bufferedReader = new BufferedReader(new InputStreamReader(
-//                    httpURLConnection.getInputStream()));
-//            String line;
-//            while ((line = bufferedReader.readLine()) != null) {
-//                responseResult.append("/n").append(line);
-//            }
-            inputStream = httpURLConnection.getInputStream();
-            fileOutputStream = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "tts.mp3"));
         } catch (Exception e) {
             Log.e(TAG, "send post request error!" + e);
         } finally {
@@ -209,9 +197,6 @@ public class CommonTools {
                 if (inputStream != null) {
                     inputStream.close();
                 }
-//                if (bufferedReader != null) {
-//                    bufferedReader.close();
-//                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

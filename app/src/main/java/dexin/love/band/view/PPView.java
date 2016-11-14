@@ -45,7 +45,7 @@ public class PPView extends View {
 
     private String firstText = "我";
     // private String secondText = "健康";
-    private String secondText = "80";
+    private String secondText = " ";
     private String thirdText = "实时心率";
     //  private String fountText = "80";
 
@@ -217,7 +217,6 @@ public class PPView extends View {
 //        mPaint.setTypeface(Typeface.DEFAULT_BOLD); //设置字体
 //        textWidth = mPaint.measureText(fountText);   //测量字体宽度，我们需要根据字体的宽度设置在圆环中间
 //        canvas.drawText(fountText, (getWidth() - textWidth) / 2,  (getHeight() + secondTextSize+3*maxHeight + 3*fourthTextSize) / 2, mPaint); //
-
 
     }
 
