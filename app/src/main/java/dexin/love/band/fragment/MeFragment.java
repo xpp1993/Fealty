@@ -483,7 +483,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         if (delatesqlite != null) {
             myHandler.removeCallbacks(delatesqlite);
         }
-        playerService.cancel(true);
+        if (playerService != null)
+            playerService.cancel(true);
     }
 
     private void showSetPhoneNumberDialog() {
@@ -585,19 +586,19 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 EventBus.getDefault().post(new NavFragmentEvent(new Fragment_Shezhi()));
                 break;
             case R.id.relative_about://关于我们
-//                mWorkQueue.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
-//                    }
-//                });//进入固件升级模式
+                mWorkQueue.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
+                    }
+                });//进入固件升级模式
 //                mWorkQueue.execute(new Runnable() {
 //                    @Override
 //                    public void run() {
 //                        CommandManager.sendGetElectricity(mBleEngine);
 //                    }
 //                });
-                CommandManager.sendGetElectricity(mBleEngine);
+                //  CommandManager.sendGetElectricity(mBleEngine);
                 break;
             default:
                 break;
@@ -648,7 +649,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         @Override
                         public void run() {
                             m_progressDlg.dismiss();
-                            Toast.makeText(AppUtils.getBaseContext(), "固件升级包下载成功！", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AppUtils.getBaseContext(), "正在准备固件升级，请耐心等待....", Toast.LENGTH_LONG).show();
                             mWorkQueue.execute(new Runnable() {
                                 @Override
                                 public void run() {
@@ -736,7 +737,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 stopDeviceScan();
             }
         }, 7000);
-
     }
 
     private void stopDeviceScan() {
@@ -765,7 +765,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         bluetoothManager = new SuotaManager(getActivity(), MeFragment.this);
         bluetoothManager.setDevice(device);
         initFileList();
-        m_progressDlg.show();
     }
 
     private void initFileList() {
@@ -775,6 +774,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         try {
             bluetoothManager.setFile(dexin.love.band.firmwareupgrade.File.getByFileName(filename));
             initParameterSettings();
+            m_progressDlg.show();
             startUpdate();
         } catch (IOException e) {
             e.printStackTrace();
@@ -1232,7 +1232,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         Log.e("json", jsonString);
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"heartRate", "mobile"}, jsonString, userInfo.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.UPLOAD_ZHEXIAN, params, null, REQUEST_CODE_RATE, MeFragment.this);
-        if (rateList.size()==8||rateList.size() > 8) {
+        if (rateList.size() == 8 || rateList.size() > 8) {
             myHandler.postDelayed(delatesqlite, 1000);//清数据
         }
     }

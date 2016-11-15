@@ -32,7 +32,8 @@ public class BleEngine {
     private BluetoothGattCharacteristic mBluetoothGattCharacteristicWriteable;
     private BluetoothGattCharacteristic mBluetoothGattCharacteristicListenable;
     private Handler mHandler = new Handler();
-    private BluetoothDevice device;
+    //private BluetoothDevice device;
+    private String address;
 
     public interface ListScanCallback {
         void onDeviceFound(final List<BluetoothDevice> devices);
@@ -163,6 +164,7 @@ public class BleEngine {
     }
 
     public void connect(final String address) {
+        this.address = address;
         if (mBluetoothAdapter == null)
             BroadcastManager.sendBroadcast4ConnectState(mContext, GlobalValues.BROADCAST_INTENT_CONNECT_STATE_CHANGED, true);
         mBluetoothAdapter.stopLeScan(null);
@@ -219,7 +221,10 @@ public class BleEngine {
 
     public boolean writeCharacteristic(byte[] data) {
         if (mBluetoothGattCharacteristicWriteable == null || mBluetoothGatt == null) {
-            Log.e(TAG, "false");
+            if (mBluetoothGatt == null) {
+//                connect(address);
+                Log.e(TAG, "false");
+            }
             return false;
         }
         Log.e(TAG, "writeCharacteristic");
