@@ -1327,10 +1327,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     //发送心率测试开始
                     myHandler.postDelayed(runnable3, 1000 * 60 * rate_int);
                 } else {
-                    progressDialog.dismiss();
+                    if (progressDialog != null)
+                        progressDialog.dismiss();
                     ToastUtils.showToastInUIThread("与手环失去连接！");
                     bluee_iv_left.setState(false);
-                    dialog.dismiss();
+                    if (dialog != null)
+                        dialog.dismiss();
                     if (mBleEngine != null) {
                         mBleEngine.close();
                     }
