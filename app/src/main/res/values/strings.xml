@@ -31,7 +31,7 @@
     <string name="sleeplow">您睡眠时的心率数据偏低，请注意！</string>
     <string name="sleephight">您睡眠时的心率数据偏高，请注意！</string>
     <string name="betty">您的手环电量不足，请及时充电！</string>
-    <string name="phonebetty">您的手机量不足，请及时充电！</string>
+    <string name="phonebetty">您的手机电量不足，请及时充电！</string>
     <string name="disconnected">连接错误，请重新连接手环！</string>
     <string name="akeyalarm">您的求助信息已发出！</string>
     <string name="akeyalarmNoNet">网络错误，您的求助信息发送失败！</string>
