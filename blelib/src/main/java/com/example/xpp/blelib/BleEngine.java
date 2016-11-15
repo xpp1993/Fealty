@@ -222,6 +222,7 @@ public class BleEngine {
     public boolean writeCharacteristic(byte[] data) {
         if (mBluetoothGattCharacteristicWriteable == null || mBluetoothGatt == null) {
             if (mBluetoothGatt == null) {
+                if (address!=null||!address.equals(""))
                 connect(address);
                 Log.e(TAG, "false");
             }
