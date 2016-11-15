@@ -286,10 +286,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener,
             }
         }
     }
-    @Override
-    public boolean onBack() {
-        return false;
-    }
 
     //防止登录页面重叠
     @Override

@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import de.greenrobot.event.EventBus;
 import dexin.love.band.base.BaseFragment;
 import dexin.love.band.event.NavFragmentEvent;
+import dexin.love.band.fragment.LoginFragment;
 import dexin.love.band.fragment.SplashFagment;
 
 /**
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         tag = baseFragment.getMTag();
         mFragments.add(tag);
         // fm.beginTransaction().add(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();
-        fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).addToBackStack(tag).commitAllowingStateLoss();
+        fm.beginTransaction().replace(R.id.main_container, baseFragment, tag).commitAllowingStateLoss();
     }
 
     private void setTranslucentStatus(boolean on) {
@@ -173,30 +174,34 @@ public class MainActivity extends AppCompatActivity {
 //            ft.setCustomAnimations(R.anim.slide_left_enter, 0, 0,R.anim.slide_right_exit);
             // 4 添加Fragment
             //   ft.add(R.id.main_container, fragment, tag);
-            ft.replace(R.id.main_container, fragment, tag);
+
             if (bundle != null) {
                 fragment.setArguments(bundle);
             }
+            ft.replace(R.id.main_container, fragment, tag);
             // 5 隐藏当前或者finish的Fragment
-            BaseFragment currFragment = getCurrentFrament();
-            if (currFragment != null) {
-                if (currFragment.finish()) {
-                    mFragments.pollLast();
-                   // fm.popBackStack();//
-                    fm.popBackStackImmediate();
-//                    //由于当前的Fragment，被弹出去，需要当前的Fragment已经变化角色，需要重新隐藏
-                    currFragment = (BaseFragment) getCurrentFrament();
-                    if (currFragment != null) {
-                        ft.hide(currFragment);
-                    }
-                } else {
-                    ft.hide(currFragment);// hide
-                }
-            }
+//            BaseFragment currFragment = getCurrentFrament();
+//            if (currFragment != null) {
+//                if (currFragment.finish()) {
+//                    mFragments.pollLast();
+//                   // fm.popBackStack();//
+////                    fm.popBackStackImmediate();
+////                    //由于当前的Fragment，被弹出去，需要当前的Fragment已经变化角色，需要重新隐藏
+////                    currFragment = (BaseFragment) getCurrentFrament();
+////                    if (currFragment != null) {
+////                        ft.hide(currFragment);
+////                    }
+//                } else {
+//                    ft.hide(currFragment);// hide
+//                }
+//            }
             // 6 把tag 添加到mFragments
             mFragments.add(tag);
             // 7 添加到返回栈
-            ft.addToBackStack(tag);
+            if(!(fragment instanceof LoginFragment)){
+                ft.addToBackStack(tag);
+            }
+
             // 8 添加事务
             //  ft.commit();
             ft.commitAllowingStateLoss();

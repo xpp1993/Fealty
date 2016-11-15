@@ -952,7 +952,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 dialogView = new DialogViewKeyAlarm(AppUtils.getBaseContext());
             }
             if (isAdded())
-                dialogView.setText(getResources().getString(R.string.akeyalarmNoNet));
+                if (dialogView != null)
+                    dialogView.setText(getResources().getString(R.string.akeyalarmNoNet));
             diffNotifyShow(0x9, getResources().getString(R.string.akeyalarmNoNet), dialogView);
             ToastUtils.showToastInUIThread(getResources().getString(R.string.akeyalarmNoNet));
         }
@@ -1630,7 +1631,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     showDialogWarn(dialogView, button);
                 }
             });
-
         }
         if (message_yuyin == true) {//如果打开语音提醒
 //            speakOut(context);
