@@ -41,8 +41,8 @@ public class Callback extends BluetoothGattCallback {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    scannerFragment.bluee_iv_left.setState(true);
                     scannerFragment.isFirm=false;
+                    scannerFragment.bluee_iv_left.setState(true);
                 }
             });
         }

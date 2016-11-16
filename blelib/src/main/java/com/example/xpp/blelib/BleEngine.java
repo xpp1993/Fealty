@@ -84,8 +84,8 @@ public class BleEngine {
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
             Log.e(TAG, "onCharacteristicChanged " + gatt.getDevice().getName()
-                    + " " + characteristic.getUuid().toString()
-                    + " -> " + Utils.bytesToHexString(characteristic.getValue())
+                            + " " + characteristic.getUuid().toString()
+                            + " -> " + Utils.bytesToHexString(characteristic.getValue())
             );
             CommandManager.decode(mContext, characteristic.getValue());
 //            try {
@@ -221,7 +221,8 @@ public class BleEngine {
 
     public boolean writeCharacteristic(byte[] data) {
         if (mBluetoothGattCharacteristicWriteable == null || mBluetoothGatt == null) {
-           close();
+            disconnect();
+            close();
             if (address != null && !"".equals(address))
                 connect(address);
             Log.e(TAG, address);

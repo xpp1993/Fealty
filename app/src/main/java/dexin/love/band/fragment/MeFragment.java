@@ -205,7 +205,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private ListView listView_device_list;
     private SharedPreferences.Editor editor;
     //    private boolean isRating = false;
-    private boolean isOpenTest = false;
+   // private boolean isOpenTest = false;
     private boolean CONNECTE_STATUS = true;
     private int rateTotal = 0;//心率值的总数
     private int rateNum = 0;//心率的个数
@@ -339,6 +339,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             @Override
             public void close() {
                 if (mBleEngine != null) {
+                    mBleEngine.disconnect();
                     mBleEngine.close();
                 }
             }
@@ -1380,7 +1381,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 rateTotal += rate;
                 rateNum++;
                 Log.e("20161104", rateTotal + "," + rateNum);
-                if (isOpenTest == false) {
+//                if (isOpenTest == false) {
                     if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
                         Log.e("lastSysTime", lastSysTime + "," + ParameterManager.Time + "," + System.currentTimeMillis());
                         lastSysTime = System.currentTimeMillis();
@@ -1401,7 +1402,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                         message.setData(rate_bundle);
                         myHandler.sendMessage(message);
                     }
-                }
+//                }
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_BAND_INFO)) {//获取的固件版本和固件MAC地址，和手环穿戴状态
                 Bundle bundle = intent.getExtras();
                 version = bundle.getString(GlobalValues.NAME_VERSION);
@@ -1641,6 +1642,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             requestParamsMap.put("ie", "UTF-8");
             requestParamsMap.put("spd", 3);
             requestParamsMap.put("text", context);
+            if (playerService!=null)
+                playerService.cancel(true);
             playerService = new PlayerService(AppUtils.getBaseContext(), requestParamsMap);
             playerService.execute();
         }

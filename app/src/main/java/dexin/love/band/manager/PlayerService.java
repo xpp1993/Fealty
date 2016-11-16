@@ -21,7 +21,7 @@ public class PlayerService extends AsyncTask<Void,Void,Void> {
 
     public PlayerService(Context context, Map<String, Object> requestParamsMap) {
         this.requestParamsMap = requestParamsMap;
-        this.file = new File(Environment.getExternalStorageDirectory(), "tts.mp3");
+        this.file = new File(Environment.getExternalStorageDirectory(), "tts.audio");
         this.mContext = context;
     }
 
