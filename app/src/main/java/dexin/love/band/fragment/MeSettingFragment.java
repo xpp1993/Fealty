@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -47,6 +48,7 @@ import dexin.love.band.bean.UserInfo;
 import dexin.love.band.event.NavFragmentEvent;
 import dexin.love.band.manager.DecodeManager;
 import dexin.love.band.manager.ParameterManager;
+import dexin.love.band.manager.SPManager;
 import dexin.love.band.manager.SessionHolder;
 import dexin.love.band.ui.wheel.ScreenInfo;
 import dexin.love.band.ui.wheel.WheelMain;
@@ -107,7 +109,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
     @ViewInject(R.id.fragment_mine_rl_about)
     private RelativeLayout see_user;
     private UserInfo userInfo;
-
+    public SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
     @Override
     protected void init() {
         userInfo = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
@@ -115,6 +118,10 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
         bar_view_left_line.setVisibility(View.VISIBLE);
         bar_tv_title_left.setVisibility(View.VISIBLE);
         bar_tv_title_left.setText("我的资料设置");
+        //1.获得sharedPreference对象,SharedPrefences只能放基础数据类型，不能放自定义数据类型。
+        preferences = SPManager.getSharedPreferences(AppUtils.getBaseContext());
+        //2. 获得编辑器:当将数据存储到SharedPrefences对象中时，需要获得编辑器。如果取出则不需要。
+        editor = preferences.edit();
         initPersonalDataShow();
 
     }
@@ -291,6 +298,8 @@ public class MeSettingFragment extends BaseFragment implements View.OnClickListe
                     FragmentManager.BackStackEntry backstatck = getActivity().getSupportFragmentManager().getBackStackEntryAt(i);
                     Log.d("Fragment", backstatck.getName());
                 }
+                editor.putLong(ParameterManager.LOGIN_TIME,0);
+                editor.commit();
                 getActivity().getSupportFragmentManager().popBackStack(null, 1);
                 EventBus.getDefault().post(new NavFragmentEvent(new LoginFragment()));
                 break;
