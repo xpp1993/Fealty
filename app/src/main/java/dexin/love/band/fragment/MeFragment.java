@@ -1640,7 +1640,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             Map<String, Object> requestParamsMap = new HashMap();
             requestParamsMap.put("lan", "zh");
             requestParamsMap.put("ie", "UTF-8");
-            requestParamsMap.put("spd", 3);
+            requestParamsMap.put("spd", 5);
             requestParamsMap.put("text", context);
             if (playerService!=null)
                 playerService.cancel(true);
