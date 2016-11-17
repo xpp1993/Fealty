@@ -21,6 +21,7 @@ import java.util.Queue;
 import dexin.love.band.fragment.MeFragment;
 import dexin.love.band.manager.ParameterManager;
 import dexin.love.band.utils.ThreadPoolUtils;
+import dexin.love.band.utils.ToastUtils;
 
 /**
  * Created by wouter on 6-11-14.
@@ -341,6 +342,7 @@ public abstract class BluetoothManager {
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         sendRebootSignal();
+                        ToastUtils.showToastInUIThread("手环正在重启，请耐心等待！");
                     }
                 })
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {

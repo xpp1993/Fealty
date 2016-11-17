@@ -1,6 +1,7 @@
 package dexin.love.band.fragment;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -56,6 +57,7 @@ public class UserDetailInfo extends BaseFragment implements View.OnClickListener
     private ArrayList<UserInfo> list;
     public static final String TAG = UserDetailInfo.class.getSimpleName();
     UserInfo userInfo;
+    private ProgressDialog progressDialog;
     @Override
     protected void init() {
         EventBus.getDefault().register(this);
@@ -69,6 +71,9 @@ public class UserDetailInfo extends BaseFragment implements View.OnClickListener
         listView.setAdapter(adapter);
         //网络请求数据
        userInfo = ContextUtils.getObjFromSp(AppUtils.getBaseContext(), "userInfo");
+        progressDialog=new ProgressDialog(getActivity());
+        progressDialog.setMessage("正在玩命加载，莫急啊");
+        progressDialog.show();
         //   Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, SessionHolder.user.getMobile());
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.SELECT_USER_BINDED, params, null, REQUEST_CODE_USERINFO_BINDED, this);
@@ -138,7 +143,7 @@ public class UserDetailInfo extends BaseFragment implements View.OnClickListener
 
     @Override
     public void onRequestFail(int requestCode, int errorNo) {
-        ToastUtils.showToastInUIThread("服务器返回错误");
+        ToastUtils.showToastInUIThread("网络错误，加载失败");
     }
 
     /**
@@ -178,6 +183,8 @@ public class UserDetailInfo extends BaseFragment implements View.OnClickListener
                         list = (ArrayList<UserInfo>) data.getSerializable("userMsg_list");
                         adapter.addData(list);
                     }
+                    progressDialog.dismiss();
+                    ToastUtils.showToastInUIThread("亲没有绑定他人哦~");
                     break;
                 case REQUEST_CODE_REJECT_BINDED:
                     if (data.getInt("code") == 1) {//解除绑定成功

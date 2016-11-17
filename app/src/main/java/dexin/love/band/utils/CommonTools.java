@@ -127,11 +127,12 @@ public class CommonTools {
         return null;
 
     }
+
     /**
      * POST请求获取数据
      */
-    public static void postDownTTS(String requestUrl, Map<String, Object> requestParamsMap,File file) {
-       // http://tts.baidu.com/text2audio?lan=zh&ie=UTF-8&spd=2&text=你要转换的文字
+    public static boolean postDownTTS(String requestUrl, Map<String, Object> requestParamsMap, File file) {
+        // http://tts.baidu.com/text2audio?lan=zh&ie=UTF-8&spd=2&text=你要转换的文字
         PrintWriter printWriter = null;
         FileOutputStream fileOutputStream = null;
         StringBuffer params = new StringBuffer();
@@ -171,7 +172,7 @@ public class CommonTools {
             int responseCode = httpURLConnection.getResponseCode();
             if (responseCode != 200) {
                 Log.e(TAG, " Error===" + responseCode);
-            } else if (responseCode==200){
+            } else if (responseCode == 200) {
                 Log.e(TAG, "Post Success!");
                 inputStream = httpURLConnection.getInputStream();
                 if (inputStream != null) {
@@ -182,6 +183,7 @@ public class CommonTools {
                         fileOutputStream.write(buf, 0, ch);
                         fileOutputStream.flush();
                     }
+                    return true;
                 }
             }
         } catch (Exception e) {
@@ -202,5 +204,7 @@ public class CommonTools {
                 e.printStackTrace();
             }
         }
+        return false;
     }
+
 }
