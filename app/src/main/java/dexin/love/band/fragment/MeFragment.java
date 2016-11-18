@@ -10,18 +10,21 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
@@ -205,11 +208,27 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
     private ListView listView_device_list;
     private SharedPreferences.Editor editor;
     //    private boolean isRating = false;
-   // private boolean isOpenTest = false;
+    // private boolean isOpenTest = false;
     private boolean CONNECTE_STATUS = true;
     private int rateTotal = 0;//心率值的总数
     private int rateNum = 0;//心率的个数
     public boolean isFirm = false;//是否处于升级模式
+
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName,
+                                       IBinder service) {
+            mBleEngine = ((BleEngine.LocalBinder) service)
+                    .getService(AppUtils.getBaseContext());
+            mBleEngine.initialize();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBleEngine = null;
+        }
+    };
 
     @Override
     protected void init() {
@@ -255,8 +274,10 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         initPersonalDataShow();
         Map<String, String> params = CommonTools.getParameterMap(new String[]{"mobile"}, userInfo.getMobile());
         NetWorkAccessTools.getInstance(AppUtils.getBaseContext()).postAsyn(ParameterManager.GET_USER_BYMOBILE, params, null, MeFragment.REQUEST_USER_BYMIBILE, this);
-        mBleEngine = new BleEngine(getActivity());
-        mBleEngine.initialize();
+//        mBleEngine = new BleEngine(getActivity());
+//        mBleEngine.initialize();
+        Intent gattServiceIntent = new Intent(getActivity(), BleEngine.class);//20161118 xpp modify
+        getActivity().bindService(gattServiceIntent, mServiceConnection, getActivity().BIND_AUTO_CREATE);//20161118 xpp modify
         mRegisterReceiver();
         xinlvhelper = XinLvSqliteHelper.getInstance(AppUtils.getBaseContext());
         xinlvdb = xinlvhelper.getReadableDatabase();
@@ -314,7 +335,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         bluee_iv_left.setSlideListener(new SlideSwitch.SlideListener() {
             @Override
             public void open() {
-                if (mBleEngine.enableBle()) {
+                if (mBleEngine!=null&&mBleEngine.enableBle()) {
                     progressDialog.show();
                     mBleEngine.scanBleDevice(true, 5000, new BleEngine.ListScanCallback() {
                         @Override
@@ -486,6 +507,8 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         }
         if (playerService != null)
             playerService.cancel(true);
+        getActivity().unbindService(mServiceConnection);
+        mBleEngine = null;
     }
 
     private void showSetPhoneNumberDialog() {
@@ -1382,26 +1405,26 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 rateNum++;
                 Log.e("20161104", rateTotal + "," + rateNum);
 //                if (isOpenTest == false) {
-                    if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
-                        Log.e("lastSysTime", lastSysTime + "," + ParameterManager.Time + "," + System.currentTimeMillis());
-                        lastSysTime = System.currentTimeMillis();
-                        //将心率数据发给首页
-                        Intent intent_health = new Intent();
-                        Log.e("20161104", rateTotal + "," + rateNum);
-                        intent_health.putExtra("tempRate", rateTotal / rateNum);
-                        intent_health.setAction(HealthDataFragement.RATE_CHANGED);
-                        if (isAdded())
-                            getActivity().sendBroadcast(intent_health);
-                        //把心率测试数据写入数据库
-                        Bundle rate_bundle = new Bundle();
-                        rate_bundle.putString("time", rateTime);
-                        rate_bundle.putInt("rate", rateTotal / rateNum);
-                        rate_bundle.putInt("status", status);
-                        Message message = Message.obtain();
-                        message.what = UPDATA_REAL_RATE_MSG;
-                        message.setData(rate_bundle);
-                        myHandler.sendMessage(message);
-                    }
+                if (lastSysTime + ParameterManager.Time < System.currentTimeMillis()) {//如果测试时间超过30秒
+                    Log.e("lastSysTime", lastSysTime + "," + ParameterManager.Time + "," + System.currentTimeMillis());
+                    lastSysTime = System.currentTimeMillis();
+                    //将心率数据发给首页
+                    Intent intent_health = new Intent();
+                    Log.e("20161104", rateTotal + "," + rateNum);
+                    intent_health.putExtra("tempRate", rateTotal / rateNum);
+                    intent_health.setAction(HealthDataFragement.RATE_CHANGED);
+                    if (isAdded())
+                        getActivity().sendBroadcast(intent_health);
+                    //把心率测试数据写入数据库
+                    Bundle rate_bundle = new Bundle();
+                    rate_bundle.putString("time", rateTime);
+                    rate_bundle.putInt("rate", rateTotal / rateNum);
+                    rate_bundle.putInt("status", status);
+                    Message message = Message.obtain();
+                    message.what = UPDATA_REAL_RATE_MSG;
+                    message.setData(rate_bundle);
+                    myHandler.sendMessage(message);
+                }
 //                }
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_BAND_INFO)) {//获取的固件版本和固件MAC地址，和手环穿戴状态
                 Bundle bundle = intent.getExtras();
@@ -1642,7 +1665,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             requestParamsMap.put("ie", "UTF-8");
             requestParamsMap.put("spd", 5);
             requestParamsMap.put("text", context);
-            if (playerService!=null)
+            if (playerService != null)
                 playerService.cancel(true);
             playerService = new PlayerService(AppUtils.getBaseContext(), requestParamsMap);
             playerService.execute();

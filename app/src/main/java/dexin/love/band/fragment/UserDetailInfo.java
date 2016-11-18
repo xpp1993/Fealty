@@ -182,9 +182,10 @@ public class UserDetailInfo extends BaseFragment implements View.OnClickListener
                     if (data.getInt("code") == 1) {//获得list，放入adapter
                         list = (ArrayList<UserInfo>) data.getSerializable("userMsg_list");
                         adapter.addData(list);
+                    }else{
+                        ToastUtils.showToastInUIThread("亲没有绑定他人哦~");
                     }
                     progressDialog.dismiss();
-                    ToastUtils.showToastInUIThread("亲没有绑定他人哦~");
                     break;
                 case REQUEST_CODE_REJECT_BINDED:
                     if (data.getInt("code") == 1) {//解除绑定成功

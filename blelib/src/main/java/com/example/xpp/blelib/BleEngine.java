@@ -1,5 +1,6 @@
 package com.example.xpp.blelib;
 
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -10,7 +11,11 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -21,7 +26,7 @@ import java.util.UUID;
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
  */
-public class BleEngine {
+public class BleEngine extends Service {
     private final static String TAG = BleEngine.class.getSimpleName();
     private List<BluetoothDevice> mBluetoothDevices = new ArrayList<>();
     private BluetoothManager mBluetoothManager;
@@ -35,15 +40,47 @@ public class BleEngine {
     //private BluetoothDevice device;
     private String address;
 
+    /**
+     * 2016 11 18 xpp 把此类改为Service
+     **/
+    public class LocalBinder extends Binder {
+        public BleEngine getService(Context context) {
+            mContext = context;
+            return BleEngine.this;
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        // After using a given device, you should make sure that BluetoothGatt.close() is called
+        // such that resources are cleaned up properly.  In this particular example, close() is
+        // invoked when the UI is disconnected from the Service.
+        /**
+         * 使用一个给定的设备后,你应该确保BluetoothGatt.close(),这样资源清理干净。在这个特殊的例子中,close()调用UI时断开服务。
+         */
+        close();
+        return super.onUnbind(intent);
+    }
+
+    private final IBinder mBinder = new LocalBinder();
+    //    public BleEngine(Context c) {
+//        mContext = c;
+//    }
+
+    /**
+     * 2016 11 18 xpp 把此类改为Service
+     **/
     public interface ListScanCallback {
         void onDeviceFound(final List<BluetoothDevice> devices);
     }
 
     private Context mContext;
 
-    public BleEngine(Context c) {
-        mContext = c;
-    }
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
@@ -88,11 +125,11 @@ public class BleEngine {
                             + " -> " + Utils.bytesToHexString(characteristic.getValue())
             );
             CommandManager.decode(mContext, characteristic.getValue());
-//            try {
-//                Thread.sleep(50);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }// 在接收数据之后线程Sleep()一段时间，可以提高数据接收的可靠性。
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }// 在接收数据之后线程Sleep()一段时间，可以提高数据接收的可靠性。
         }
 
         @Override

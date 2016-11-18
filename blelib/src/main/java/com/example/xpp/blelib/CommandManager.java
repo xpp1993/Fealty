@@ -77,7 +77,7 @@ public class CommandManager {
                     BroadcastManager.sendBroadcast4SleepQuality(context, GlobalValues.BROADCAST_INTENT_SLEEPQ, lightSleepTime, deepSleepTime);
                 }
             };
-            timer.schedule(task, 2000);
+            timer.schedule(task, 3000);
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEPNO)) {
             Log.e(TAG, "没有睡眠数据！");
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTART)) {//心率测试回复数据
