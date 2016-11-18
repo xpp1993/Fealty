@@ -20,10 +20,10 @@ public class ParameterManager {
     public static final String MESSAGE_zhend = "message_zhend"; //保存在sp文件中消息提醒中震动提醒是否打开的key值
     public static final String MESSAGE_yuyin = "message_yuyin"; //保存在sp文件中消息提醒中语音提醒是否打开的key值
     public static final String MESSAGE_dialog = "message_tanc"; //保存在sp文件中消息提醒中弹窗提醒是否打开的key值
-    public static final String BAOJIN_SOUND = "baojin_sound"; //保存在sp文件中消息提醒中声音提醒是否打开的key值
-    public static final String BAOJIN_zhend = "baojin_zhend"; //保存在sp文件中消息提醒中震动提醒是否打开的key值
-    public static final String BAOJIN_yuyin = "baojin_yuyin"; //保存在sp文件中消息提醒中语音提醒是否打开的key值
-    public static final String BAOJIN_dialog = "baojin_tanc"; //保存在sp文件中消息提醒中弹窗提醒是否打开的key值
+//    public static final String BAOJIN_SOUND = "baojin_sound"; //保存在sp文件中消息提醒中声音提醒是否打开的key值
+//    public static final String BAOJIN_zhend = "baojin_zhend"; //保存在sp文件中消息提醒中震动提醒是否打开的key值
+//    public static final String BAOJIN_yuyin = "baojin_yuyin"; //保存在sp文件中消息提醒中语音提醒是否打开的key值
+//    public static final String BAOJIN_dialog = "baojin_tanc"; //保存在sp文件中消息提醒中弹窗提醒是否打开的key值
     public static final String LOGIN_TIME = "login_time"; //保存在sp文件中消息提醒中弹窗提醒是否打开的key值
     public static final String TEST_RATE = "TEST_RATE"; //保存在sp文件中
        public static final String BAND_ADRRESS= "band_address";
@@ -34,7 +34,7 @@ public class ParameterManager {
     public static final String SESSION_CACHE_SP_NAME = "dexin_session_cache";//sp文件名称
     public static final int TOTAL_ROCK_TIME = 60;//计时器总时长
      public static final String FIRSTRATE_TIME = "06:28:15";//心率测试获取的第一个心率值得时间
-    public static final String Local_HOST = "http://192.168.8.133:8080/";//本地服务器
+   // public static final String Local_HOST = "http://192.168.8.133:8080/";//本地服务器
     //public static final String HOST = "http://120.76.27.233:8080/";//外网服务器
     public static final String HOST = "http://139.129.217.190:8080/";//外网服务器
     public static final String SOS = "cuffapi/user/send_sms_sos";

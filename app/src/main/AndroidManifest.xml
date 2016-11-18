@@ -68,6 +68,7 @@
         android:icon="@mipmap/xiaoxin"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:persistent="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:replace="android:icon, android:theme">
         <!-- Required SDK 核心功能-->
@@ -197,7 +198,11 @@
                 <action android:name="android.intent.action.BLUETOOTH_GATT_UPDATE" />
             </intent-filter>
         </receiver>
-
+        <receiver android:name=".manager.StartReceiver">
+            <intent-filter >
+                <action android:name="install_and_start"/>
+            </intent-filter>
+        </receiver>
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"

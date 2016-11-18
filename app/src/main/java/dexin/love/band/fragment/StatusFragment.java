@@ -1,6 +1,8 @@
 package dexin.love.band.fragment;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -45,6 +47,7 @@ import dexin.love.band.bean.UserInfo;
 import dexin.love.band.manager.DecodeManager;
 import dexin.love.band.manager.ParameterManager;
 import dexin.love.band.manager.SPManager;
+import dexin.love.band.manager.StartReceiver;
 import dexin.love.band.utils.AppUtils;
 import dexin.love.band.utils.CommonTools;
 import dexin.love.band.utils.ContextUtils;
@@ -269,11 +272,19 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
             @Override
             public void run() {
                 m_progressDlg.dismiss();
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.fromFile(new File(
-                        Environment.getExternalStorageDirectory(),
+                //主要就是通过,安装程序之前,启动一个定时任务,任务发送一个广播,广播收到之后,启动程序
+                Intent ite = new Intent(getActivity(), StartReceiver.class);
+                ite.setAction("install_and_start");
+                PendingIntent SENDER = PendingIntent.getBroadcast(getActivity(), 0, ite,
+                        PendingIntent.FLAG_CANCEL_CURRENT);
+                AlarmManager ALARM = (AlarmManager) getActivity().getSystemService(getActivity().ALARM_SERVICE);
+                ALARM.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000,
+                        SENDER);
+                 Intent intent = new Intent(Intent.ACTION_VIEW);
+                 intent.setDataAndType(Uri.fromFile(new File(
+                       Environment.getExternalStorageDirectory(),
                         ParameterManager.APPLICATION_NAME)), "application/vnd.android.package-archive");
-                startActivity(intent);
+               startActivity(intent);
             }
         });
     }
