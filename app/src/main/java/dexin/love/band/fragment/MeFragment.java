@@ -281,10 +281,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         mRegisterReceiver();
         xinlvhelper = XinLvSqliteHelper.getInstance(AppUtils.getBaseContext());
         xinlvdb = xinlvhelper.getReadableDatabase();
+        xinlvdb.delete("xinlv", null, null);
         mVibrator = ((BaseApplication) AppUtils.getBaseContext()).mVibrator;
         notificationManager = ((BaseApplication) AppUtils.getBaseContext()).notificationManager;
         tts = new TextToSpeech(AppUtils.getBaseContext(), this);
         sleepData = new SleepData();
+
     }
 
     /**
