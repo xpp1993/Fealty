@@ -18,19 +18,10 @@ import net.tsz.afinal.http.AjaxParams;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import de.hdodenhof.circleimageview.CircleImageView;
-
 public class NetWorkAccessTools {
     private static final int BITMAP_MAX_SIZE = 60;
 
