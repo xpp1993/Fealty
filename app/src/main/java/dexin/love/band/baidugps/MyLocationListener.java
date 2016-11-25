@@ -16,12 +16,18 @@ import com.baidu.mapapi.search.geocode.GeoCoder;
 import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeOption;
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
+import com.example.xpp.blelib.BroadcastManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Map;
+
 import dexin.love.band.manager.DecodeManager;
+import dexin.love.band.manager.ParameterManager;
+import dexin.love.band.manager.SessionHolder;
 import dexin.love.band.utils.AppUtils;
+import dexin.love.band.utils.CommonTools;
 import dexin.love.band.utils.MySqliteHelper;
 import dexin.love.band.utils.NetWorkAccessTools;
 
@@ -37,14 +43,14 @@ public class MyLocationListener implements BDLocationListener, NetWorkAccessTool
     private MySqliteHelper helper=new MySqliteHelper(AppUtils.getBaseContext());
     private SQLiteDatabase db=helper.getReadableDatabase();
     public static final int GPS_UPLOAD_CODE = 0x21;
-   // GeoCoder geoCoder = GeoCoder.newInstance();
+    private static final String TAG =  MyLocationListener.class.getSimpleName();
     public MyLocationListener(CallBack mCallBack) {
         this.mCallBack = mCallBack;
     }
 
     @Override
     public void onReceiveLocation(BDLocation location) {
-        Log.e("sb", "开始监听定位" + location);
+        Log.e(TAG, "开始监听定位" + location);
         if (null != location && location.getLocType() != BDLocation.TypeServerError) {
             StringBuffer sb = new StringBuffer(256);
             //获取经纬度
