@@ -612,19 +612,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 EventBus.getDefault().post(new NavFragmentEvent(new Fragment_Shezhi()));
                 break;
             case R.id.relative_about://关于我们
-//                mWorkQueue.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        CommandManager.sendStartFirmWareUpgrade(mBleEngine);
-//                    }
-//                });//进入固件升级模式
                 mWorkQueue.execute(new Runnable() {
                     @Override
                     public void run() {
                         CommandManager.sendGetElectricity(mBleEngine);
                     }
                 });
-                //  CommandManager.sendGetElectricity(mBleEngine);
                 break;
             default:
                 break;
@@ -962,9 +955,6 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     ToastUtils.showToastInUIThread("服务器异常！");
                 }
                 break;
-//            case REQUEST_TTS:
-//
-//                break;
             default:
                 break;
         }
