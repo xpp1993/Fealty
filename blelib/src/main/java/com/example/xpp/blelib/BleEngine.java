@@ -142,7 +142,6 @@ public class BleEngine extends Service {
 
     /**
      * Initializes a reference to the local Bluetooth adapter.
-     *
      * @return Return true if the initialization is successful.
      */
     public boolean initialize() {
@@ -241,28 +240,8 @@ public class BleEngine extends Service {
         mBluetoothGatt = null;
     }
 
-    /**
-     * Request a read on a given {@code BluetoothGattCharacteristic}. The read result is reported
-     * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int)}
-     * callback.
-     *
-     * @param characteristic The characteristic to read from.
-     */
-    public boolean readCharacteristic(BluetoothGattCharacteristic characteristic) {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
-            return false;
-        }
-        return mBluetoothGatt.readCharacteristic(characteristic);
-    }
-
     public boolean writeCharacteristic(byte[] data) {
         if (mBluetoothGattCharacteristicWriteable == null || mBluetoothGatt == null) {
-            disconnect();
-            close();
-            if (address != null && !"".equals(address))
-                connect(address);
-            Log.e(TAG, address);
             return false;
         }
         Log.e(TAG, "writeCharacteristic");
