@@ -1382,6 +1382,11 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                 sleepData.setParentPhone(userInfo.getMobile());
                 Log.e("xpp", deepSleep + "," + lightSleep);
                 //把这些数据上传到服务器
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 updataSleepData(deep_hour, deep_minute, light_hour, light_minute, sleepData.getTotal_hour_str());
                 EventBus.getDefault().post(sleepData);//把数据传到首页面
             } else if (action.equals(GlobalValues.BROADCAST_INTENT_RATE)) {//心率数据
@@ -1493,7 +1498,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.postDelayed(this, 1000 * 60 * rate_int);
         }
     };
+    private Runnable runnable_sleep= new Runnable() {
+        @Override
+        public void run() {
 
+        }
+    };
     /**
      * 获取手机电量
      */
