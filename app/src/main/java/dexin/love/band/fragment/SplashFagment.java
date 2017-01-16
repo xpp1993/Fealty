@@ -39,7 +39,7 @@ public class SplashFagment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (beforeTime - sharedPreferences.getLong(ParameterManager.LOGIN_TIME, 0) < 1000 * 60 * 60 * 8) {
+        if (beforeTime - sharedPreferences.getLong(ParameterManager.LOGIN_TIME, 0) < 1000 * 60 * 60 * 24*3) {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {

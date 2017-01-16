@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.greenrobot.event.EventBus;
 import dexin.love.band.R;
@@ -63,7 +64,8 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
     @ViewInject(R.id.mJazzy)
     private JazzyViewPager mJazzy;
     private HeathMonitoringAdapter adapter;
-    private List<HealthDataFragement> fragments = new ArrayList<HealthDataFragement>();
+    //    private List<HealthDataFragement> fragments = new ArrayList<HealthDataFragement>();
+    private CopyOnWriteArrayList<HealthDataFragement> fragments = new CopyOnWriteArrayList<>();
     public static final int REQUEST_CODE_USERINFO_BINDED = 0x19;
     private final int REQUEST_CODE_UPDATA_USERIFO_INTERNET = 0x23;
     private final int REQUEST_CODE_UPDATA_GPS_INTERNET = 0x26;
@@ -280,11 +282,11 @@ public class StatusFragment extends BaseFragment implements NetWorkAccessTools.R
                 AlarmManager ALARM = (AlarmManager) getActivity().getSystemService(getActivity().ALARM_SERVICE);
                 ALARM.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000,
                         SENDER);
-                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                 intent.setDataAndType(Uri.fromFile(new File(
-                       Environment.getExternalStorageDirectory(),
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(Uri.fromFile(new File(
+                        Environment.getExternalStorageDirectory(),
                         ParameterManager.APPLICATION_NAME)), "application/vnd.android.package-archive");
-               startActivity(intent);
+                startActivity(intent);
             }
         });
     }

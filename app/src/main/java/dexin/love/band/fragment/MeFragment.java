@@ -1498,12 +1498,12 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
             myHandler.postDelayed(this, 1000 * 60 * rate_int);
         }
     };
-    private Runnable runnable_sleep= new Runnable() {
-        @Override
-        public void run() {
-
-        }
-    };
+//    private Runnable runnable_sleep= new Runnable() {
+//        @Override
+//        public void run() {
+//
+//        }
+//    };
     /**
      * 获取手机电量
      */

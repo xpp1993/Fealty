@@ -15,7 +15,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -39,17 +38,22 @@ public class BleEngine extends Service {
     private Handler mHandler = new Handler();
     //private BluetoothDevice device;
     private String address;
+    private Context mContext;
+    private final IBinder mBinder = new LocalBinder();
+    private static BleEngine instance = null;
+    public BleEngine() {
+        instance = this;
+        Log.d(TAG, "BleEngine initialized.");
+    }
+
+    public static BleEngine getInstance() {
+        if (instance == null) throw new NullPointerException("BleEngine is not bind.");
+        return instance;
+    }
 
     /**
      * 2016 11 18 xpp 把此类改为Service
      **/
-    public class LocalBinder extends Binder {
-        public BleEngine getService(Context context) {
-            mContext = context;
-            return BleEngine.this;
-        }
-    }
-
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
@@ -64,13 +68,16 @@ public class BleEngine extends Service {
          * 使用一个给定的设备后,你应该确保BluetoothGatt.close(),这样资源清理干净。在这个特殊的例子中,close()调用UI时断开服务。
          */
         close();
+        instance=null;
         return super.onUnbind(intent);
     }
+    public class LocalBinder extends Binder {
+        public BleEngine getService(Context context) {
+            mContext = context;
+            return BleEngine.this;
+        }
+    }
 
-    private final IBinder mBinder = new LocalBinder();
-    //    public BleEngine(Context c) {
-//        mContext = c;
-//    }
 
     /**
      * 2016 11 18 xpp 把此类改为Service
@@ -78,8 +85,6 @@ public class BleEngine extends Service {
     public interface ListScanCallback {
         void onDeviceFound(final List<BluetoothDevice> devices);
     }
-
-    private Context mContext;
 
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -89,6 +94,7 @@ public class BleEngine extends Service {
                 mBluetoothGatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 BroadcastManager.sendBroadcast4ConnectState(mContext, GlobalValues.BROADCAST_INTENT_CONNECT_STATE_CHANGED, false);
+                close();
             }
         }
 
@@ -108,7 +114,6 @@ public class BleEngine extends Service {
                 e.printStackTrace();
                 BroadcastManager.sendBroadcast4ConnectState(mContext, GlobalValues.BROADCAST_INTENT_CONNECT_STATE_CHANGED, false);
             }
-
         }
 
         @Override
@@ -121,8 +126,8 @@ public class BleEngine extends Service {
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
             Log.e(TAG, "onCharacteristicChanged " + gatt.getDevice().getName()
-                            + " " + characteristic.getUuid().toString()
-                            + " -> " + Utils.bytesToHexString(characteristic.getValue())
+                    + " " + characteristic.getUuid().toString()
+                    + " -> " + Utils.bytesToHexString(characteristic.getValue())
             );
             CommandManager.decode(mContext, characteristic.getValue());
             try {
@@ -142,6 +147,7 @@ public class BleEngine extends Service {
 
     /**
      * Initializes a reference to the local Bluetooth adapter.
+     *
      * @return Return true if the initialization is successful.
      */
     public boolean initialize() {
@@ -160,7 +166,6 @@ public class BleEngine extends Service {
             Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
             return false;
         }
-
         return true;
     }
 
