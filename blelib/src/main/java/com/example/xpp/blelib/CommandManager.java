@@ -16,7 +16,7 @@ public class CommandManager {
 
     public static void decode(final Context context, byte[] data) {
         String dataString = Utils.bytesToHexString(data);
-        Timer timer = new Timer();
+        final Timer timer = new Timer();
         if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_ELECTRICITY)) {//获取手环电量
             String electricity = String.valueOf(Integer.parseInt(dataString.substring(2, 4), 16));
             String isElectricize = dataString.substring(4, 6);//是否充电，00为没有充电，01为充电
@@ -43,9 +43,11 @@ public class CommandManager {
                             Integer.parseInt(distance, 16),
                             Integer.parseInt(calo, 16),
                             Integer.parseInt(sleep, 16));
+                    timer.cancel();
                 }
             };
             timer.schedule(task, 2000);
+
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEP_BACK)) {//返回睡眠质量数据
             // Log.e("xpp", "同步睡眠数据完成:" + dataString.toString());
             String datetime = dataString.substring(8, 10) + dataString.substring(6, 8) + dataString.substring(4, 6) + dataString.substring(2, 4);
@@ -75,9 +77,11 @@ public class CommandManager {
                 @Override
                 public void run() {
                     BroadcastManager.sendBroadcast4SleepQuality(context, GlobalValues.BROADCAST_INTENT_SLEEPQ, lightSleepTime, deepSleepTime);
+                    timer.cancel();
                 }
             };
             timer.schedule(task, 3000);
+
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_SYNSLEEPNO)) {
             Log.e(TAG, "没有睡眠数据！");
         } else if (dataString.startsWith(GlobalValues.BLE_COMMAND_TYPE_CODE_RATESTART)) {//心率测试回复数据

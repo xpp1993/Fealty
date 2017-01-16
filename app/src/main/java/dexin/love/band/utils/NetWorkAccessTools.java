@@ -22,19 +22,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 public class NetWorkAccessTools {
     private static final int BITMAP_MAX_SIZE = 60;
-
     private static NetWorkAccessTools netWorkAccessTools;
     private RequestQueue requestQueue;
     private LruCache<String, Bitmap> lruCache;
     private ImageLoader imageLoader;
     private ImageLoader.ImageCache imageCache;
     private FinalHttp finalHttp;
-    private Context mContext ;
+    private Context mContext;
 
     private NetWorkAccessTools(Context context) {
-        mContext = context ;
+//        mContext = context;
+        mContext = context.getApplicationContext();
         requestQueue = Volley.newRequestQueue(context);
         lruCache = new LruCache<String, Bitmap>(BITMAP_MAX_SIZE);
         imageCache = new ImageLoader.ImageCache() {
@@ -50,8 +51,8 @@ public class NetWorkAccessTools {
         };
         imageLoader = new ImageLoader(requestQueue, imageCache);
         finalHttp = new FinalHttp();
-       // finalHttp.configTimeout(Integer.parseInt(PropertiesUtil.getInstance(mContext).getValue(PropertiesUtil.NETWORK_TIMEOUT_MS,"5000")));
-      //  finalHttp.configRequestExecutionRetryCount(Integer.parseInt(PropertiesUtil.getInstance(mContext).getValue(PropertiesUtil.NETWORK_RETRY_COUNT,"5")));
+        // finalHttp.configTimeout(Integer.parseInt(PropertiesUtil.getInstance(mContext).getValue(PropertiesUtil.NETWORK_TIMEOUT_MS,"5000")));
+        //  finalHttp.configRequestExecutionRetryCount(Integer.parseInt(PropertiesUtil.getInstance(mContext).getValue(PropertiesUtil.NETWORK_RETRY_COUNT,"5")));
     }
 
     public synchronized static NetWorkAccessTools getInstance(Context context) {
@@ -66,11 +67,11 @@ public class NetWorkAccessTools {
      *
      * @param url         访问地址,带上http://头, 不要跟上传递参数文本,不要跟上"?"
      * @param params      参数集合
-     * @param requestCode   请求码，回调中用于区分请求
-     * @param listener  回调接受者，非UI线程
-     * */
+     * @param requestCode 请求码，回调中用于区分请求
+     * @param listener    回调接受者，非UI线程
+     */
     public void getAsyn(final String url, Map<String, String> params, final int requestCode, final RequestTaskListener listener) {
-        if(params == null){
+        if (params == null) {
             params = new HashMap<>();
         }
         AjaxParams ajaxParams = new AjaxParams(params);
@@ -78,16 +79,16 @@ public class NetWorkAccessTools {
         finalHttp.get(url, ajaxParams, new AjaxCallBack<String>() {
             @Override
             public void onStart() {
-                Log.d("NetWorkAccessTools-->", "onStart :" + url+" , params is "+ finalParams.toString());
-                if(listener!=null)
-                listener.onRequestStart(requestCode);
+                Log.d("NetWorkAccessTools-->", "onStart :" + url + " , params is " + finalParams.toString());
+                if (listener != null)
+                    listener.onRequestStart(requestCode);
             }
 
             @Override
             public void onLoading(long count, long current) {
                 Log.d("NetWorkAccessTools-->", "onLoading -count:" + count + " -current:" + current);
-                if(listener!=null)
-                listener.onRequestLoading(requestCode, current, count);
+                if (listener != null)
+                    listener.onRequestLoading(requestCode, current, count);
             }
 
             @Override
@@ -96,35 +97,34 @@ public class NetWorkAccessTools {
                 JSONObject jsonObject = null;
                 try {
                     jsonObject = new JSONObject(t);
-                    jsonObject.put("params",finalParams);
-                }catch (Exception e){
+                    jsonObject.put("params", finalParams);
+                } catch (Exception e) {
                     e.printStackTrace();
-                    onFailure(e,0,e.getMessage());
+                    onFailure(e, 0, e.getMessage());
                     return;
                 }
-                if(listener!=null)
-                listener.onRequestSuccess(jsonObject, requestCode);
+                if (listener != null)
+                    listener.onRequestSuccess(jsonObject, requestCode);
             }
 
             @Override
             public void onFailure(Throwable t, int errorNo, String strMsg) {
-                Log.d("NetWorkAccessTools-->", "onFailure : -errorNo:"+errorNo+" -message:" + strMsg+" -exception:"+t.getMessage());
-                if(listener!=null)
-                listener.onRequestFail(requestCode,errorNo);
+                Log.d("NetWorkAccessTools-->", "onFailure : -errorNo:" + errorNo + " -message:" + strMsg + " -exception:" + t.getMessage());
+                if (listener != null)
+                    listener.onRequestFail(requestCode, errorNo);
             }
         });
     }
 
     /**
-     *
-     * @param url           访问地址,带上http://头, 不要跟上传递参数文本,不要跟上"?"
-     * @param params        参数集合
-     * @param files         需要上传的文件集合，可以置空
-     * @param requestCode   请求码，回调中用于区分请求
-     * @param listener      回调接受者
+     * @param url         访问地址,带上http://头, 不要跟上传递参数文本,不要跟上"?"
+     * @param params      参数集合
+     * @param files       需要上传的文件集合，可以置空
+     * @param requestCode 请求码，回调中用于区分请求
+     * @param listener    回调接受者
      */
     public void postAsyn(final String url, Map<String, String> params, Map<String, String> files, final int requestCode, final RequestTaskListener listener) {
-        if(params == null){
+        if (params == null) {
             params = new HashMap<>();
         }
         AjaxParams ajaxParams = new AjaxParams(params);
@@ -136,14 +136,15 @@ public class NetWorkAccessTools {
                 ajaxParams.put(name, value);
             }
         }
-        FinalHttp fh = new FinalHttp();
+        //  FinalHttp fh = new FinalHttp();
         final Map<String, String> finalParams = params;
-        fh.post(url, ajaxParams, new AjaxCallBack<String>() {
+//        fh.post(url, ajaxParams, new AjaxCallBack<String>() {
+        finalHttp.post(url, ajaxParams, new AjaxCallBack<String>() {
             @Override
             public void onLoading(long count, long current) {
                 Log.d("NetWorkAccessTools-->", "onLoading -count:" + count + " current:" + current);
-                if(listener!=null)
-                listener.onRequestLoading(requestCode, current, count);
+                if (listener != null)
+                    listener.onRequestLoading(requestCode, current, count);
             }
 
             @Override
@@ -152,33 +153,34 @@ public class NetWorkAccessTools {
                 JSONObject jsonObject = null;
                 try {
                     jsonObject = new JSONObject(t);
-                    jsonObject.put("params",finalParams);
-                }catch (Exception e){
+                    jsonObject.put("params", finalParams);
+                    if (listener != null)
+                        listener.onRequestSuccess(jsonObject, requestCode);
+                } catch (Exception e) {
                     e.printStackTrace();
-                    onFailure(e,0,e.getMessage());
+                    onFailure(e, 0, e.getMessage());
                     return;
                 }
-                if(listener!=null)
-                listener.onRequestSuccess(jsonObject, requestCode);
             }
+
             @Override
             public void onFailure(Throwable t, int errorNo, String strMsg) {
                 Log.d(NetWorkAccessTools.class.getSimpleName(), "onFailure :" + strMsg);
-                if(listener!=null)
-                listener.onRequestFail(requestCode,errorNo);
+                if (listener != null)
+                    listener.onRequestFail(requestCode, errorNo);
             }
 
             @Override
             public void onStart() {
                 Log.d(NetWorkAccessTools.class.getSimpleName(), "onStart :" + url);
-                if(listener!=null)
-                listener.onRequestStart(requestCode);
+                if (listener != null)
+                    listener.onRequestStart(requestCode);
             }
         });
     }
 
-    public void downLoadFile(final String url, Map<String, String> params, String savePath,final int requestCode, final RequestTaskListener listener){
-        if(params == null){
+    public void downLoadFile(final String url, Map<String, String> params, String savePath, final int requestCode, final RequestTaskListener listener) {
+        if (params == null) {
             params = new HashMap<>();
         }
         final Map<String, String> finalParams = params;
@@ -201,10 +203,10 @@ public class NetWorkAccessTools {
                 JSONObject jsonObject = null;
                 try {
                     jsonObject = new JSONObject();
-                    jsonObject.put("params",finalParams);
-                }catch (Exception e){
+                    jsonObject.put("params", finalParams);
+                } catch (Exception e) {
                     e.printStackTrace();
-                    onFailure(e,0,e.getMessage());
+                    onFailure(e, 0, e.getMessage());
                     return;
                 }
                 listener.onRequestSuccess(jsonObject, requestCode);
@@ -212,11 +214,12 @@ public class NetWorkAccessTools {
 
             @Override
             public void onFailure(Throwable t, int errorNo, String strMsg) {
-                Log.d("NetWorkAccessTools-->", "onFailure : -errorNo:"+errorNo+" -message:" + strMsg+" -exception:"+t.getMessage());
-                listener.onRequestFail(requestCode,errorNo);
+                Log.d("NetWorkAccessTools-->", "onFailure : -errorNo:" + errorNo + " -message:" + strMsg + " -exception:" + t.getMessage());
+                listener.onRequestFail(requestCode, errorNo);
             }
         });
     }
+
     /**
      * 加载图片的工具方法
      *
@@ -226,13 +229,14 @@ public class NetWorkAccessTools {
      * @param errorImageResId
      */
     public void toLoadImage(String imageURL, ImageView imageContainer, int defaultImageResId, int errorImageResId) {
-        if(TextUtils.isEmpty(imageURL)){
+        if (TextUtils.isEmpty(imageURL)) {
             imageContainer.setImageResource(errorImageResId);
-        }else{
+        } else {
             ImageLoader.ImageListener listener = imageLoader.getImageListener(imageContainer, defaultImageResId, errorImageResId);
             imageLoader.get(imageURL, listener);
         }
     }
+
     /**
      *
      */

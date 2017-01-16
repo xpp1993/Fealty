@@ -41,6 +41,7 @@ public class BleEngine extends Service {
     private Context mContext;
     private final IBinder mBinder = new LocalBinder();
     private static BleEngine instance = null;
+
     public BleEngine() {
         instance = this;
         Log.d(TAG, "BleEngine initialized.");
@@ -68,9 +69,10 @@ public class BleEngine extends Service {
          * 使用一个给定的设备后,你应该确保BluetoothGatt.close(),这样资源清理干净。在这个特殊的例子中,close()调用UI时断开服务。
          */
         close();
-        instance=null;
+        instance = null;
         return super.onUnbind(intent);
     }
+
     public class LocalBinder extends Binder {
         public BleEngine getService(Context context) {
             mContext = context;
