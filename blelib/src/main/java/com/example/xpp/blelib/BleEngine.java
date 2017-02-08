@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
@@ -50,6 +51,11 @@ public class BleEngine extends Service {
     public static BleEngine getInstance() {
         if (instance == null) throw new NullPointerException("BleEngine is not bind.");
         return instance;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
     }
 
     /**

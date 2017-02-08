@@ -21,7 +21,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.nfc.Tag;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1118,7 +1117,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
                     break;
                 case REQUEST_CODE_SPORTDATA_SLEEPDATA:
                     if (msg.getData().getInt("code") == 1) {
-                        Log.e(TAG+"REQUEST_CODE_SPORTDATA_SLEEPDATA:", msg.getData().getString("desc"));
+                       // Log.e(TAG+"REQUEST_CODE_SPORTDATA_SLEEPDATA:", msg.getData().getString("desc"));
                     }
                     break;
                 case REQUEST_CODE_RATE:
@@ -1518,7 +1517,7 @@ public class MeFragment extends BaseFragment implements View.OnClickListener, Ne
         int level = -1;
         if (rawlevel >= 0 && scale > 0) {
             level = (rawlevel * 100) / scale;
-            Log.e(TAG+"Battery Level Remaining", level + "%");
+           // Log.e(TAG+"Battery Level Remaining", level + "%");
             Map<String, String> params = new HashMap<>();
             params.put(TAG+"mobileElectricity", level + "");
             alterSelfData(params);//上传到服务器
